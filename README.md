@@ -63,3 +63,4 @@ resources/js/     → React + TypeScript (pages, components, layouts)
 resources/css/    → Tailwind CSS
 tests/            → Pest (Feature + Unit)
 ```
+# jmswebshield-store
