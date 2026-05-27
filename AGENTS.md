@@ -127,6 +127,28 @@ Every feature or change must follow this order **strictly**:
 - **Conventional Commits**: `feat:`, `fix:`, `chore:`, `refactor:`, `test:`, `docs:`
 - No auto-commit or auto-push without explicit review.
 
+## 🛡️ Quality gates (MANDATORY)
+
+Before committing or pushing, ALL of these must pass:
+
+```bash
+./vendor/bin/pest                          # All tests (50 pass, 0 fail)
+composer lint:check                        # PHP Pint
+npm run lint:check                         # ESLint
+npm run format:check                       # Prettier
+npm run types:check                        # TypeScript
+```
+
+If any fails, fix the issues before proceeding. Use auto-fix variants first:
+
+```bash
+composer lint                              # Pint --fix
+npm run lint                               # ESLint --fix
+npm run format                             # Prettier --write
+```
+
+Run quality gates again to verify all pass before committing.
+
 ## Key Quirks
 
 - **ESLint ignores**: `vendor/`, `node_modules/`, `public/`, `bootstrap/ssr/`, `tailwind.config.js`, `vite.config.ts`, `resources/js/actions/**`, `resources/js/components/ui/**`, `resources/js/routes/**`, `resources/js/wayfinder/**`
