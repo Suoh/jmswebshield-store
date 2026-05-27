@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Marca;
+use App\Models\Brand;
 use App\Models\Product;
 
 beforeEach(function () {
@@ -8,9 +8,9 @@ beforeEach(function () {
 });
 
 it('renders products index with paginated active products', function () {
-    $marca = Marca::factory()->create();
-    Product::factory()->count(15)->create(['is_active' => true, 'marca_id' => $marca->id]);
-    Product::factory()->count(3)->create(['is_active' => false, 'marca_id' => $marca->id]);
+    $brand = Brand::factory()->create();
+    Product::factory()->count(15)->create(['is_active' => true, 'brand_id' => $brand->id]);
+    Product::factory()->count(3)->create(['is_active' => false, 'brand_id' => $brand->id]);
 
     $response = $this->get('/products');
 
@@ -24,9 +24,9 @@ it('renders products index with paginated active products', function () {
 });
 
 it('only shows active products on index', function () {
-    $marca = Marca::factory()->create();
-    Product::factory()->count(5)->create(['is_active' => true, 'marca_id' => $marca->id]);
-    Product::factory()->count(5)->create(['is_active' => false, 'marca_id' => $marca->id]);
+    $brand = Brand::factory()->create();
+    Product::factory()->count(5)->create(['is_active' => true, 'brand_id' => $brand->id]);
+    Product::factory()->count(5)->create(['is_active' => false, 'brand_id' => $brand->id]);
 
     $response = $this->get('/products');
 
@@ -37,9 +37,9 @@ it('only shows active products on index', function () {
         );
 });
 
-it('renders product show page with marca', function () {
-    $marca = Marca::factory()->create();
-    $product = Product::factory()->create(['marca_id' => $marca->id]);
+it('renders product show page with brand', function () {
+    $brand = Brand::factory()->create();
+    $product = Product::factory()->create(['brand_id' => $brand->id]);
 
     $response = $this->get("/products/{$product->id}");
 
@@ -49,8 +49,8 @@ it('renders product show page with marca', function () {
             ->has('product')
             ->where('product.id', $product->id)
             ->where('product.name', $product->name)
-            ->has('product.marca')
-            ->where('product.marca.id', $marca->id)
+            ->has('product.brand')
+            ->where('product.brand.id', $brand->id)
         );
 });
 

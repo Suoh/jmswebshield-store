@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Marca;
+use App\Models\Brand;
 use App\Models\Product;
 use Illuminate\Database\Seeder;
 
@@ -10,11 +10,11 @@ class ProductSeeder extends Seeder
 {
     public function run(): void
     {
-        $marcas = Marca::all();
+        $brands = Brand::all();
 
         Product::factory()
             ->count(24)
-            ->recycle($marcas)
+            ->recycle($brands)
             ->create();
     }
 }

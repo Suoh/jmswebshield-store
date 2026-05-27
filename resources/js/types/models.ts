@@ -1,4 +1,4 @@
-export interface Marca {
+export interface Brand {
     id: number;
     name: string;
     slug: string;
@@ -15,14 +15,14 @@ export interface Product {
     price: string;
     discount: number;
     image_url: string | null;
-    marca_id: number | null;
+    brand_id: number | null;
     model: string | null;
-    extra_data: Record<string, string> | null;
+    metadata: Record<string, string> | null;
     is_active: boolean;
     created_at: string;
     updated_at: string;
     deleted_at: string | null;
-    marca?: Marca;
+    brand?: Brand;
     availability: string;
     discounted_price: string | null;
     cover_image: string | null;

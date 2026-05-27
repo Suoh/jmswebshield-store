@@ -20,9 +20,9 @@ return new class extends Migration
             $table->decimal('price', 10, 2);
             $table->integer('discount')->default(0);
             $table->string('image_url')->nullable();
-            $table->foreignId('marca_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('brand_id')->nullable()->constrained()->nullOnDelete();
             $table->string('model')->nullable();
-            $table->json('extra_data')->nullable();
+            $table->json('metadata')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
             $table->softDeletes();

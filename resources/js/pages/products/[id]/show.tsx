@@ -64,8 +64,8 @@ export default function ProductShow({ product }: Props) {
                             </div>
                         )}
 
-                        {product.extra_data &&
-                            Object.keys(product.extra_data).length > 0 && (
+                        {product.metadata &&
+                            Object.keys(product.metadata).length > 0 && (
                                 <div>
                                     <h2 className="mb-4 text-2xl font-bold">
                                         Especificaciones
@@ -75,7 +75,7 @@ export default function ProductShow({ product }: Props) {
                                             <table className="w-full">
                                                 <tbody>
                                                     {Object.entries(
-                                                        product.extra_data,
+                                                        product.metadata,
                                                     ).map(
                                                         (
                                                             [key, value],
@@ -126,9 +126,9 @@ export default function ProductShow({ product }: Props) {
                                     >
                                         {product.availability}
                                     </Badge>
-                                    {product.marca && (
+                                    {product.brand && (
                                         <span className="text-sm text-muted-foreground">
-                                            {product.marca.name}
+                                            {product.brand.name}
                                         </span>
                                     )}
                                 </div>
