@@ -63,9 +63,9 @@ export default function ProductIndex({ products }: Props) {
                                                     {product.short_description}
                                                 </p>
                                             )}
-                                            {product.marca && (
+                                            {product.brand && (
                                                 <p className="mb-2 text-xs text-muted-foreground">
-                                                    {product.marca.name}
+                                                    {product.brand.name}
                                                 </p>
                                             )}
                                             <div className="flex items-center gap-2">

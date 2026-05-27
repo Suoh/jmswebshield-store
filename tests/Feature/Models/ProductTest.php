@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Marca;
+use App\Models\Brand;
 use App\Models\Product;
 use Illuminate\Support\Facades\Schema;
 
@@ -18,9 +18,9 @@ it('creates the products table with all expected columns', function () {
         'price',
         'discount',
         'image_url',
-        'marca_id',
+        'brand_id',
         'model',
-        'extra_data',
+        'metadata',
         'is_active',
         'created_at',
         'updated_at',
@@ -29,7 +29,7 @@ it('creates the products table with all expected columns', function () {
 });
 
 it('can create a product with all fillable fields', function () {
-    $marca = Marca::factory()->create();
+    $brand = Brand::factory()->create();
 
     $product = Product::create([
         'name' => 'Test Product',
@@ -39,9 +39,9 @@ it('can create a product with all fillable fields', function () {
         'price' => 99.99,
         'discount' => 20,
         'image_url' => 'https://example.com/image.jpg',
-        'marca_id' => $marca->id,
+        'brand_id' => $brand->id,
         'model' => 'Model X',
-        'extra_data' => ['key' => 'value'],
+        'metadata' => ['key' => 'value'],
         'is_active' => true,
     ]);
 
@@ -50,16 +50,16 @@ it('can create a product with all fillable fields', function () {
         ->and($product->stock)->toBe(10)
         ->and($product->price)->toBe('99.99')
         ->and($product->discount)->toBe(20)
-        ->and($product->extra_data)->toBe(['key' => 'value'])
+        ->and($product->metadata)->toBe(['key' => 'value'])
         ->and($product->is_active)->toBeTrue();
 });
 
-it('belongs to a marca', function () {
-    $marca = Marca::factory()->create();
-    $product = Product::factory()->create(['marca_id' => $marca->id]);
+it('belongs to a brand', function () {
+    $brand = Brand::factory()->create();
+    $product = Product::factory()->create(['brand_id' => $brand->id]);
 
-    expect($product->marca)->toBeInstanceOf(Marca::class)
-        ->and($product->marca->id)->toBe($marca->id);
+    expect($product->brand)->toBeInstanceOf(Brand::class)
+        ->and($product->brand->id)->toBe($brand->id);
 });
 
 it('returns correct availability based on stock', function () {
@@ -106,14 +106,14 @@ it('casts attributes correctly', function () {
     $product = Product::factory()->create([
         'price' => 99.99,
         'discount' => 15,
-        'extra_data' => ['color' => 'red', 'size' => 'L'],
+        'metadata' => ['color' => 'red', 'size' => 'L'],
         'is_active' => true,
         'stock' => 42,
     ]);
 
     expect($product->price)->toBeString()
         ->and($product->discount)->toBeInt()
-        ->and($product->extra_data)->toBeArray()
+        ->and($product->metadata)->toBeArray()
         ->and($product->is_active)->toBeBool()
         ->and($product->stock)->toBeInt();
 });

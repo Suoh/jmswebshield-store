@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Models\Marca;
+use App\Models\Brand;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -21,9 +21,9 @@ class ProductFactory extends Factory
             'price' => fake()->randomFloat(2, 10, 5000),
             'discount' => fake()->boolean(30) ? fake()->numberBetween(5, 50) : 0,
             'image_url' => 'https://picsum.photos/400/300?random='.fake()->unique()->numberBetween(1, 1000),
-            'marca_id' => Marca::factory(),
+            'brand_id' => Brand::factory(),
             'model' => fake()->bothify('Model-####'),
-            'extra_data' => [
+            'metadata' => [
                 fake()->word() => fake()->word(),
                 fake()->word() => fake()->word(),
                 fake()->word() => fake()->word(),

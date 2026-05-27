@@ -17,9 +17,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'price',
     'discount',
     'image_url',
-    'marca_id',
+    'brand_id',
     'model',
-    'extra_data',
+    'metadata',
     'is_active',
 ])]
 class Product extends Model
@@ -32,14 +32,14 @@ class Product extends Model
             'price' => 'decimal:2',
             'discount' => 'integer',
             'stock' => 'integer',
-            'extra_data' => 'array',
+            'metadata' => 'array',
             'is_active' => 'boolean',
         ];
     }
 
-    public function marca(): BelongsTo
+    public function brand(): BelongsTo
     {
-        return $this->belongsTo(Marca::class);
+        return $this->belongsTo(Brand::class);
     }
 
     protected function availability(): Attribute

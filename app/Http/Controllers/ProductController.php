@@ -11,7 +11,7 @@ class ProductController extends Controller
     public function index(): Response
     {
         $products = Product::where('is_active', true)
-            ->with('marca')
+            ->with('brand')
             ->orderBy('created_at', 'desc')
             ->paginate(12);
 
@@ -22,7 +22,7 @@ class ProductController extends Controller
 
     public function show(Product $product): Response
     {
-        $product->load('marca');
+        $product->load('brand');
 
         return Inertia::render('products/[id]/show', [
             'product' => $product,
