@@ -28,6 +28,18 @@ The source of truth for this project is at:
 - Business rules
 - Complete setup guide
 
+## 📝 Session log (MANDATORY)
+
+At the start of every session, **read** `03 - Bitácora.md` in the dev-notes
+to know the current project state and the latest instructions.
+
+At the end of every session (or after any significant phase progress), **update**
+`03 - Bitácora.md` recording:
+- Date and summary of what was worked on
+- Instructions received from the user
+- Completed tasks (with checkboxes)
+- Next steps
+
 ## Developer Commands
 
 ### Infra (Docker)
@@ -103,6 +115,12 @@ Every feature or change must follow this order **strictly**:
 | Functions / variables | camelCase | `getProducts()` |
 | TS/TSX files | kebab-case | `product-card.tsx` |
 | Constants | UPPER_SNAKE_CASE | `MAX_PRICE` |
+
+## 🌐 Language
+
+- **Code and comments**: English (variable names, function names, docblocks, inline comments)
+- **Documentation** (`AGENTS.md`, dev-notes, commit messages): English
+- **Product presentation** (UI labels, page titles, product descriptions, error messages): Spanish
 
 ## ✍️ Commits
 
