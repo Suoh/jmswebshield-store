@@ -18,7 +18,7 @@
 The source of truth for this project is at:
 
 ```
-~/Documents/dev/dev-notes/Projects/jmswebshield-store/
+~/Documents/PunkRecords/Projects/jmswebshield-store/
 ```
 
 **It is mandatory to read this documentation before touching any code.** It contains:
@@ -30,15 +30,16 @@ The source of truth for this project is at:
 
 ## 📝 Session log (MANDATORY)
 
-At the start of every session, **read** `03 - Bitácora.md` in the dev-notes
+At the start of every session, **read** `nn - Bitácora.md` and `nn - Stack & roadmap` in the PunkRecords
 to know the current project state and the latest instructions.
 
 At the end of every session (or after any significant phase progress), **update**
-`03 - Bitácora.md` recording:
+`nn - Bitácora.md` recording:
 - Date and summary of what was worked on
 - Instructions received from the user
 - Completed tasks (with checkboxes)
 - Next steps
+Also update `nn - Stack & roadmap` checking completed steps or updating information
 
 ## Developer Commands
 
@@ -83,7 +84,7 @@ php artisan db:seed
 
 Every feature or change must follow this order **strictly**:
 
-1. **Read documentation** — Review the dev-notes (`~/Documents/dev/dev-notes/Projects/jmswebshield-store/`) to understand the current project state.
+1. **Read documentation** — Review the PunkRecords (`~/Documents/PunkRecords/Projects/jmswebshield-store/`) to understand the current project state.
 2. **Assess scope** — Analyze how big the change is, which files/routes it impacts, and estimate complexity.
 3. **Decide branch strategy** (MANDATORY) — Choose branch type based on the change:
    - `feature/xxx` → new functionality
@@ -119,7 +120,7 @@ Every feature or change must follow this order **strictly**:
 ## 🌐 Language
 
 - **Code and comments**: English (variable names, function names, docblocks, inline comments)
-- **Documentation** (`AGENTS.md`, dev-notes, commit messages): English
+- **Documentation** (`AGENTS.md`, PunkRecords, commit messages): English
 - **Product presentation** (UI labels, page titles, product descriptions, error messages): Spanish
 
 ## ✍️ Commits

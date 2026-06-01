@@ -2,7 +2,7 @@
   "$schema": "https://opencode.ai/config.json",
   "permission": {
     "external_directory": {
-      "~/Documents/dev/dev-notes/Projects/jmswebshield-store/**": "allow"
+      "~/Documents/PunkRecords/Projects/jmswebshield-store/**": "allow"
     }
   }
 }
