@@ -5,18 +5,19 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class BrandController extends Controller
 {
-    public function index(): View
+    public function index(): Response
     {
-        return view('admin.brands.index');
+        return Inertia::render('admin/brands/index');
     }
 
-    public function create(): View
+    public function create(): Response
     {
-        return view('admin.brands.create');
+        return Inertia::render('admin/brands/create');
     }
 
     public function store(Request $request): RedirectResponse
@@ -24,9 +25,9 @@ class BrandController extends Controller
         abort(501);
     }
 
-    public function edit(int $id): View
+    public function edit(int $id): Response
     {
-        return view('admin.brands.edit', ['id' => $id]);
+        return Inertia::render('admin/brands/[id]/edit', ['id' => $id]);
     }
 
     public function update(Request $request, int $id): RedirectResponse
