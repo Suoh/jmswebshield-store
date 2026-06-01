@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Admin\BrandController as AdminBrandController;
+use App\Http\Controllers\Admin\Syscom\BrandController as SyscomBrandController;
+use App\Http\Controllers\Admin\Syscom\ProductController as SyscomProductController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 
@@ -10,6 +13,16 @@ Route::get('/products/{product}', [ProductController::class, 'show'])->name('pro
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
+});
+
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('brands', AdminBrandController::class);
+
+    Route::get('syscom/brands', [SyscomBrandController::class, 'index'])->name('syscom.brands.index');
+    Route::post('syscom/brands/import', [SyscomBrandController::class, 'import'])->name('syscom.brands.import');
+
+    Route::get('syscom/products', [SyscomProductController::class, 'index'])->name('syscom.products.index');
+    Route::post('syscom/products/import', [SyscomProductController::class, 'import'])->name('syscom.products.import');
 });
 
 require __DIR__.'/settings.php';
