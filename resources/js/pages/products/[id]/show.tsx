@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { Badge } from '@/components/ui/badge';
 import {
     Breadcrumb,
@@ -15,7 +15,19 @@ interface Props {
     product: Product;
 }
 
+const WHATSAPP_ICON = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%2325D366' d='M16.004 0h-.028C7.176 0 0 7.191 0 16.02c0 3.484 1.121 6.656 3.033 9.206L.996 32l6.731-1.766C9.9 31.183 12.824 32 16.004 32 24.822 32 32 24.809 32 16.02S24.822 0 16.004 0z'/%3E%3Cpath fill='%23fff' d='M11.203 9.28c-.588-.262-3.538-1.748-4.08-1.95-.543-.2-.938-.302-1.332.303-.395.604-1.528 1.95-1.872 2.351-.344.4-.688.452-1.278.151-.588-.302-2.485-1.117-4.737-3.565-1.848-2.008-3.094-4.478-3.445-5.242-.35-.765-.037-1.17.263-1.55.27-.341.603-.887.905-1.33.276-.403.553-.486.932-.486.378 0 .905.151 1.41.756.504.605 1.92 2.076 1.92 3.96 0 1.885-.763 3.494-1.09 3.958-.327.463-.592 1.032-.104 1.644.491.61 2.182 2.477 4.707 4.185 1.636 1.107 2.925 1.787 3.94 2.286.675.33 1.22.538 1.658.723.743.314 1.423.272 1.958-.15.65-.515 1.047-1.332 1.188-1.752.141-.42.07-.773-.034-1.086-.11-.31-.41-.508-.854-.889z'/%3E%3C/svg%3E`;
+
 export default function ProductShow({ product }: Props) {
+    const { props } = usePage<{ whatsappNumber: string | null }>();
+    const whatsappNumber = props.whatsappNumber;
+    const canContact = product.stock > 0 && whatsappNumber;
+
+    const whatsappHref = canContact
+        ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
+              `¡Hola! Me interesa el siguiente producto: ${product.name} (${product.model}). ${typeof window !== 'undefined' ? window.location.href : ''}. ¿Podrían darme más información?`,
+          )}`
+        : '#';
+
     return (
         <>
             <Head title={product.name} />
@@ -173,6 +185,25 @@ export default function ProductShow({ product }: Props) {
                                         </span>
                                     </div>
                                 </div>
+
+                                {canContact && (
+                                    <div className="mt-6 border-t pt-4">
+                                        <a
+                                            href={whatsappHref}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#25D366] px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-[#20bd5a] focus-visible:ring-2 focus-visible:ring-[#25D366] focus-visible:ring-offset-2 focus-visible:outline-none"
+                                        >
+                                            <img
+                                                src={WHATSAPP_ICON}
+                                                alt=""
+                                                className="h-5 w-5"
+                                                aria-hidden="true"
+                                            />
+                                            Consultar por WhatsApp
+                                        </a>
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
                     </div>
