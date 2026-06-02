@@ -44,6 +44,7 @@ class HandleInertiaRequests extends Middleware
                     && $request->user()->email === config('app.admin_email'),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'whatsappNumber' => config('services.whatsapp.number'),
         ];
     }
 }

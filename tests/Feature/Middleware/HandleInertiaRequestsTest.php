@@ -44,3 +44,27 @@ describe('HandleInertiaRequests auth.isAdmin prop', function () {
             );
     });
 });
+
+describe('HandleInertiaRequests whatsappNumber prop', function () {
+    it('shares whatsappNumber from services.whatsapp.number config', function () {
+        config(['services.whatsapp.number' => '5491123456789']);
+
+        $response = $this->get('/products');
+
+        $response->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->where('whatsappNumber', '5491123456789')
+            );
+    });
+
+    it('shares whatsappNumber as null when config is not set', function () {
+        config(['services.whatsapp.number' => null]);
+
+        $response = $this->get('/products');
+
+        $response->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->where('whatsappNumber', null)
+            );
+    });
+});

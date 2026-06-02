@@ -111,11 +111,13 @@
         "paths": {
             "@/*": ["./resources/js/*"]
         },
-        "jsx": "react-jsx"
+        "jsx": "react-jsx",
+        "types": ["vitest/globals"]
     },
     "include": [
         "resources/js/**/*.ts",
         "resources/js/**/*.d.ts",
         "resources/js/**/*.tsx"
-    ]
+    ],
+    "exclude": ["node_modules"]
 }
