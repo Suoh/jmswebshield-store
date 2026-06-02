@@ -23,6 +23,7 @@ class BrandFactory extends Factory
         return [
             'name' => $name,
             'slug' => Str::slug($name),
+            'metadata' => null,
         ];
     }
 }
