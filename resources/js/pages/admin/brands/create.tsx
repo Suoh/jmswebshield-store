@@ -1,10 +1,14 @@
+import { router } from '@inertiajs/react';
+import BrandForm from '@/components/admin/brand-form';
+
 export default function AdminBrandsCreate() {
+    const handleSubmit = (data: { name: string }) => {
+        router.post('/admin/brands', data);
+    };
+
     return (
         <div className="p-6">
-            <h1 className="text-2xl font-bold">Crear marca</h1>
-            <p className="mt-4 text-muted-foreground">
-                Formulario de creación — implementación pendiente.
-            </p>
+            <BrandForm onSubmit={handleSubmit} />
         </div>
     );
 }

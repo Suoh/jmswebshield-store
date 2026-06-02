@@ -1,14 +1,28 @@
-interface Props {
+import { router, usePage } from '@inertiajs/react';
+import BrandForm from '@/components/admin/brand-form';
+
+interface Brand {
     id: number;
+    name: string;
+    slug: string;
+    products_count: number;
 }
 
-export default function AdminBrandsEdit({ id }: Props) {
+interface PageProps {
+    brand: Brand;
+    [key: string]: unknown;
+}
+
+export default function AdminBrandsEdit() {
+    const { brand } = usePage<PageProps>().props;
+
+    const handleSubmit = (data: { name: string }) => {
+        router.put(`/admin/brands/${brand.id}`, data);
+    };
+
     return (
         <div className="p-6">
-            <h1 className="text-2xl font-bold">Editar marca #{id}</h1>
-            <p className="mt-4 text-muted-foreground">
-                Formulario de edición — implementación pendiente.
-            </p>
+            <BrandForm brand={brand} onSubmit={handleSubmit} />
         </div>
     );
 }

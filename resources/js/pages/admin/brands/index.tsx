@@ -1,10 +1,150 @@
+import { Link, router, usePage } from '@inertiajs/react';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
+import type { PaginatedData } from '@/types/models';
+
+interface Brand {
+    id: number;
+    name: string;
+    slug: string;
+    products_count: number;
+}
+
+interface PageProps {
+    brands: PaginatedData<Brand>;
+    [key: string]: unknown;
+}
+
 export default function AdminBrandsIndex() {
+    const { brands } = usePage<PageProps>().props;
+    const [search, setSearch] = useState('');
+
+    const filtered = brands.data.filter((brand) =>
+        brand.name.toLowerCase().includes(search.toLowerCase()),
+    );
+
+    const handleDelete = (id: number, name: string) => {
+        if (!confirm(`¿Eliminar la marca "${name}"?`)) {
+            return;
+        }
+
+        router.delete(`/admin/brands/${id}`);
+    };
+
     return (
         <div className="p-6">
-            <h1 className="text-2xl font-bold">Marcas</h1>
-            <p className="mt-4 text-muted-foreground">
-                Gestión de marcas — implementación pendiente.
-            </p>
+            <div className="mb-6 flex items-center justify-between">
+                <h1 className="text-2xl font-bold">Marcas</h1>
+                <Button asChild>
+                    <Link href="/admin/brands/create">Nueva marca</Link>
+                </Button>
+            </div>
+
+            <div className="mb-4">
+                <Input
+                    placeholder="Buscar por nombre..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="max-w-xs"
+                />
+            </div>
+
+            <div className="overflow-hidden rounded-lg border">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Nombre</TableHead>
+                            <TableHead>Slug</TableHead>
+                            <TableHead className="text-center">
+                                Productos
+                            </TableHead>
+                            <TableHead className="text-right">
+                                Acciones
+                            </TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {filtered.length === 0 ? (
+                            <TableRow>
+                                <TableCell
+                                    colSpan={4}
+                                    className="py-8 text-center text-muted-foreground"
+                                >
+                                    {search
+                                        ? 'No se encontraron marcas.'
+                                        : 'No hay marcas registradas.'}
+                                </TableCell>
+                            </TableRow>
+                        ) : (
+                            filtered.map((brand) => (
+                                <TableRow key={brand.id}>
+                                    <TableCell className="font-medium">
+                                        {brand.name}
+                                    </TableCell>
+                                    <TableCell className="text-muted-foreground">
+                                        {brand.slug}
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                        {brand.products_count}
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <div className="flex items-center justify-end gap-2">
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                asChild
+                                            >
+                                                <Link
+                                                    href={`/admin/brands/${brand.id}/edit`}
+                                                >
+                                                    Editar
+                                                </Link>
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="text-destructive hover:text-destructive"
+                                                onClick={() =>
+                                                    handleDelete(
+                                                        brand.id,
+                                                        brand.name,
+                                                    )
+                                                }
+                                            >
+                                                Eliminar
+                                            </Button>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
+
+            {brands.last_page > 1 && (
+                <div className="mt-4 flex items-center justify-center gap-2">
+                    {brands.links.map((link, i) => (
+                        <Button
+                            key={i}
+                            variant={link.active ? 'default' : 'ghost'}
+                            size="sm"
+                            disabled={!link.url}
+                            onClick={() => link.url && router.get(link.url)}
+                            dangerouslySetInnerHTML={{ __html: link.label }}
+                        />
+                    ))}
+                </div>
+            )}
         </div>
     );
 }
