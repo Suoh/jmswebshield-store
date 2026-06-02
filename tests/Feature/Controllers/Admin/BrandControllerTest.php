@@ -5,7 +5,6 @@ namespace Tests\Feature\Controllers\Admin;
 use App\Models\Brand;
 use App\Models\Product;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 beforeEach(function () {
     $this->withoutVite();

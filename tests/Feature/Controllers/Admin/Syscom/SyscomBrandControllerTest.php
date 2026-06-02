@@ -4,8 +4,6 @@ namespace Tests\Feature\Controllers\Admin\Syscom;
 
 use App\Models\Brand;
 use App\Models\User;
-use App\Services\Syscom\SyscomClient;
-use App\Services\Syscom\SyscomMapper;
 use App\Services\Syscom\SyscomService;
 use Mockery;
 
