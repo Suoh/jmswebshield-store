@@ -39,4 +39,10 @@ return [
         'number' => env('WHATSAPP_NUMBER'),
     ],
 
+    'syscom' => [
+        'base_url' => env('SYSCOM_BASE_URL'),
+        'client_id' => env('SYSCOM_CLIENT_ID'),
+        'client_secret' => env('SYSCOM_CLIENT_SECRET'),
+    ],
+
 ];
