@@ -3,7 +3,6 @@ import {
     BookOpen,
     FolderGit2,
     LayoutGrid,
-    Package,
     Tag,
     Box,
     Download,
@@ -33,11 +32,6 @@ const mainNavItems: NavItem[] = [
 ];
 
 const adminNavItems: NavItem[] = [
-    {
-        title: 'Productos',
-        href: '/admin/products',
-        icon: Package,
-    },
     {
         title: 'Marcas',
         href: '/admin/brands',

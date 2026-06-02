@@ -10,19 +10,19 @@ class AdminUserSeeder extends Seeder
 {
     public function run(): void
     {
-        $adminEmails = array_filter(
-            array_map('trim', explode(',', env('ADMIN_EMAILS', '')))
-        );
+        $email = env('ADMIN_EMAIL');
 
-        foreach ($adminEmails as $email) {
-            User::firstOrCreate(
-                ['email' => $email],
-                [
-                    'name' => 'Admin',
-                    'password' => Hash::make('password'),
-                    'email_verified_at' => now(),
-                ]
-            );
+        if (! $email) {
+            return;
         }
+
+        User::firstOrCreate(
+            ['email' => $email],
+            [
+                'name' => 'Admin',
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+            ]
+        );
     }
 }
