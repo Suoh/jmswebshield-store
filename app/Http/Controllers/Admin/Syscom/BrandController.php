@@ -65,6 +65,7 @@ class BrandController extends Controller
 
             if (isset($existingSyscomIds[$syscomId])) {
                 $skipped++;
+
                 continue;
             }
 
