@@ -62,6 +62,7 @@ class SyscomMapper
             'is_active' => true,
             'metadata' => [
                 'syscom_id' => $syscomProduct[self::PRODUCT_ID] ?? '',
+                'syscom_marca_id' => $syscomProduct[self::PRODUCT_BRAND_ID] ?? null,
                 'syscom_precios' => [
                     'precio_lista' => $prices[self::PRICE_LISTA] ?? null,
                     'precio_descuento' => $prices[self::PRICE_DESCUENTO] ?? null,
