@@ -21,17 +21,17 @@ it('product seeder creates 24 products', function () {
 });
 
 it('admin user seeder creates admin user from env', function () {
-    putenv('ADMIN_EMAIL=admin@test.com');
+    $_SERVER['ADMIN_EMAIL'] = 'admin@test.com';
 
     $this->seed(AdminUserSeeder::class);
 
     expect(User::where('email', 'admin@test.com')->exists())->toBeTrue();
 
-    putenv('ADMIN_EMAIL');
+    unset($_SERVER['ADMIN_EMAIL']);
 });
 
 it('database seeder calls all seeders in correct order', function () {
-    putenv('ADMIN_EMAIL=admin@test.com');
+    $_SERVER['ADMIN_EMAIL'] = 'admin@test.com';
 
     $this->seed();
 
@@ -39,5 +39,5 @@ it('database seeder calls all seeders in correct order', function () {
         ->and(Product::count())->toBe(24)
         ->and(User::count())->toBeGreaterThanOrEqual(1);
 
-    putenv('ADMIN_EMAIL');
+    unset($_SERVER['ADMIN_EMAIL']);
 });
