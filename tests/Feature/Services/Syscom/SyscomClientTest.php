@@ -15,14 +15,14 @@ describe('SyscomClient', function () {
     describe('getAccessToken', function () {
         it('fetches token from SYSCOM OAuth endpoint', function () {
             Http::fake([
-                'syscom-api.example.com/oauth/token' => Http::response([
+                'syscom-api.example.com/api/v1/oauth/token' => Http::response([
                     'access_token' => 'test_token_123',
                     'token_type' => 'Bearer',
                     'expires_in' => 31536000,
                 ], 200),
             ]);
 
-            config(['services.syscom.base_url' => 'https://syscom-api.example.com']);
+            config(['services.syscom.base_url' => 'https://syscom-api.example.com/api/v1']);
             config(['services.syscom.client_id' => 'test_client_id']);
             config(['services.syscom.client_secret' => 'test_client_secret']);
 
@@ -36,14 +36,14 @@ describe('SyscomClient', function () {
 
         it('caches token in Cache with 350 day TTL', function () {
             Http::fake([
-                'syscom-api.example.com/oauth/token' => Http::response([
+                'syscom-api.example.com/api/v1/oauth/token' => Http::response([
                     'access_token' => 'cached_token_abc',
                     'token_type' => 'Bearer',
                     'expires_in' => 31536000,
                 ], 200),
             ]);
 
-            config(['services.syscom.base_url' => 'https://syscom-api.example.com']);
+            config(['services.syscom.base_url' => 'https://syscom-api.example.com/api/v1']);
             config(['services.syscom.client_id' => 'client']);
             config(['services.syscom.client_secret' => 'secret']);
 
@@ -58,12 +58,12 @@ describe('SyscomClient', function () {
 
         it('refreshes token on 401 response', function () {
             Http::fake([
-                'syscom-api.example.com/oauth/token' => Http::sequence()
+                'syscom-api.example.com/api/v1/oauth/token' => Http::sequence()
                     ->push(['access_token' => 'expired_token'], 200)
                     ->push(['access_token' => 'new_refreshed_token'], 200),
             ]);
 
-            config(['services.syscom.base_url' => 'https://syscom-api.example.com']);
+            config(['services.syscom.base_url' => 'https://syscom-api.example.com/api/v1']);
             config(['services.syscom.client_id' => 'client']);
             config(['services.syscom.client_secret' => 'secret']);
 
@@ -82,18 +82,18 @@ describe('SyscomClient', function () {
     describe('getCategories', function () {
         it('returns array of categories from SYSCOM API', function () {
             Http::fake([
-                'syscom-api.example.com/oauth/token' => Http::response([
+                'syscom-api.example.com/api/v1/oauth/token' => Http::response([
                     'access_token' => 'valid_token',
                     'token_type' => 'Bearer',
                     'expires_in' => 31536000,
                 ], 200),
-                'syscom-api.example.com/v1/categorias' => Http::response([
+                'syscom-api.example.com/api/v1/categorias' => Http::response([
                     ['id' => '1', 'nombre' => 'Routers'],
                     ['id' => '2', 'nombre' => 'Switches'],
                 ], 200),
             ]);
 
-            config(['services.syscom.base_url' => 'https://syscom-api.example.com']);
+            config(['services.syscom.base_url' => 'https://syscom-api.example.com/api/v1']);
             config(['services.syscom.client_id' => 'client']);
             config(['services.syscom.client_secret' => 'secret']);
 
@@ -110,12 +110,12 @@ describe('SyscomClient', function () {
     describe('getBrands', function () {
         it('returns paginated brands response', function () {
             Http::fake([
-                'syscom-api.example.com/oauth/token' => Http::response([
+                'syscom-api.example.com/api/v1/oauth/token' => Http::response([
                     'access_token' => 'token',
                     'token_type' => 'Bearer',
                     'expires_in' => 31536000,
                 ], 200),
-                'syscom-api.example.com/v1/marcas*' => Http::response([
+                'syscom-api.example.com/api/v1/marcas*' => Http::response([
                     'data' => [
                         ['id' => 'tp-link', 'nombre' => 'TP-Link'],
                         ['id' => 'netgear', 'nombre' => 'Netgear'],
@@ -126,7 +126,7 @@ describe('SyscomClient', function () {
                 ], 200),
             ]);
 
-            config(['services.syscom.base_url' => 'https://syscom-api.example.com']);
+            config(['services.syscom.base_url' => 'https://syscom-api.example.com/api/v1']);
             config(['services.syscom.client_id' => 'client']);
             config(['services.syscom.client_secret' => 'secret']);
 
@@ -144,12 +144,12 @@ describe('SyscomClient', function () {
     describe('getProducts', function () {
         it('passes filters as query parameters', function () {
             Http::fake([
-                'syscom-api.example.com/oauth/token' => Http::response([
+                'syscom-api.example.com/api/v1/oauth/token' => Http::response([
                     'access_token' => 'token',
                     'token_type' => 'Bearer',
                     'expires_in' => 31536000,
                 ], 200),
-                'syscom-api.example.com/v1/productos*' => Http::response([
+                'syscom-api.example.com/api/v1/productos*' => Http::response([
                     'data' => [],
                     'current_page' => 1,
                     'last_page' => 1,
@@ -157,7 +157,7 @@ describe('SyscomClient', function () {
                 ], 200),
             ]);
 
-            config(['services.syscom.base_url' => 'https://syscom-api.example.com']);
+            config(['services.syscom.base_url' => 'https://syscom-api.example.com/api/v1']);
             config(['services.syscom.client_id' => 'client']);
             config(['services.syscom.client_secret' => 'secret']);
 
@@ -176,12 +176,12 @@ describe('SyscomClient', function () {
     describe('getProductDetail', function () {
         it('returns full product detail for given id', function () {
             Http::fake([
-                'syscom-api.example.com/oauth/token' => Http::response([
+                'syscom-api.example.com/api/v1/oauth/token' => Http::response([
                     'access_token' => 'token',
                     'token_type' => 'Bearer',
                     'expires_in' => 31536000,
                 ], 200),
-                'syscom-api.example.com/v1/productos/12345' => Http::response([
+                'syscom-api.example.com/api/v1/productos/12345' => Http::response([
                     'id' => '12345',
                     'nombre' => 'Router RBK852',
                     'descripcion_corta' => 'Sistema WiFi mesh',
@@ -193,7 +193,7 @@ describe('SyscomClient', function () {
                 ], 200),
             ]);
 
-            config(['services.syscom.base_url' => 'https://syscom-api.example.com']);
+            config(['services.syscom.base_url' => 'https://syscom-api.example.com/api/v1']);
             config(['services.syscom.client_id' => 'client']);
             config(['services.syscom.client_secret' => 'secret']);
 
