@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'image_url',
     'brand_id',
     'model',
+    'sku',
     'metadata',
     'is_active',
 ])]

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\BrandController as AdminBrandController;
+use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\Syscom\BrandController as SyscomBrandController;
 use App\Http\Controllers\Admin\Syscom\ProductController as SyscomProductController;
 use App\Http\Controllers\ProductController;
@@ -17,6 +18,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('brands', AdminBrandController::class);
+
+    Route::resource('products', AdminProductController::class)->except(['create', 'show']);
+    Route::get('products/create', [AdminProductController::class, 'create'])->name('products.create');
+    Route::get('products/{product}/edit', [AdminProductController::class, 'edit'])->name('products.edit');
+
+    Route::post('products/{id}/restore', [AdminProductController::class, 'restore'])->name('products.restore');
+    Route::delete('products/{id}/force', [AdminProductController::class, 'forceDelete'])->name('products.forceDelete');
 
     Route::get('syscom/brands', [SyscomBrandController::class, 'index'])->name('syscom.brands.index');
     Route::post('syscom/brands/import', [SyscomBrandController::class, 'import'])->name('syscom.brands.import');
