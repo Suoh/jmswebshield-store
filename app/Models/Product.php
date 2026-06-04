@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable([
@@ -43,6 +44,11 @@ class Product extends Model
         return $this->belongsTo(Brand::class);
     }
 
+    public function images(): HasMany
+    {
+        return $this->hasMany(ProductImage::class)->orderBy('position');
+    }
+
     protected function availability(): Attribute
     {
         return Attribute::make(
@@ -62,7 +68,14 @@ class Product extends Model
     protected function coverImage(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->image_url,
+            get: function (): ?string {
+                $coverImage = $this->images()->where('is_cover', true)->first();
+                if ($coverImage) {
+                    return asset("storage/{$coverImage->path}");
+                }
+
+                return $this->image_url;
+            },
         );
     }
 }
