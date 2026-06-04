@@ -23,11 +23,11 @@ interface Product {
     name: string;
     short_description: string | null;
     full_description: string | null;
-    price: string;
-    stock: number;
-    discount: number;
+    price: string | number;
+    stock: string | number;
+    discount: string | number;
     sku: string | null;
-    brand_id: number | null;
+    brand_id: number | string | null;
     model: string | null;
     image_url: string | null;
     is_active: boolean;
@@ -68,7 +68,7 @@ export default function ProductForm({
         e.preventDefault();
         const payload = {
             ...data,
-            price: parseFloat(data.price) || 0,
+            price: parseFloat(String(data.price)) || 0,
             stock: parseInt(String(data.stock), 10) || 0,
             discount: parseInt(String(data.discount), 10) || 0,
             brand_id: data.brand_id ? parseInt(data.brand_id, 10) : null,

@@ -27,6 +27,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('products/{id}/restore', [AdminProductController::class, 'restore'])->name('products.restore');
     Route::delete('products/{id}/force', [AdminProductController::class, 'forceDelete'])->name('products.forceDelete');
 
+    Route::post('products/{product}/images/batch', [ProductImageController::class, 'batchStore'])->name('products.images.batchStore');
     Route::post('products/{product}/images', [ProductImageController::class, 'store'])->name('products.images.store');
     Route::put('products/{product}/images/reorder', [ProductImageController::class, 'reorder'])->name('products.images.reorder');
     Route::put('products/{product}/images/{image}/cover', [ProductImageController::class, 'setCover'])->name('products.images.setCover');

@@ -10,7 +10,8 @@ interface PageProps {
 export default function AdminProductsCreate() {
     const { brands } = usePage<PageProps>().props;
 
-    const handleSubmit = (data: Record<string, unknown>) => {
+    const handleSubmit = (data: unknown) => {
+        // @ts-expect-error Inertia router accepts various data types
         router.post('/admin/products', data);
     };
 
