@@ -14,18 +14,27 @@ class ProductController extends Controller
 {
     public function index(): Response
     {
-        $products = Product::with('brand')
+        $query = Product::with('brand')
             ->when(request('search'), fn ($q, $search) => $q->where('name', 'like', "%{$search}%"))
             ->when(request('brand_id'), fn ($q, $brandId) => $q->where('brand_id', $brandId))
-            ->when(request('is_active') !== null, fn ($q) => $q->where('is_active', request('is_active') == '1'))
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
+            ->when(request('is_active') !== null, fn ($q) => $q->where('is_active', request('is_active') == '1'));
 
+        if (request('trashed') === '1') {
+            $query->onlyTrashed();
+        }
+
+        $products = $query->orderBy('created_at', 'desc')->paginate(15);
         $brands = Brand::orderBy('name')->get();
 
         return Inertia::render('admin/products/index', [
             'products' => $products,
             'brands' => $brands,
+            'filters' => [
+                'search' => request('search'),
+                'brand_id' => request('brand_id'),
+                'is_active' => request('is_active'),
+                'trashed' => request('trashed'),
+            ],
         ]);
     }
 
@@ -57,12 +66,12 @@ class ProductController extends Controller
 
         Product::create($validated);
 
-        return redirect()->route('admin.products.index');
+        return redirect()->route('admin.products.index')->with('success', 'Producto creado exitosamente.');
     }
 
     public function edit(int $id): Response
     {
-        $product = Product::findOrFail($id);
+        $product = Product::with(['brand', 'images' => fn ($q) => $q->orderBy('position')])->findOrFail($id);
         $brands = Brand::orderBy('name')->get();
 
         return Inertia::render('admin/products/[id]/edit', [
@@ -92,7 +101,7 @@ class ProductController extends Controller
 
         $product->update($validated);
 
-        return redirect()->route('admin.products.index');
+        return redirect()->route('admin.products.index')->with('success', 'Producto actualizado exitosamente.');
     }
 
     public function destroy(int $id): RedirectResponse
@@ -100,7 +109,7 @@ class ProductController extends Controller
         $product = Product::findOrFail($id);
         $product->delete();
 
-        return redirect()->route('admin.products.index');
+        return redirect()->route('admin.products.index')->with('success', 'Producto eliminado.');
     }
 
     public function restore(int $id): RedirectResponse
@@ -108,7 +117,7 @@ class ProductController extends Controller
         $product = Product::withTrashed()->findOrFail($id);
         $product->restore();
 
-        return redirect()->route('admin.products.index');
+        return redirect()->route('admin.products.index')->with('success', 'Producto restaurado.');
     }
 
     public function forceDelete(int $id): RedirectResponse
@@ -116,6 +125,6 @@ class ProductController extends Controller
         $product = Product::withTrashed()->findOrFail($id);
         $product->forceDelete();
 
-        return redirect()->route('admin.products.index');
+        return redirect()->route('admin.products.index')->with('success', 'Producto eliminado permanentemente.');
     }
 }

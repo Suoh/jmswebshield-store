@@ -40,7 +40,7 @@ class ProductImageController extends Controller
             'is_cover' => $isCover,
         ]);
 
-        return redirect()->back();
+        return redirect()->back()->with('success', 'Imagen subida exitosamente.');
     }
 
     public function batchStore(Request $request, int $productId): JsonResponse
@@ -111,7 +111,7 @@ class ProductImageController extends Controller
             ProductImage::where('id', $imageId)->update(['position' => $position]);
         }
 
-        return redirect()->back();
+        return redirect()->back()->with('success', 'Imágenes reordenadas.');
     }
 
     public function setCover(int $productId, int $imageId): RedirectResponse
@@ -122,7 +122,7 @@ class ProductImageController extends Controller
         $product->images()->update(['is_cover' => false]);
         $image->update(['is_cover' => true]);
 
-        return redirect()->back();
+        return redirect()->back()->with('success', 'Imagen de portada actualizada.');
     }
 
     public function destroy(int $productId, int $imageId): RedirectResponse
@@ -144,6 +144,6 @@ class ProductImageController extends Controller
 
         Storage::disk('public')->delete($imagePath);
 
-        return redirect()->back();
+        return redirect()->back()->with('success', 'Imagen eliminada.');
     }
 }

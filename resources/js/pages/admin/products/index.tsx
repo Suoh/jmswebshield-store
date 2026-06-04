@@ -1,5 +1,17 @@
 import { Link, router, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -27,20 +39,42 @@ interface PageProps {
         search?: string;
         brand_id?: string;
         is_active?: string;
+        trashed?: string;
+    };
+    flash?: {
+        success?: string;
+        error?: string;
     };
     [key: string]: unknown;
 }
 
 export default function AdminProductsIndex() {
-    const { products, brands, filters } = usePage<PageProps>().props;
+    const { products, brands, filters, flash } = usePage<PageProps>().props;
     const [search, setSearch] = useState(filters.search ?? '');
     const [brandId, setBrandId] = useState(filters.brand_id ?? 'all');
     const [isActive, setIsActive] = useState(filters.is_active ?? 'all');
+    const [showTrashed, setShowTrashed] = useState(filters.trashed === '1');
+    const [deleteTarget, setDeleteTarget] = useState<{
+        id: number;
+        name: string;
+    } | null>(null);
+    const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    useEffect(() => {
+        if (flash?.success) {
+            toast.success(flash.success);
+        }
+
+        if (flash?.error) {
+            toast.error(flash.error);
+        }
+    }, [flash]);
 
     const applyFilters = (
         newSearch?: string,
         newBrandId?: string,
         newIsActive?: string,
+        newTrashed?: boolean,
     ) => {
         const params: Record<string, string> = {};
 
@@ -56,23 +90,26 @@ export default function AdminProductsIndex() {
             params.is_active = newIsActive;
         }
 
+        if (newTrashed !== undefined) {
+            params.trashed = newTrashed ? '1' : '';
+        }
+
         router.get('/admin/products', params, {
             preserveState: true,
             replace: true,
         });
     };
 
-    const handleSearchSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        applyFilters(search, brandId, isActive);
-    };
+    const handleSearchChange = (value: string) => {
+        setSearch(value);
 
-    const handleDelete = (id: number, name: string) => {
-        if (!confirm(`Eliminar el producto "${name}"?`)) {
-            return;
+        if (searchTimeout.current) {
+            clearTimeout(searchTimeout.current);
         }
 
-        router.delete(`/admin/products/${id}`);
+        searchTimeout.current = setTimeout(() => {
+            applyFilters(value, brandId, isActive, showTrashed);
+        }, 300);
     };
 
     const clearFilters = () => {
@@ -86,24 +123,86 @@ export default function AdminProductsIndex() {
         );
     };
 
+    const handleRestore = (id: number) => {
+        router.post(
+            `/admin/products/${id}/restore`,
+            {},
+            {
+                onSuccess: () => {
+                    toast.success('Producto restaurado');
+                },
+                onError: () => {
+                    toast.error('Error al restaurar el producto');
+                },
+            },
+        );
+    };
+
+    const handleForceDelete = (id: number) => {
+        router.delete(`/admin/products/${id}/force`, {
+            onSuccess: () => {
+                toast.success('Producto eliminado permanentemente');
+            },
+            onError: () => {
+                toast.error('Error al eliminar el producto');
+            },
+        });
+    };
+
+    const confirmDelete = () => {
+        if (!deleteTarget) {
+            return;
+        }
+
+        router.delete(`/admin/products/${deleteTarget.id}`, {
+            onSuccess: () => {
+                toast.success('Producto eliminado');
+                setDeleteTarget(null);
+            },
+            onError: () => {
+                toast.error('Error al eliminar el producto');
+                setDeleteTarget(null);
+            },
+        });
+    };
+
     const hasFilters =
         search ||
         (brandId && brandId !== 'all') ||
-        (isActive && isActive !== 'all');
+        (isActive && isActive !== 'all') ||
+        showTrashed;
 
     return (
         <div className="p-6">
             <div className="mb-6 flex items-center justify-between">
                 <h1 className="text-2xl font-bold">Productos</h1>
-                <Button asChild>
-                    <Link href="/admin/products/create">Nuevo producto</Link>
-                </Button>
+                <div className="flex items-center gap-3">
+                    <label className="flex items-center gap-2 text-sm">
+                        <input
+                            type="checkbox"
+                            checked={showTrashed}
+                            onChange={(e) => {
+                                setShowTrashed(e.target.checked);
+                                applyFilters(
+                                    search,
+                                    brandId,
+                                    isActive,
+                                    e.target.checked,
+                                );
+                            }}
+                            className="rounded border-input"
+                        />
+                        Mostrar eliminados
+                    </label>
+                    <Button asChild>
+                        <Link href="/admin/products/create">
+                            Nuevo producto
+                        </Link>
+                    </Button>
+                </div>
             </div>
 
-            <form
-                onSubmit={handleSearchSubmit}
-                className="mb-6 flex flex-wrap items-end gap-4"
-            >
+            <form className="mb-6 flex flex-wrap items-end gap-4">
                 <div className="min-w-[200px] flex-1">
                     <Label htmlFor="search" className="sr-only">
                         Buscar
@@ -112,7 +211,7 @@ export default function AdminProductsIndex() {
                         id="search"
                         placeholder="Buscar por nombre..."
                         value={search}
-                        onChange={(e) => setSearch(e.target.value)}
+                        onChange={(e) => handleSearchChange(e.target.value)}
                     />
                 </div>
 
@@ -122,10 +221,9 @@ export default function AdminProductsIndex() {
                     </Label>
                     <Select
                         value={brandId}
-                        onValueChange={(val) => {
-                            setBrandId(val);
-                            applyFilters(search, val, isActive);
-                        }}
+                        onValueChange={(val) =>
+                            applyFilters(search, val, isActive, showTrashed)
+                        }
                     >
                         <SelectTrigger id="brand_filter">
                             <SelectValue placeholder="Todas las marcas" />
@@ -152,10 +250,9 @@ export default function AdminProductsIndex() {
                     </Label>
                     <Select
                         value={isActive}
-                        onValueChange={(val) => {
-                            setIsActive(val);
-                            applyFilters(search, brandId, val);
-                        }}
+                        onValueChange={(val) =>
+                            applyFilters(search, brandId, val, showTrashed)
+                        }
                     >
                         <SelectTrigger id="is_active_filter">
                             <SelectValue placeholder="Todos" />
@@ -168,7 +265,6 @@ export default function AdminProductsIndex() {
                     </Select>
                 </div>
 
-                <Button type="submit">Filtrar</Button>
                 {hasFilters && (
                     <Button
                         type="button"
@@ -180,7 +276,7 @@ export default function AdminProductsIndex() {
                 )}
             </form>
 
-            <div className="overflow-hidden rounded-lg border">
+            <div className="overflow-x-auto rounded-lg border">
                 <Table>
                     <TableHeader>
                         <TableRow>
@@ -211,7 +307,14 @@ export default function AdminProductsIndex() {
                             products.data.map((product) => (
                                 <TableRow key={product.id}>
                                     <TableCell className="font-medium">
-                                        {product.name}
+                                        <div className="flex items-center gap-2">
+                                            {product.deleted_at && (
+                                                <span className="rounded bg-destructive/10 px-1.5 py-0.5 text-xs text-destructive">
+                                                    Eliminado
+                                                </span>
+                                            )}
+                                            {product.name}
+                                        </div>
                                     </TableCell>
                                     <TableCell className="text-muted-foreground">
                                         {product.sku ?? '-'}
@@ -238,30 +341,108 @@ export default function AdminProductsIndex() {
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex items-center justify-end gap-2">
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                asChild
-                                            >
-                                                <Link
-                                                    href={`/admin/products/${product.id}/edit`}
-                                                >
-                                                    Editar
-                                                </Link>
-                                            </Button>
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className="text-destructive hover:text-destructive"
-                                                onClick={() =>
-                                                    handleDelete(
-                                                        product.id,
-                                                        product.name,
-                                                    )
-                                                }
-                                            >
-                                                Eliminar
-                                            </Button>
+                                            {!product.deleted_at ? (
+                                                <>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        asChild
+                                                    >
+                                                        <Link
+                                                            href={`/admin/products/${product.id}/edit`}
+                                                        >
+                                                            Editar
+                                                        </Link>
+                                                    </Button>
+                                                    <AlertDialog>
+                                                        <AlertDialogTrigger
+                                                            asChild
+                                                        >
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="text-destructive hover:text-destructive"
+                                                                onClick={() =>
+                                                                    setDeleteTarget(
+                                                                        {
+                                                                            id: product.id,
+                                                                            name: product.name,
+                                                                        },
+                                                                    )
+                                                                }
+                                                            >
+                                                                Eliminar
+                                                            </Button>
+                                                        </AlertDialogTrigger>
+                                                        <AlertDialogContent>
+                                                            <AlertDialogHeader>
+                                                                <AlertDialogTitle>
+                                                                    Eliminar
+                                                                    producto
+                                                                </AlertDialogTitle>
+                                                                <AlertDialogDescription>
+                                                                    ¿Estás
+                                                                    seguro de
+                                                                    que deseas
+                                                                    eliminar "
+                                                                    {
+                                                                        product.name
+                                                                    }
+                                                                    "? Esta
+                                                                    acción no se
+                                                                    puede
+                                                                    deshacer.
+                                                                </AlertDialogDescription>
+                                                            </AlertDialogHeader>
+                                                            <AlertDialogFooter>
+                                                                <AlertDialogCancel>
+                                                                    Cancelar
+                                                                </AlertDialogCancel>
+                                                                <AlertDialogAction
+                                                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                                    onClick={
+                                                                        confirmDelete
+                                                                    }
+                                                                >
+                                                                    Eliminar
+                                                                </AlertDialogAction>
+                                                            </AlertDialogFooter>
+                                                        </AlertDialogContent>
+                                                    </AlertDialog>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={() =>
+                                                            handleRestore(
+                                                                product.id,
+                                                            )
+                                                        }
+                                                    >
+                                                        Restaurar
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="text-destructive hover:text-destructive"
+                                                        onClick={() => {
+                                                            if (
+                                                                confirm(
+                                                                    '¿Eliminar permanentemente este producto?',
+                                                                )
+                                                            ) {
+                                                                handleForceDelete(
+                                                                    product.id,
+                                                                );
+                                                            }
+                                                        }}
+                                                    >
+                                                        Eliminar definitivamente
+                                                    </Button>
+                                                </>
+                                            )}
                                         </div>
                                     </TableCell>
                                 </TableRow>

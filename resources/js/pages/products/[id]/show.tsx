@@ -56,24 +56,24 @@ export default function ProductShow({ product }: Props) {
                 <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
                     <div className="lg:col-span-2">
                         <div className="mb-6">
-                        {product.images && product.images.length > 0 ? (
-                            <ProductImageCarousel
-                                images={product.images}
-                                productName={product.name}
-                            />
-                        ) : (
-                            <div className="aspect-[16/9] overflow-hidden rounded-lg">
-                                <img
-                                    src={
-                                        product.cover_image ||
-                                        'https://via.placeholder.com/800x450?text=Sin+imagen'
-                                    }
-                                    alt={product.name}
-                                    className="h-full w-full object-cover"
+                            {product.images && product.images.length > 0 ? (
+                                <ProductImageCarousel
+                                    images={product.images}
+                                    productName={product.name}
                                 />
-                            </div>
-                        )}
-                    </div>
+                            ) : (
+                                <div className="aspect-[16/9] overflow-hidden rounded-lg">
+                                    <img
+                                        src={
+                                            product.cover_image ||
+                                            'https://via.placeholder.com/800x450?text=Sin+imagen'
+                                        }
+                                        alt={product.name}
+                                        className="h-full w-full object-cover"
+                                    />
+                                </div>
+                            )}
+                        </div>
 
                         {product.full_description && (
                             <div className="mb-8">
