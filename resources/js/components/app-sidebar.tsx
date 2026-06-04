@@ -28,6 +28,7 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: dashboard(),
         icon: LayoutGrid,
+        prefetch: true,
     },
 ];
 
@@ -36,6 +37,7 @@ const adminNavItems: NavItem[] = [
         title: 'Marcas',
         href: '/admin/brands',
         icon: Tag,
+        prefetch: true,
     },
     {
         title: 'SYSCOM Marcas',
