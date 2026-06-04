@@ -17,6 +17,7 @@ export interface Product {
     image_url: string | null;
     brand_id: number | null;
     model: string | null;
+    sku: string | null;
     metadata: Record<string, string> | null;
     is_active: boolean;
     created_at: string;
