@@ -94,8 +94,31 @@ describe('SyscomMapper', function () {
 
             $result = SyscomMapper::toLocalProduct($syscomProduct, 450.00);
 
-            expect($result['price'])->toBe('450.00');
-            expect($result['price'])->not->toBe('9999.99');
+            expect($result['price'])->toBe(450.00)
+                ->and($result['price'])->not->toBe(9999.99);
+        });
+
+        it('stores price as float not string', function () {
+            $syscomProduct = [
+                'id' => '1',
+                'nombre' => 'Test Product',
+                'descripcion_corta' => null,
+                'descripcion_larga' => null,
+                'stock' => 5,
+                'modelo' => null,
+                'marca_id' => null,
+                'categoria_id' => null,
+                'precios' => [
+                    'precio_lista' => 100.00,
+                    'precio_descuento' => 90.00,
+                ],
+                'imagen' => null,
+            ];
+
+            $result = SyscomMapper::toLocalProduct($syscomProduct, 80.50);
+
+            expect($result['price'])->toBeFloat()
+                ->and($result['price'])->toBe(80.50);
         });
 
         it('sets is_active to true', function () {

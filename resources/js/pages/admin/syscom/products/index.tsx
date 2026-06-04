@@ -1,5 +1,6 @@
 import { router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -41,6 +42,7 @@ interface PageProps {
     categories: Array<{ id: string; nombre: string }>;
     brands: Array<{ id: string; nombre: string }>;
     imported_syscom_ids: string[];
+    [key: string]: unknown;
 }
 
 export default function AdminSyscomProductsIndex() {
@@ -175,7 +177,19 @@ export default function AdminSyscomProductsIndex() {
                 products: productsToImport,
             },
             {
-                onFinish: () => setIsImporting(false),
+                onSuccess: () => {
+                    setIsImporting(false);
+                    router.reload({
+                        only: ['syscom_products', 'imported_syscom_ids'],
+                    });
+                    toast.success(
+                        `${productsToImport.length} producto${productsToImport.length > 1 ? 's' : ''} importado${productsToImport.length > 1 ? 's' : ''}`,
+                    );
+                },
+                onError: () => {
+                    setIsImporting(false);
+                    toast.error('Error al importar productos');
+                },
             },
         );
     };
