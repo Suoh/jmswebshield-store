@@ -87,7 +87,7 @@ describe('SyscomClient', function () {
                     'token_type' => 'Bearer',
                     'expires_in' => 31536000,
                 ], 200),
-                'syscom-api.example.com/v1/categorias' => Http::response([
+                'syscom-api.example.com/api/v1/categorias' => Http::response([
                     ['id' => '1', 'nombre' => 'Routers'],
                     ['id' => '2', 'nombre' => 'Switches'],
                 ], 200),
@@ -108,21 +108,16 @@ describe('SyscomClient', function () {
     });
 
     describe('getBrands', function () {
-        it('returns paginated brands response', function () {
+        it('returns brands array from SYSCOM API', function () {
             Http::fake([
                 'syscom-api.example.com/oauth/token' => Http::response([
                     'access_token' => 'token',
                     'token_type' => 'Bearer',
                     'expires_in' => 31536000,
                 ], 200),
-                'syscom-api.example.com/v1/marcas*' => Http::response([
-                    'data' => [
-                        ['id' => 'tp-link', 'nombre' => 'TP-Link'],
-                        ['id' => 'netgear', 'nombre' => 'Netgear'],
-                    ],
-                    'current_page' => 1,
-                    'last_page' => 3,
-                    'total' => 50,
+                'syscom-api.example.com/api/v1/marcas*' => Http::response([
+                    ['id' => 'tp-link', 'nombre' => 'TP-Link'],
+                    ['id' => 'netgear', 'nombre' => 'Netgear'],
                 ], 200),
             ]);
 
@@ -133,11 +128,10 @@ describe('SyscomClient', function () {
             $client = new SyscomClient;
             $result = $client->getBrands(1);
 
-            expect($result)->toHaveKey('data')
-                ->toHaveKey('current_page', 1)
-                ->toHaveKey('last_page', 3)
-                ->toHaveKey('total', 50)
-                ->and($result['data'])->toHaveCount(2);
+            expect($result)->toBeArray()
+                ->toHaveCount(2)
+                ->and($result[0])->toHaveKey('id', 'tp-link')
+                ->and($result[0])->toHaveKey('nombre', 'TP-Link');
         });
     });
 
@@ -149,11 +143,11 @@ describe('SyscomClient', function () {
                     'token_type' => 'Bearer',
                     'expires_in' => 31536000,
                 ], 200),
-                'syscom-api.example.com/v1/productos*' => Http::response([
-                    'data' => [],
-                    'current_page' => 1,
-                    'last_page' => 1,
-                    'total' => 0,
+                'syscom-api.example.com/api/v1/productos*' => Http::response([
+                    'cantidad' => 0,
+                    'pagina' => 1,
+                    'paginas' => 1,
+                    'productos' => [],
                 ], 200),
             ]);
 
@@ -164,7 +158,7 @@ describe('SyscomClient', function () {
             $client = new SyscomClient;
             $result = $client->getProducts(['categoria_id' => '5', 'marca_id' => 'tp-link'], 1);
 
-            expect($result)->toHaveKey('data');
+            expect($result)->toHaveKey('productos');
 
             Http::assertSent(function ($request) {
                 return str_contains($request->url(), 'categoria_id=5')
@@ -181,7 +175,7 @@ describe('SyscomClient', function () {
                     'token_type' => 'Bearer',
                     'expires_in' => 31536000,
                 ], 200),
-                'syscom-api.example.com/v1/productos/12345' => Http::response([
+                'syscom-api.example.com/api/v1/productos/12345' => Http::response([
                     'id' => '12345',
                     'nombre' => 'Router RBK852',
                     'descripcion_corta' => 'Sistema WiFi mesh',

@@ -108,23 +108,23 @@ class SyscomClient
 
     public function getCategories(): array
     {
-        return $this->request('GET', '/v1/categorias');
+        return $this->request('GET', '/api/v1/categorias');
     }
 
     public function getBrands(int $page = 1): array
     {
-        return $this->request('GET', '/v1/marcas', ['page' => $page]);
+        return $this->request('GET', '/api/v1/marcas', ['page' => $page]);
     }
 
     public function getProducts(array $filters = [], int $page = 1): array
     {
         $params = array_merge($filters, ['page' => $page]);
 
-        return $this->request('GET', '/v1/productos', $params);
+        return $this->request('GET', '/api/v1/productos', $params);
     }
 
     public function getProductDetail(string $id): array
     {
-        return $this->request('GET', "/v1/productos/{$id}");
+        return $this->request('GET', "/api/v1/productos/{$id}");
     }
 }

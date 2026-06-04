@@ -33,19 +33,14 @@ describe('SyscomService', function () {
     });
 
     describe('getBrands', function () {
-        it('returns paginated brands structure from client', function () {
+        it('normalizes flat array from SYSCOM API to PaginatedData', function () {
             $mockClient = Mockery::mock(SyscomClient::class);
             $mockClient->shouldReceive('getBrands')
                 ->with(1)
                 ->once()
                 ->andReturn([
-                    'data' => [
-                        ['id' => 'tp-link', 'nombre' => 'TP-Link'],
-                        ['id' => 'netgear', 'nombre' => 'Netgear'],
-                    ],
-                    'current_page' => 1,
-                    'last_page' => 2,
-                    'total' => 30,
+                    ['id' => 'tp-link', 'nombre' => 'TP-Link'],
+                    ['id' => 'netgear', 'nombre' => 'Netgear'],
                 ]);
 
             $service = new SyscomService($mockClient);
@@ -53,8 +48,8 @@ describe('SyscomService', function () {
 
             expect($result)->toHaveKey('data')
                 ->toHaveKey('current_page', 1)
-                ->toHaveKey('last_page', 2)
-                ->toHaveKey('total', 30)
+                ->toHaveKey('last_page', 1)
+                ->toHaveKey('total', 2)
                 ->and($result['data'])->toHaveCount(2);
         });
 
@@ -64,39 +59,39 @@ describe('SyscomService', function () {
                 ->with(3)
                 ->once()
                 ->andReturn([
-                    'data' => [],
-                    'current_page' => 3,
-                    'last_page' => 5,
-                    'total' => 100,
+                    ['id' => 'brand-a', 'nombre' => 'Brand A'],
                 ]);
 
             $service = new SyscomService($mockClient);
             $result = $service->getBrands(3);
 
-            expect($result['current_page'])->toBe(3);
+            expect($result['data'][0]['id'])->toBe('brand-a');
         });
     });
 
     describe('getProducts', function () {
-        it('returns paginated products structure from client', function () {
+        it('normalizes Búsqueda schema from SYSCOM API to PaginatedData', function () {
             $mockClient = Mockery::mock(SyscomClient::class);
             $mockClient->shouldReceive('getProducts')
                 ->with([], 1)
                 ->once()
                 ->andReturn([
-                    'data' => [
+                    'cantidad' => 500,
+                    'pagina' => 1,
+                    'paginas' => 10,
+                    'productos' => [
                         ['id' => '1', 'nombre' => 'Router 1'],
                     ],
-                    'current_page' => 1,
-                    'last_page' => 10,
-                    'total' => 500,
                 ]);
 
             $service = new SyscomService($mockClient);
             $result = $service->getProducts([], 1);
 
             expect($result)->toHaveKey('data')
-                ->toHaveKey('total', 500);
+                ->toHaveKey('current_page', 1)
+                ->toHaveKey('last_page', 10)
+                ->toHaveKey('total', 500)
+                ->and($result['data'])->toHaveCount(1);
         });
 
         it('passes filters and page to client', function () {
@@ -105,16 +100,17 @@ describe('SyscomService', function () {
                 ->with(['categoria_id' => '5', 'stock' => 'true'], 2)
                 ->once()
                 ->andReturn([
-                    'data' => [],
-                    'current_page' => 2,
-                    'last_page' => 1,
-                    'total' => 0,
+                    'cantidad' => 0,
+                    'pagina' => 2,
+                    'paginas' => 1,
+                    'productos' => [],
                 ]);
 
             $service = new SyscomService($mockClient);
             $result = $service->getProducts(['categoria_id' => '5', 'stock' => 'true'], 2);
 
-            expect($result)->toBeArray();
+            expect($result)->toHaveKey('data')
+                ->and($result['current_page'])->toBe(2);
         });
     });
 
