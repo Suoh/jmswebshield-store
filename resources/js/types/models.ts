@@ -6,6 +6,16 @@ export interface Brand {
     updated_at: string;
 }
 
+export interface ProductImage {
+    id: number;
+    product_id: number;
+    path: string;
+    position: number;
+    is_cover: boolean;
+    created_at: string;
+    updated_at: string;
+}
+
 export interface Product {
     id: number;
     name: string;
@@ -24,6 +34,7 @@ export interface Product {
     updated_at: string;
     deleted_at: string | null;
     brand?: Brand;
+    images?: ProductImage[];
     availability: string;
     discounted_price: string | null;
     cover_image: string | null;
