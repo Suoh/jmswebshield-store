@@ -1,4 +1,5 @@
-import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import type { DropResult } from '@hello-pangea/dnd';
 import { router } from '@inertiajs/react';
 import { useState, useCallback } from 'react';
 import { Badge } from '@/components/ui/badge';

@@ -1,47 +1,50 @@
-"use client"
+'use client';
 
-import useEmblaCarousel from 'embla-carousel-react'
-import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
-import { useCallback } from 'react'
-import { cn } from '@/lib/utils'
-import type { ProductImage } from '@/types/models'
+import useEmblaCarousel from 'embla-carousel-react';
+import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
+import { useCallback } from 'react';
+import { cn } from '@/lib/utils';
+import type { ProductImage } from '@/types/models';
 
 interface ProductImageCarouselProps {
-    images: ProductImage[]
-    productName: string
+    images: ProductImage[];
+    productName: string;
 }
 
-export default function ProductImageCarousel({ images, productName }: ProductImageCarouselProps) {
+export default function ProductImageCarousel({
+    images,
+    productName,
+}: ProductImageCarouselProps) {
     const [emblaRef, emblaApi] = useEmblaCarousel({
         loop: images.length > 1,
-    })
+    });
 
     const scrollPrev = useCallback(() => {
         if (emblaApi) {
-emblaApi.scrollPrev()
-}
-    }, [emblaApi])
+            emblaApi.scrollPrev();
+        }
+    }, [emblaApi]);
 
     const scrollNext = useCallback(() => {
         if (emblaApi) {
-emblaApi.scrollNext()
-}
-    }, [emblaApi])
+            emblaApi.scrollNext();
+        }
+    }, [emblaApi]);
 
     const onThumbClick = (index: number) => {
         if (!emblaApi) {
-return
-}
+            return;
+        }
 
-        emblaApi.scrollTo(index)
-    }
+        emblaApi.scrollTo(index);
+    };
 
     if (images.length === 0) {
         return (
             <div className="flex aspect-[16/9] items-center justify-center overflow-hidden rounded-lg bg-muted">
                 <span className="text-muted-foreground">Sin imagen</span>
             </div>
-        )
+        );
     }
 
     return (
@@ -65,14 +68,14 @@ return
                     <>
                         <button
                             onClick={scrollPrev}
-                            className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white transition-colors hover:bg-black/70"
+                            className="absolute top-1/2 left-2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white transition-colors hover:bg-black/70"
                             aria-label="Imagen anterior"
                         >
                             <ChevronLeftIcon className="size-5" />
                         </button>
                         <button
                             onClick={scrollNext}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white transition-colors hover:bg-black/70"
+                            className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white transition-colors hover:bg-black/70"
                             aria-label="Siguiente imagen"
                         >
                             <ChevronRightIcon className="size-5" />
@@ -91,7 +94,7 @@ return
                                 'relative flex-shrink-0 overflow-hidden rounded-md border-2 transition-all',
                                 image.is_cover
                                     ? 'border-primary ring-2 ring-primary/20'
-                                    : 'border-transparent opacity-60 hover:opacity-100'
+                                    : 'border-transparent opacity-60 hover:opacity-100',
                             )}
                         >
                             <img
@@ -104,5 +107,5 @@ return
                 </div>
             )}
         </div>
-    )
+    );
 }
