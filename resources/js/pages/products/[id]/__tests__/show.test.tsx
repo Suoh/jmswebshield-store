@@ -28,6 +28,7 @@ const mockProduct = {
     image_url: 'https://example.com/image.jpg',
     brand_id: 1,
     model: 'MODEL-2024',
+    sku: 'SKU-TEST-001',
     metadata: { color: 'Negro', peso: '2kg' },
     is_active: true,
     created_at: '2026-01-01T00:00:00Z',

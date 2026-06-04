@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ProductImage;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -40,6 +41,54 @@ class ProductImageController extends Controller
         ]);
 
         return redirect()->back();
+    }
+
+    public function batchStore(Request $request, int $productId): JsonResponse
+    {
+        $product = Product::findOrFail($productId);
+        $currentCount = $product->images()->count();
+        $files = $request->file('images');
+
+        if (! $files || ! is_array($files)) {
+            return response()->json(['message' => 'No se proporcionaron imágenes'], 422);
+        }
+
+        $maxAdd = 6 - $currentCount;
+        if (count($files) > $maxAdd) {
+            return response()->json(['errors' => ['image' => ["Máximo {$maxAdd} imágenes más"]]], 422);
+        }
+
+        $created = [];
+        foreach ($files as $file) {
+            if (! in_array($file->getMimeType(), ['image/jpeg', 'image/png', 'image/webp'])) {
+                continue;
+            }
+            if ($file->getSize() > 2 * 1024 * 1024) {
+                continue;
+            }
+
+            $path = $file->store("products/{$product->id}", 'public');
+            $isCover = $product->images()->count() === 0;
+
+            $image = ProductImage::create([
+                'product_id' => $product->id,
+                'path' => $path,
+                'position' => $product->images()->max('position') + 1,
+                'is_cover' => $isCover,
+            ]);
+
+            $created[] = [
+                'id' => $image->id,
+                'product_id' => $image->product_id,
+                'path' => $image->path,
+                'position' => $image->position,
+                'is_cover' => $image->is_cover,
+                'created_at' => $image->created_at?->toISOString() ?? '',
+                'updated_at' => $image->updated_at?->toISOString() ?? '',
+            ];
+        }
+
+        return response()->json(['images' => $created], 201);
     }
 
     public function reorder(Request $request, int $productId): RedirectResponse
