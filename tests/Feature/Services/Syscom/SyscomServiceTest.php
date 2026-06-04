@@ -174,8 +174,8 @@ describe('SyscomService', function () {
             $service = new SyscomService($mockClient);
             $result = $service->getProductDetail('99999', 500.00);
 
-            expect($result['price'])->toBe('500.00')
-                ->not->toBe('99999.99');
+            expect($result['price'])->toBe(500.00)
+                ->and($result['price'])->not->toBe(99999.99);
         });
     });
 });

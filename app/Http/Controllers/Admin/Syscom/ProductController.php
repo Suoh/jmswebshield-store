@@ -20,9 +20,9 @@ class ProductController extends Controller
     public function index(Request $request): Response
     {
         $filters = array_filter([
-            'categoria_id' => $request->query('categoria_id'),
-            'marca_id' => $request->query('marca_id'),
-            'search' => $request->query('search'),
+            'categoria' => $request->query('categoria_id'),
+            'marca' => $request->query('marca_id'),
+            'busqueda' => $request->query('search'),
             'stock' => $request->query('stock'),
         ]);
 
@@ -63,6 +63,7 @@ class ProductController extends Controller
         $products = $validated['products'];
         $imported = 0;
         $skipped = 0;
+        $failed = 0;
 
         $brandsData = $this->syscomService->getBrands(1);
         $brandLookup = [];
@@ -95,7 +96,13 @@ class ProductController extends Controller
                 continue;
             }
 
-            $localData = $this->syscomService->getProductDetail($productoId, $adminPrice);
+            try {
+                $localData = $this->syscomService->getProductDetail($productoId, $adminPrice);
+            } catch (\Exception $e) {
+                $failed++;
+
+                continue;
+            }
 
             $marcaId = $localData['metadata']['syscom_marca_id'] ?? null;
             $brandId = null;
@@ -126,6 +133,7 @@ class ProductController extends Controller
         return response()->json([
             'imported' => $imported,
             'skipped' => $skipped,
+            'failed' => $failed,
         ]);
     }
 }

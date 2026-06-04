@@ -156,13 +156,14 @@ describe('SyscomClient', function () {
             config(['services.syscom.client_secret' => 'secret']);
 
             $client = new SyscomClient;
-            $result = $client->getProducts(['categoria_id' => '5', 'marca_id' => 'tp-link'], 1);
+            $result = $client->getProducts(['categoria' => '5', 'marca' => 'tp-link'], 1);
 
             expect($result)->toHaveKey('productos');
 
             Http::assertSent(function ($request) {
-                return str_contains($request->url(), 'categoria_id=5')
-                    && str_contains($request->url(), 'marca_id=tp-link');
+                return str_contains($request->url(), 'categoria=5')
+                    && str_contains($request->url(), 'marca=tp-link')
+                    && str_contains($request->url(), 'pagina=1');
             });
         });
     });

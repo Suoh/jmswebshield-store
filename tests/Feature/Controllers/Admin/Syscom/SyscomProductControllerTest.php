@@ -74,12 +74,12 @@ describe('Syscom Product Import Controller', function () {
                 );
         });
 
-        it('passes filters to getProducts', function () {
+        it('passes filters to getProducts with SYSCOM param names', function () {
             $mockService = Mockery::mock(SyscomService::class);
             $mockService->shouldReceive('getCategories')->andReturn([]);
             $mockService->shouldReceive('getBrands')->andReturn(['data' => [], 'current_page' => 1, 'last_page' => 1, 'total' => 0]);
             $mockService->shouldReceive('getProducts')
-                ->with(['categoria_id' => '5', 'stock' => 'true'], 2)
+                ->with(['categoria' => '5', 'marca' => 'tp-link', 'busqueda' => 'router', 'stock' => 'true'], 2)
                 ->once()
                 ->andReturn([
                     'data' => [],
@@ -91,7 +91,7 @@ describe('Syscom Product Import Controller', function () {
 
             $this->app->instance(SyscomService::class, $mockService);
 
-            $response = $this->actingAs($this->admin)->get('/admin/syscom/products?categoria_id=5&stock=true&page=2');
+            $response = $this->actingAs($this->admin)->get('/admin/syscom/products?categoria_id=5&marca_id=tp-link&search=router&stock=true&page=2');
 
             $response->assertOk();
         });
@@ -265,6 +265,50 @@ describe('Syscom Product Import Controller', function () {
                 ->assertJson(['imported' => 0, 'skipped' => 1]);
 
             $this->assertDatabaseCount('products', 1);
+        });
+
+        it('skips failed products and continues batch import', function () {
+            $mockService = Mockery::mock(SyscomService::class);
+            $mockService->shouldReceive('getBrands')
+                ->andReturn(['data' => [], 'current_page' => 1, 'last_page' => 1, 'total' => 0]);
+            $mockService->shouldReceive('getProductDetail')
+                ->with('prod-001', 80.00)
+                ->once()
+                ->andThrow(new \Exception('SYSCOM API error'));
+            $mockService->shouldReceive('getProductDetail')
+                ->with('prod-002', 160.00)
+                ->once()
+                ->andReturn([
+                    'name' => 'Router 2',
+                    'short_description' => null,
+                    'full_description' => null,
+                    'stock' => 3,
+                    'price' => 160.00,
+                    'model' => 'M2',
+                    'image_url' => null,
+                    'brand_id' => null,
+                    'is_active' => true,
+                    'metadata' => [
+                        'syscom_id' => 'prod-002',
+                        'syscom_marca_id' => null,
+                        'syscom_precios' => ['precio_lista' => 200.00, 'precio_descuento' => 180.00],
+                    ],
+                ]);
+
+            $this->app->instance(SyscomService::class, $mockService);
+
+            $response = $this->actingAs($this->admin)->postJson('/admin/syscom/products/import', [
+                'products' => [
+                    ['producto_id' => 'prod-001', 'price' => 80.00],
+                    ['producto_id' => 'prod-002', 'price' => 160.00],
+                ],
+            ]);
+
+            $response->assertOk()
+                ->assertJson(['imported' => 1, 'skipped' => 0, 'failed' => 1]);
+
+            $this->assertDatabaseHas('products', ['name' => 'Router 2']);
+            $this->assertDatabaseMissing('products', ['name' => 'Router 1']);
         });
 
         it('fails when price is missing', function () {

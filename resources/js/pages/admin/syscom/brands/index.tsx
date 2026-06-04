@@ -22,6 +22,7 @@ interface SyscomBrand {
 interface PageProps {
     syscom_brands: PaginatedData<SyscomBrand>;
     imported_syscom_ids: string[];
+    [key: string]: unknown;
 }
 
 export default function AdminSyscomBrandsIndex() {

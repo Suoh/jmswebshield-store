@@ -55,7 +55,7 @@ class SyscomMapper
             'short_description' => $syscomProduct[self::PRODUCT_SHORT_DESC] ?? null,
             'full_description' => $syscomProduct[self::PRODUCT_FULL_DESC] ?? null,
             'stock' => (int) ($syscomProduct[self::PRODUCT_STOCK] ?? 0),
-            'price' => number_format($adminPrice, 2, '.', ''),
+            'price' => (float) $adminPrice,
             'model' => $syscomProduct[self::PRODUCT_MODEL] ?? null,
             'image_url' => $syscomProduct[self::PRODUCT_IMAGE] ?? null,
             'brand_id' => null,
