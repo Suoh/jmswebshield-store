@@ -17,7 +17,7 @@ class ProductController extends Controller
         private SyscomService $syscomService,
     ) {}
 
-    public function index(Request $request): Response
+    public function index(Request $request): Response|RedirectResponse
     {
         $filters = array_filter([
             'categoria' => $request->query('categoria_id'),
@@ -25,6 +25,10 @@ class ProductController extends Controller
             'busqueda' => $request->query('search'),
             'stock' => $request->query('stock'),
         ]);
+
+        if (isset($filters['stock'])) {
+            $filters['stock'] = $filters['stock'] === 'true' ? '1' : '0';
+        }
 
         $page = (int) $request->query('page', 1);
 
@@ -37,7 +41,9 @@ class ProductController extends Controller
             empty($filters)
             && ! empty($categories)
         ) {
-            $filters['categoria'] = $categories[0]['id'];
+            return redirect()->route('admin.syscom.products.index', [
+                'categoria_id' => $categories[0]['id'],
+            ]);
         }
 
         $syscomProducts = $this->syscomService->getProducts($filters, $page);
