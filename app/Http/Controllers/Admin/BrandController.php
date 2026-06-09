@@ -39,7 +39,7 @@ class BrandController extends Controller
             'slug' => Str::slug($validated['name']),
         ]);
 
-        return redirect()->route('admin.brands.index');
+        return redirect()->route('admin.brands.index')->with('success', 'Marca creada exitosamente.');
     }
 
     public function edit(int $id): Response
@@ -64,7 +64,7 @@ class BrandController extends Controller
             'slug' => Str::slug($validated['name']),
         ]);
 
-        return redirect()->route('admin.brands.index');
+        return redirect()->route('admin.brands.index')->with('success', 'Marca actualizada exitosamente.');
     }
 
     public function destroy(int $id): RedirectResponse
@@ -77,6 +77,6 @@ class BrandController extends Controller
 
         $brand->delete();
 
-        return redirect()->route('admin.brands.index');
+        return redirect()->route('admin.brands.index')->with('success', 'Marca eliminada.');
     }
 }
