@@ -182,6 +182,8 @@ export default function AdminSyscomProductsIndex() {
             .filter((p) => p.price > 0);
 
         if (productsToImport.length === 0) {
+            toast.error('Ingresá un precio para al menos un producto');
+
             return;
         }
 
