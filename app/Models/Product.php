@@ -28,6 +28,8 @@ class Product extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $appends = ['cover_image', 'availability', 'discounted_price'];
+
     protected function casts(): array
     {
         return [

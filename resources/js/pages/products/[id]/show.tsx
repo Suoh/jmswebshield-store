@@ -1,5 +1,6 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import ProductImageCarousel from '@/components/product/product-image-carousel';
+import ProductPlaceholderImage from '@/components/product/product-placeholder-image';
 import { Badge } from '@/components/ui/badge';
 import {
     Breadcrumb,
@@ -63,14 +64,15 @@ export default function ProductShow({ product }: Props) {
                                 />
                             ) : (
                                 <div className="aspect-[16/9] overflow-hidden rounded-lg">
-                                    <img
-                                        src={
-                                            product.cover_image ||
-                                            'https://via.placeholder.com/800x450?text=Sin+imagen'
-                                        }
-                                        alt={product.name}
-                                        className="h-full w-full object-cover"
-                                    />
+                                    {product.cover_image ? (
+                                        <img
+                                            src={product.cover_image}
+                                            alt={product.name}
+                                            className="h-full w-full object-cover"
+                                        />
+                                    ) : (
+                                        <ProductPlaceholderImage className="aspect-[16/9]" />
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -80,54 +82,72 @@ export default function ProductShow({ product }: Props) {
                                 <h2 className="mb-4 text-2xl font-bold">
                                     Descripción
                                 </h2>
-                                <p className="whitespace-pre-line text-muted-foreground">
-                                    {product.full_description}
-                                </p>
+                                <div
+                                    className="prose prose-sm max-w-none text-muted-foreground"
+                                    dangerouslySetInnerHTML={{
+                                        __html: product.full_description,
+                                    }}
+                                />
                             </div>
                         )}
 
                         {product.metadata &&
-                            Object.keys(product.metadata).length > 0 && (
-                                <div>
-                                    <h2 className="mb-4 text-2xl font-bold">
-                                        Especificaciones
-                                    </h2>
-                                    <Card>
-                                        <CardContent className="p-0">
-                                            <table className="w-full">
-                                                <tbody>
-                                                    {Object.entries(
-                                                        product.metadata,
-                                                    ).map(
-                                                        (
-                                                            [key, value],
-                                                            index,
-                                                        ) => (
-                                                            <tr
-                                                                key={key}
-                                                                className={
-                                                                    index %
-                                                                        2 ===
-                                                                    0
-                                                                        ? 'bg-muted/50'
-                                                                        : ''
-                                                                }
-                                                            >
-                                                                <td className="px-4 py-3 font-medium">
-                                                                    {key}
-                                                                </td>
-                                                                <td className="px-4 py-3 text-muted-foreground">
-                                                                    {value}
-                                                                </td>
-                                                            </tr>
-                                                        ),
-                                                    )}
-                                                </tbody>
-                                            </table>
-                                        </CardContent>
-                                    </Card>
-                                </div>
-                            )}
+                            Object.keys(product.metadata).length > 0 &&
+                            (() => {
+                                const entries = Object.entries(
+                                    product.metadata,
+                                ).filter(
+                                    ([, value]) =>
+                                        value !== null &&
+                                        typeof value !== 'object',
+                                );
+
+                                if (entries.length === 0) {
+                                    return null;
+                                }
+
+                                return (
+                                    <div>
+                                        <h2 className="mb-4 text-2xl font-bold">
+                                            Especificaciones
+                                        </h2>
+                                        <Card>
+                                            <CardContent className="p-0">
+                                                <table className="w-full">
+                                                    <tbody>
+                                                        {entries.map(
+                                                            (
+                                                                [key, value],
+                                                                index,
+                                                            ) => (
+                                                                <tr
+                                                                    key={key}
+                                                                    className={
+                                                                        index %
+                                                                            2 ===
+                                                                        0
+                                                                            ? 'bg-muted/50'
+                                                                            : ''
+                                                                    }
+                                                                >
+                                                                    <td className="px-4 py-3 font-medium">
+                                                                        {key}
+                                                                    </td>
+                                                                    <td className="px-4 py-3 text-muted-foreground">
+                                                                        {String(
+                                                                            value,
+                                                                        )}
+                                                                    </td>
+                                                                </tr>
+                                                            ),
+                                                        )}
+                                                    </tbody>
+                                                </table>
+                                            </CardContent>
+                                        </Card>
+                                    </div>
+                                );
+                            })()}
                     </div>
 
                     <div className="lg:col-span-1">
@@ -148,9 +168,15 @@ export default function ProductShow({ product }: Props) {
                                     >
                                         {product.availability}
                                     </Badge>
-                                    {product.brand && (
+                                    {product.brand ? (
                                         <span className="text-sm text-muted-foreground">
-                                            {product.brand.name}
+                                            {product.brand.name === 'sinmarca'
+                                                ? 'Sin marca'
+                                                : product.brand.name}
+                                        </span>
+                                    ) : (
+                                        <span className="text-sm text-muted-foreground">
+                                            Sin marca
                                         </span>
                                     )}
                                 </div>

@@ -1,4 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
+import ProductPlaceholderImage from '@/components/product/product-placeholder-image';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -25,7 +26,7 @@ export default function ProductIndex({ products }: Props) {
                     </div>
                 ) : (
                     <>
-                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
                             {products.data.map((product) => (
                                 <Link
                                     key={product.id}
@@ -34,14 +35,15 @@ export default function ProductIndex({ products }: Props) {
                                 >
                                     <Card className="h-full transition-shadow hover:shadow-lg">
                                         <div className="relative aspect-[4/3] overflow-hidden rounded-t-lg">
-                                            <img
-                                                src={
-                                                    product.cover_image ||
-                                                    'https://via.placeholder.com/400x300?text=Sin+imagen'
-                                                }
-                                                alt={product.name}
-                                                className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                                            />
+                                            {product.cover_image ? (
+                                                <img
+                                                    src={product.cover_image}
+                                                    alt={product.name}
+                                                    className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                                                />
+                                            ) : (
+                                                <ProductPlaceholderImage />
+                                            )}
                                             <Badge
                                                 variant={
                                                     product.availability ===
@@ -49,32 +51,43 @@ export default function ProductIndex({ products }: Props) {
                                                         ? 'default'
                                                         : 'destructive'
                                                 }
-                                                className="absolute top-2 right-2"
+                                                className="absolute top-1.5 right-1.5 text-xs"
                                             >
                                                 {product.availability}
                                             </Badge>
                                         </div>
-                                        <CardContent className="p-4">
-                                            <h2 className="mb-2 line-clamp-1 text-lg font-semibold">
+                                        <CardContent className="p-3">
+                                            <h2 className="mb-1 line-clamp-1 text-sm font-semibold">
                                                 {product.name}
                                             </h2>
                                             {product.short_description && (
-                                                <p className="mb-3 line-clamp-2 text-sm text-muted-foreground">
-                                                    {product.short_description}
+                                                <p className="mb-1 line-clamp-1 text-xs text-muted-foreground">
+                                                    {product.short_description.replace(
+                                                        /<[^>]*>/g,
+                                                        '',
+                                                    )}
                                                 </p>
                                             )}
                                             {product.brand && (
-                                                <p className="mb-2 text-xs text-muted-foreground">
-                                                    {product.brand.name}
+                                                <p className="mb-1 text-xs text-muted-foreground">
+                                                    {product.brand.name ===
+                                                    'sinmarca'
+                                                        ? 'Sin marca'
+                                                        : product.brand.name}
                                                 </p>
                                             )}
-                                            <div className="flex items-center gap-2">
+                                            {!product.brand && (
+                                                <p className="mb-1 text-xs text-muted-foreground">
+                                                    Sin marca
+                                                </p>
+                                            )}
+                                            <div className="flex items-center gap-1.5">
                                                 {product.discounted_price ? (
                                                     <>
-                                                        <span className="text-sm text-muted-foreground line-through">
+                                                        <span className="text-xs text-muted-foreground line-through">
                                                             ${product.price}
                                                         </span>
-                                                        <span className="text-lg font-bold text-primary">
+                                                        <span className="text-sm font-bold text-primary">
                                                             $
                                                             {
                                                                 product.discounted_price
@@ -82,7 +95,7 @@ export default function ProductIndex({ products }: Props) {
                                                         </span>
                                                     </>
                                                 ) : (
-                                                    <span className="text-lg font-bold">
+                                                    <span className="text-sm font-bold">
                                                         ${product.price}
                                                     </span>
                                                 )}
