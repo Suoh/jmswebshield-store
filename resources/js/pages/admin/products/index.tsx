@@ -323,7 +323,13 @@ export default function AdminProductsIndex() {
                                         {product.brand?.name ?? '-'}
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        ${parseFloat(product.price).toFixed(2)}
+                                        $
+                                        {parseFloat(
+                                            product.price,
+                                        ).toLocaleString('es-MX', {
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2,
+                                        })}
                                     </TableCell>
                                     <TableCell className="text-center">
                                         {product.stock}

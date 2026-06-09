@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use App\Models\Product;
 use App\Services\Syscom\SyscomService;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -47,7 +47,7 @@ class ProductController extends Controller
             ->whereRaw("json_extract(metadata, '$.syscom_id') IS NOT NULL")
             ->get()
             ->pluck('metadata.syscom_id')
-            ->filter()
+            ->reject(fn ($v) => $v === null || $v === '')
             ->values()
             ->all();
 
@@ -59,7 +59,7 @@ class ProductController extends Controller
         ]);
     }
 
-    public function import(Request $request): JsonResponse
+    public function import(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'products' => 'required|array|min:1|max:50',
@@ -83,7 +83,7 @@ class ProductController extends Controller
             ->whereRaw("json_extract(metadata, '$.syscom_id') IS NOT NULL")
             ->get()
             ->pluck('metadata.syscom_id')
-            ->filter()
+            ->reject(fn ($v) => $v === null || $v === '')
             ->flip()
             ->toArray();
 
@@ -137,10 +137,6 @@ class ProductController extends Controller
             $imported++;
         }
 
-        return response()->json([
-            'imported' => $imported,
-            'skipped' => $skipped,
-            'failed' => $failed,
-        ]);
+        return Inertia::flash('success', "Productos importados: $imported, omitidos: $skipped, fallidos: $failed.")->back()->with('success', "Productos importados: $imported, omitidos: $skipped, fallidos: $failed.");
     }
 }

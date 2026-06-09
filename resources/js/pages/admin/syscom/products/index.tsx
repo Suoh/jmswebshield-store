@@ -1,5 +1,5 @@
 import { router, usePage } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
 import {
     Table,
@@ -42,16 +43,41 @@ interface PageProps {
     categories: Array<{ id: string; nombre: string }>;
     brands: Array<{ id: string; nombre: string }>;
     imported_syscom_ids: string[];
+    flash?: { success?: string; error?: string };
     [key: string]: unknown;
 }
 
 export default function AdminSyscomProductsIndex() {
+    const pageProps = usePage<PageProps>();
     const { syscom_products, categories, brands, imported_syscom_ids } =
-        usePage<PageProps>().props;
+        pageProps.props;
 
     const [selected, setSelected] = useState<Set<string>>(new Set());
     const [prices, setPrices] = useState<Map<string, string>>(new Map());
     const [isImporting, setIsImporting] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const prevFlash = useRef<string | null>(null);
+
+    useEffect(() => {
+        const unbindStart = router.on('start', () => setIsLoading(true));
+        const unbindFinish = router.on('finish', () => setIsLoading(false));
+
+        return () => {
+            unbindStart();
+            unbindFinish();
+        };
+    }, []);
+
+    useEffect(() => {
+        const { flash } = pageProps as unknown as {
+            flash: { success?: string; error?: string };
+        };
+
+        if (flash.success && flash.success !== prevFlash.current) {
+            prevFlash.current = flash.success;
+            toast.success(flash.success);
+        }
+    }, [pageProps]);
 
     const [categoriaId, setCategoriaId] = useState('all');
     const [marcaId, setMarcaId] = useState('all');
@@ -196,12 +222,9 @@ export default function AdminSyscomProductsIndex() {
             {
                 onSuccess: () => {
                     setIsImporting(false);
-                    router.reload({
-                        only: ['syscom_products', 'imported_syscom_ids'],
-                    });
-                    toast.success(
-                        `${productsToImport.length} producto${productsToImport.length > 1 ? 's' : ''} importado${productsToImport.length > 1 ? 's' : ''}`,
-                    );
+                    setSelected(new Set());
+                    setPrices(new Map());
+                    router.reload({ only: ['syscom_products'] });
                 },
                 onError: () => {
                     setIsImporting(false);
@@ -330,7 +353,36 @@ export default function AdminSyscomProductsIndex() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {filtered.length === 0 ? (
+                        {isLoading ? (
+                            Array.from({ length: 10 }).map((_, i) => (
+                                <TableRow key={i}>
+                                    <TableCell>
+                                        <Skeleton className="h-4 w-4" />
+                                    </TableCell>
+                                    <TableCell>
+                                        <Skeleton className="h-10 w-10 rounded-md" />
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="flex flex-col gap-1">
+                                            <Skeleton className="h-4 w-48" />
+                                            <Skeleton className="h-3 w-24" />
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                        <Skeleton className="mx-auto h-4 w-8" />
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <Skeleton className="ml-auto h-4 w-20" />
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                        <Skeleton className="mx-auto h-4 w-16" />
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <Skeleton className="ml-auto h-8 w-28" />
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        ) : filtered.length === 0 ? (
                             <TableRow>
                                 <TableCell
                                     colSpan={7}

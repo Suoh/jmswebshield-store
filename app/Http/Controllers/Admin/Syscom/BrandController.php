@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use App\Services\Syscom\SyscomMapper;
 use App\Services\Syscom\SyscomService;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -28,7 +28,7 @@ class BrandController extends Controller
             ->whereRaw("json_extract(metadata, '$.syscom_id') IS NOT NULL")
             ->get()
             ->pluck('metadata.syscom_id')
-            ->filter()
+            ->reject(fn ($v) => $v === null || $v === '')
             ->values()
             ->all();
 
@@ -38,7 +38,7 @@ class BrandController extends Controller
         ]);
     }
 
-    public function import(Request $request): JsonResponse
+    public function import(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'brands' => 'required|array|min:1|max:50',
@@ -55,7 +55,7 @@ class BrandController extends Controller
             ->whereRaw("json_extract(metadata, '$.syscom_id') IS NOT NULL")
             ->get()
             ->pluck('metadata.syscom_id')
-            ->filter()
+            ->reject(fn ($v) => $v === null || $v === '')
             ->flip()
             ->toArray();
 
@@ -79,9 +79,6 @@ class BrandController extends Controller
             $imported++;
         }
 
-        return response()->json([
-            'imported' => $imported,
-            'skipped' => $skipped,
-        ]);
+        return Inertia::flash('success', "Marcas importadas: $imported, omitidas: $skipped.")->back()->with('success', "Marcas importadas: $imported, omitidas: $skipped.");
     }
 }
