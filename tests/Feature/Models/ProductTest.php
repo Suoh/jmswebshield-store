@@ -102,6 +102,23 @@ it('supports soft deletes', function () {
         ->and(Product::withTrashed()->count())->toBe(1);
 });
 
+it('includes accessors in array output', function () {
+    $product = Product::factory()->create([
+        'image_url' => 'https://example.com/photo.jpg',
+        'stock' => 5,
+        'price' => 100,
+        'discount' => 10,
+    ]);
+
+    $array = $product->toArray();
+
+    expect($array)->toHaveKey('cover_image')
+        ->and($array['cover_image'])->toBe('https://example.com/photo.jpg')
+        ->and($array)->toHaveKey('availability')
+        ->and($array['availability'])->toBe('Disponible')
+        ->and($array)->toHaveKey('discounted_price');
+});
+
 it('casts attributes correctly', function () {
     $product = Product::factory()->create([
         'price' => 99.99,
