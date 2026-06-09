@@ -33,6 +33,13 @@ class ProductController extends Controller
         $brandsData = $this->syscomService->getBrands(1);
         $brands = $brandsData['data'] ?? [];
 
+        if (
+            empty($filters)
+            && ! empty($categories)
+        ) {
+            $filters['categoria'] = $categories[0]['id'];
+        }
+
         $syscomProducts = $this->syscomService->getProducts($filters, $page);
 
         $importedSyscomIds = Product::query()

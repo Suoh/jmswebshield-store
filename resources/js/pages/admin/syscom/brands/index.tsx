@@ -1,9 +1,11 @@
 import { router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
+import { Spinner } from '@/components/ui/spinner';
 import {
     Table,
     TableBody,
@@ -29,6 +31,7 @@ export default function AdminSyscomBrandsIndex() {
     const { syscom_brands, imported_syscom_ids } = usePage<PageProps>().props;
     const [selected, setSelected] = useState<Set<string>>(new Set());
     const [search, setSearch] = useState('');
+    const [isImporting, setIsImporting] = useState(false);
 
     const filtered = syscom_brands.data.filter((brand) =>
         brand.nombre.toLowerCase().includes(search.toLowerCase()),
@@ -63,7 +66,26 @@ export default function AdminSyscomBrandsIndex() {
             .filter((b) => selected.has(b.id))
             .map((b) => ({ syscom_id: b.id, name: b.nombre }));
 
-        router.post('/admin/syscom/brands/import', { brands: brandsToImport });
+        setIsImporting(true);
+        router.post(
+            '/admin/syscom/brands/import',
+            { brands: brandsToImport },
+            {
+                onSuccess: () => {
+                    setIsImporting(false);
+                    router.reload({
+                        only: ['syscom_brands', 'imported_syscom_ids'],
+                    });
+                    toast.success(
+                        `${brandsToImport.length} marca${brandsToImport.length > 1 ? 's' : ''} importada${brandsToImport.length > 1 ? 's' : ''}`,
+                    );
+                },
+                onError: () => {
+                    setIsImporting(false);
+                    toast.error('Error al importar marcas');
+                },
+            },
+        );
     };
 
     return (
@@ -81,11 +103,18 @@ export default function AdminSyscomBrandsIndex() {
                     )}
                     <Button
                         onClick={handleImport}
-                        disabled={selected.size === 0}
+                        disabled={selected.size === 0 || isImporting}
                     >
-                        {selected.size > 0
-                            ? 'Importar seleccionadas'
-                            : 'Importar'}
+                        {isImporting ? (
+                            <>
+                                <Spinner className="mr-2" />
+                                Importando...
+                            </>
+                        ) : selected.size > 0 ? (
+                            `Importar ${selected.size} seleccionada${selected.size > 1 ? 's' : ''}`
+                        ) : (
+                            'Importar'
+                        )}
                     </Button>
                 </div>
             </div>

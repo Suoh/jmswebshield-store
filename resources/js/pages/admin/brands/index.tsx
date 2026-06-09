@@ -1,5 +1,6 @@
 import { Link, router, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -21,12 +22,26 @@ interface Brand {
 
 interface PageProps {
     brands: PaginatedData<Brand>;
+    flash?: {
+        success?: string;
+        error?: string;
+    };
     [key: string]: unknown;
 }
 
 export default function AdminBrandsIndex() {
-    const { brands } = usePage<PageProps>().props;
+    const { brands, flash } = usePage<PageProps>().props;
     const [search, setSearch] = useState('');
+
+    useEffect(() => {
+        if (flash?.success) {
+            toast.success(flash.success);
+        }
+
+        if (flash?.error) {
+            toast.error(flash.error);
+        }
+    }, [flash]);
 
     const filtered = brands.data.filter((brand) =>
         brand.name.toLowerCase().includes(search.toLowerCase()),
@@ -37,7 +52,14 @@ export default function AdminBrandsIndex() {
             return;
         }
 
-        router.delete(`/admin/brands/${id}`);
+        router.delete(`/admin/brands/${id}`, {
+            onSuccess: () => {
+                toast.success('Marca eliminada.');
+            },
+            onError: () => {
+                toast.error('Error al eliminar la marca.');
+            },
+        });
     };
 
     return (

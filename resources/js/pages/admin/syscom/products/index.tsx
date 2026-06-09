@@ -1,5 +1,5 @@
 import { router, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -53,16 +53,27 @@ export default function AdminSyscomProductsIndex() {
     const [prices, setPrices] = useState<Map<string, string>>(new Map());
     const [isImporting, setIsImporting] = useState(false);
 
-    const queryParams = new URLSearchParams(window.location.search);
-    const initialCategoria = queryParams.get('categoria_id') ?? 'all';
-    const initialMarca = queryParams.get('marca_id') ?? 'all';
-    const initialSearch = queryParams.get('search') ?? '';
-    const initialStock = queryParams.get('stock') ?? 'all';
+    const [categoriaId, setCategoriaId] = useState('all');
+    const [marcaId, setMarcaId] = useState('all');
+    const [search, setSearch] = useState('');
+    const [stock, setStock] = useState('all');
 
-    const [categoriaId, setCategoriaId] = useState(initialCategoria);
-    const [marcaId, setMarcaId] = useState(initialMarca);
-    const [search, setSearch] = useState(initialSearch);
-    const [stock, setStock] = useState(initialStock);
+    /* eslint-disable react-hooks/set-state-in-effect */
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        setCategoriaId(
+            params.get('categoria_id') ?? categories[0]?.id ?? 'all',
+        );
+        setMarcaId(params.get('marca_id') ?? 'all');
+        setSearch(params.get('search') ?? '');
+        setStock(params.get('stock') ?? 'all');
+    }, [categories]);
+    /* eslint-enable react-hooks/set-state-in-effect */
+
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setSelected(new Set());
+    }, [syscom_products.data]);
 
     const filtered = syscom_products.data.filter((product) => {
         const matchesSearch =
@@ -128,23 +139,27 @@ export default function AdminSyscomProductsIndex() {
     };
 
     const toggleAll = () => {
-        if (selected.size === filtered.length) {
-            setSelected(new Set());
-        } else {
-            setSelected(new Set(filtered.map((p) => p.id)));
-        }
+        setSelected((prev) => {
+            if (prev.size === filtered.length) {
+                return new Set();
+            }
+
+            return new Set(filtered.map((p) => p.id));
+        });
     };
 
     const toggleOne = (id: string) => {
-        const next = new Set(selected);
+        setSelected((prev) => {
+            const next = new Set(prev);
 
-        if (next.has(id)) {
-            next.delete(id);
-        } else {
-            next.add(id);
-        }
+            if (next.has(id)) {
+                next.delete(id);
+            } else {
+                next.add(id);
+            }
 
-        setSelected(next);
+            return next;
+        });
     };
 
     const handlePriceChange = (id: string, value: string) => {
@@ -167,6 +182,8 @@ export default function AdminSyscomProductsIndex() {
             .filter((p) => p.price > 0);
 
         if (productsToImport.length === 0) {
+            toast.error('Ingresá un precio para al menos un producto');
+
             return;
         }
 
