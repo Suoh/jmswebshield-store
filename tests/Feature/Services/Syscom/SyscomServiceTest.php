@@ -121,19 +121,18 @@ describe('SyscomService', function () {
                 ->with('12345')
                 ->once()
                 ->andReturn([
-                    'id' => '12345',
-                    'nombre' => 'Router Premium',
-                    'descripcion_corta' => 'WiFi 6E mesh system',
-                    'descripcion_larga' => 'Sistema mesh de alta velocidad',
-                    'stock' => 15,
+                    'producto_id' => '12345',
+                    'titulo' => 'Router Premium',
+                    'descripcion' => 'Sistema mesh de alta velocidad',
+                    'total_existencia' => 15,
                     'modelo' => 'RBK953',
-                    'marca_id' => 'tp-link',
+                    'marca' => 'tp-link',
                     'categoria_id' => '1',
                     'precios' => [
                         'precio_lista' => 20000.00,
                         'precio_descuento' => 18000.00,
                     ],
-                    'imagen' => 'https://syscom.com/router.jpg',
+                    'img_portada' => 'https://syscom.com/router.jpg',
                 ]);
 
             $service = new SyscomService($mockClient);
@@ -156,19 +155,18 @@ describe('SyscomService', function () {
                 ->with('99999')
                 ->once()
                 ->andReturn([
-                    'id' => '99999',
-                    'nombre' => 'Expensive Item',
-                    'descripcion_corta' => null,
-                    'descripcion_larga' => null,
-                    'stock' => 1,
+                    'producto_id' => '99999',
+                    'titulo' => 'Expensive Item',
+                    'descripcion' => null,
+                    'total_existencia' => 1,
                     'modelo' => null,
-                    'marca_id' => null,
+                    'marca' => null,
                     'categoria_id' => null,
                     'precios' => [
                         'precio_lista' => 99999.99,
                         'precio_descuento' => 89999.99,
                     ],
-                    'imagen' => null,
+                    'img_portada' => null,
                 ]);
 
             $service = new SyscomService($mockClient);

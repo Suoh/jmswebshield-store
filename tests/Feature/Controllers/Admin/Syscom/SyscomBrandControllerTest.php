@@ -106,14 +106,14 @@ describe('Syscom Brand Import Controller', function () {
 
             $this->app->instance(SyscomService::class, $mockService);
 
-            $response = $this->actingAs($this->admin)->postJson('/admin/syscom/brands/import', [
+            $response = $this->actingAs($this->admin)->post('/admin/syscom/brands/import', [
                 'brands' => [
                     ['syscom_id' => 'tp-link', 'name' => 'TP-Link'],
                 ],
             ]);
 
-            $response->assertOk()
-                ->assertJson(['imported' => 1, 'skipped' => 0]);
+            $response->assertRedirect()
+                ->assertSessionHas('success');
 
             $this->assertDatabaseHas('brands', [
                 'name' => 'TP-Link',
@@ -125,7 +125,7 @@ describe('Syscom Brand Import Controller', function () {
             $mockService = Mockery::mock(SyscomService::class);
             $this->app->instance(SyscomService::class, $mockService);
 
-            $response = $this->actingAs($this->admin)->postJson('/admin/syscom/brands/import', [
+            $response = $this->actingAs($this->admin)->post('/admin/syscom/brands/import', [
                 'brands' => [
                     ['syscom_id' => 'tp-link', 'name' => 'TP-Link'],
                     ['syscom_id' => 'netgear', 'name' => 'Netgear'],
@@ -133,8 +133,8 @@ describe('Syscom Brand Import Controller', function () {
                 ],
             ]);
 
-            $response->assertOk()
-                ->assertJson(['imported' => 3, 'skipped' => 0]);
+            $response->assertRedirect()
+                ->assertSessionHas('success');
 
             $this->assertDatabaseHas('brands', ['name' => 'TP-Link', 'slug' => 'tp-link']);
             $this->assertDatabaseHas('brands', ['name' => 'Netgear', 'slug' => 'netgear']);
@@ -151,15 +151,15 @@ describe('Syscom Brand Import Controller', function () {
             $mockService = Mockery::mock(SyscomService::class);
             $this->app->instance(SyscomService::class, $mockService);
 
-            $response = $this->actingAs($this->admin)->postJson('/admin/syscom/brands/import', [
+            $response = $this->actingAs($this->admin)->post('/admin/syscom/brands/import', [
                 'brands' => [
                     ['syscom_id' => 'tp-link', 'name' => 'TP-Link'],
                     ['syscom_id' => 'netgear', 'name' => 'Netgear'],
                 ],
             ]);
 
-            $response->assertOk()
-                ->assertJson(['imported' => 1, 'skipped' => 1]);
+            $response->assertRedirect()
+                ->assertSessionHas('success');
 
             $this->assertDatabaseCount('brands', 2);
         });

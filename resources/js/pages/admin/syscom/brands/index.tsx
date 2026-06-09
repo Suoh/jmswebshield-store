@@ -1,10 +1,11 @@
 import { router, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
 import {
     Table,
@@ -28,10 +29,34 @@ interface PageProps {
 }
 
 export default function AdminSyscomBrandsIndex() {
-    const { syscom_brands, imported_syscom_ids } = usePage<PageProps>().props;
+    const pageProps = usePage<PageProps>();
+    const { syscom_brands, imported_syscom_ids } = pageProps.props;
     const [selected, setSelected] = useState<Set<string>>(new Set());
     const [search, setSearch] = useState('');
     const [isImporting, setIsImporting] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const prevFlash = useRef<string | null>(null);
+
+    useEffect(() => {
+        const unbindStart = router.on('start', () => setIsLoading(true));
+        const unbindFinish = router.on('finish', () => setIsLoading(false));
+
+        return () => {
+            unbindStart();
+            unbindFinish();
+        };
+    }, []);
+
+    useEffect(() => {
+        const { flash } = pageProps as unknown as {
+            flash: { success?: string; error?: string };
+        };
+
+        if (flash.success && flash.success !== prevFlash.current) {
+            prevFlash.current = flash.success;
+            toast.success(flash.success);
+        }
+    }, [pageProps]);
 
     const filtered = syscom_brands.data.filter((brand) =>
         brand.nombre.toLowerCase().includes(search.toLowerCase()),
@@ -73,12 +98,8 @@ export default function AdminSyscomBrandsIndex() {
             {
                 onSuccess: () => {
                     setIsImporting(false);
-                    router.reload({
-                        only: ['syscom_brands', 'imported_syscom_ids'],
-                    });
-                    toast.success(
-                        `${brandsToImport.length} marca${brandsToImport.length > 1 ? 's' : ''} importada${brandsToImport.length > 1 ? 's' : ''}`,
-                    );
+                    setSelected(new Set());
+                    router.reload({ only: ['syscom_brands'] });
                 },
                 onError: () => {
                     setIsImporting(false);
@@ -149,7 +170,24 @@ export default function AdminSyscomBrandsIndex() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {filtered.length === 0 ? (
+                        {isLoading ? (
+                            Array.from({ length: 10 }).map((_, i) => (
+                                <TableRow key={i}>
+                                    <TableCell>
+                                        <Skeleton className="h-4 w-4" />
+                                    </TableCell>
+                                    <TableCell>
+                                        <Skeleton className="h-4 w-20" />
+                                    </TableCell>
+                                    <TableCell>
+                                        <Skeleton className="h-4 w-40" />
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                        <Skeleton className="mx-auto h-4 w-16" />
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        ) : filtered.length === 0 ? (
                             <TableRow>
                                 <TableCell
                                     colSpan={4}

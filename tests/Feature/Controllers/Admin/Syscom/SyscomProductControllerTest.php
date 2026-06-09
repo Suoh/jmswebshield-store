@@ -147,14 +147,14 @@ describe('Syscom Product Import Controller', function () {
 
             $this->app->instance(SyscomService::class, $mockService);
 
-            $response = $this->actingAs($this->admin)->postJson('/admin/syscom/products/import', [
+            $response = $this->actingAs($this->admin)->post('/admin/syscom/products/import', [
                 'products' => [
                     ['producto_id' => 'prod-001', 'price' => 120.00],
                 ],
             ]);
 
-            $response->assertOk()
-                ->assertJson(['imported' => 1, 'skipped' => 0]);
+            $response->assertRedirect()
+                ->assertSessionHas('success');
 
             $this->assertDatabaseHas('products', [
                 'name' => 'Router WiFi 6',
@@ -224,15 +224,15 @@ describe('Syscom Product Import Controller', function () {
 
             $this->app->instance(SyscomService::class, $mockService);
 
-            $response = $this->actingAs($this->admin)->postJson('/admin/syscom/products/import', [
+            $response = $this->actingAs($this->admin)->post('/admin/syscom/products/import', [
                 'products' => [
                     ['producto_id' => 'prod-001', 'price' => 80.00],
                     ['producto_id' => 'prod-002', 'price' => 160.00],
                 ],
             ]);
 
-            $response->assertOk()
-                ->assertJson(['imported' => 2, 'skipped' => 0]);
+            $response->assertRedirect()
+                ->assertSessionHas('success');
 
             $this->assertDatabaseHas('products', ['name' => 'Router 1', 'price' => '80.00']);
             $this->assertDatabaseHas('products', ['name' => 'Router 2', 'price' => '160.00']);
@@ -255,14 +255,14 @@ describe('Syscom Product Import Controller', function () {
 
             $this->app->instance(SyscomService::class, $mockService);
 
-            $response = $this->actingAs($this->admin)->postJson('/admin/syscom/products/import', [
+            $response = $this->actingAs($this->admin)->post('/admin/syscom/products/import', [
                 'products' => [
                     ['producto_id' => 'prod-001', 'price' => 120.00],
                 ],
             ]);
 
-            $response->assertOk()
-                ->assertJson(['imported' => 0, 'skipped' => 1]);
+            $response->assertRedirect()
+                ->assertSessionHas('success');
 
             $this->assertDatabaseCount('products', 1);
         });
@@ -297,15 +297,15 @@ describe('Syscom Product Import Controller', function () {
 
             $this->app->instance(SyscomService::class, $mockService);
 
-            $response = $this->actingAs($this->admin)->postJson('/admin/syscom/products/import', [
+            $response = $this->actingAs($this->admin)->post('/admin/syscom/products/import', [
                 'products' => [
                     ['producto_id' => 'prod-001', 'price' => 80.00],
                     ['producto_id' => 'prod-002', 'price' => 160.00],
                 ],
             ]);
 
-            $response->assertOk()
-                ->assertJson(['imported' => 1, 'skipped' => 0, 'failed' => 1]);
+            $response->assertRedirect()
+                ->assertSessionHas('success');
 
             $this->assertDatabaseHas('products', ['name' => 'Router 2']);
             $this->assertDatabaseMissing('products', ['name' => 'Router 1']);

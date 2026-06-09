@@ -33,15 +33,22 @@ class SyscomService
     public function getProductDetail(string $id, float $adminPrice): array
     {
         $rawProduct = $this->client->getProductDetail($id);
+        $normalized = $this->normalizeProductDetail($rawProduct);
 
-        return SyscomMapper::toLocalProduct($rawProduct, $adminPrice);
+        return SyscomMapper::toLocalProduct($normalized, $adminPrice);
     }
 
     private function normalizeBrandsResponse(array $raw): array
     {
         if (array_is_list($raw)) {
+            $normalized = array_map(function (array $brand): array {
+                $brand['id'] = (string) ($brand['id'] ?? '');
+
+                return $brand;
+            }, $raw);
+
             return [
-                'data' => $raw,
+                'data' => $normalized,
                 'current_page' => 1,
                 'last_page' => 1,
                 'total' => count($raw),
@@ -84,6 +91,22 @@ class SyscomService
             'marca_id' => $item['marca'] ?? null,
             'precios' => $item['precios'] ?? null,
             'imagen' => $item['img_portada'] ?? null,
+        ];
+    }
+
+    private function normalizeProductDetail(array $raw): array
+    {
+        return [
+            'id' => (string) ($raw['producto_id'] ?? ''),
+            'nombre' => $raw['titulo'] ?? '',
+            'descripcion_corta' => $raw['descripcion'] ?? null,
+            'descripcion_larga' => $raw['descripcion'] ?? null,
+            'stock' => (int) ($raw['total_existencia'] ?? 0),
+            'modelo' => $raw['modelo'] ?? null,
+            'marca_id' => strtolower($raw['marca'] ?? null),
+            'precios' => $raw['precios'] ?? null,
+            'imagen' => $raw['img_portada'] ?? null,
+            'categoria_id' => null,
         ];
     }
 
