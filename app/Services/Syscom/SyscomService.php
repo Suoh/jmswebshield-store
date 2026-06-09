@@ -59,7 +59,32 @@ class SyscomService
 
     private function normalizeProductsResponse(array $raw): array
     {
+        if (array_is_list($raw)) {
+            return [
+                'data' => array_map([$this, 'normalizeProductItem'], $raw),
+                'current_page' => 1,
+                'last_page' => 1,
+                'total' => count($raw),
+                'per_page' => count($raw),
+                'links' => [],
+            ];
+        }
+
         return $this->normalizeBusquedaResponse($raw);
+    }
+
+    private function normalizeProductItem(array $item): array
+    {
+        return [
+            'id' => $item['producto_id'] ?? '',
+            'nombre' => $item['titulo'] ?? '',
+            'descripcion_corta' => $item['sat_description'] ?? null,
+            'stock' => (int) ($item['total_existencia'] ?? 0),
+            'modelo' => $item['modelo'] ?? null,
+            'marca_id' => $item['marca'] ?? null,
+            'precios' => $item['precios'] ?? null,
+            'imagen' => $item['img_portada'] ?? null,
+        ];
     }
 
     private function normalizeBusquedaResponse(array $raw): array
@@ -67,7 +92,7 @@ class SyscomService
         $items = $raw['productos'] ?? [];
 
         return [
-            'data' => $items,
+            'data' => array_map([$this, 'normalizeProductItem'], $items),
             'current_page' => (int) ($raw['pagina'] ?? 1),
             'last_page' => (int) ($raw['paginas'] ?? 1),
             'total' => (int) ($raw['cantidad'] ?? 0),

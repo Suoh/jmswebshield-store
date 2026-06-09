@@ -1,5 +1,5 @@
 import { usePage } from '@inertiajs/react';
-import { Box, Download, Tag } from 'lucide-react';
+import { Box, Download, Package, Tag } from 'lucide-react';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import {
@@ -18,6 +18,12 @@ const adminNavItems: NavItem[] = [
         title: 'Marcas',
         href: '/admin/brands',
         icon: Tag,
+        prefetch: true,
+    },
+    {
+        title: 'Productos',
+        href: '/admin/products',
+        icon: Package,
         prefetch: true,
     },
     {

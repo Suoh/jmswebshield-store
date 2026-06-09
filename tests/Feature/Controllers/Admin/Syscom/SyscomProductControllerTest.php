@@ -37,7 +37,7 @@ describe('Syscom Product Import Controller', function () {
                     'total' => 2,
                 ]);
             $mockService->shouldReceive('getProducts')
-                ->with([], 1)
+                ->with(['categoria' => '1'], 1)
                 ->once()
                 ->andReturn([
                     'data' => [

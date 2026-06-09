@@ -71,7 +71,12 @@ export default function ProductForm({
             price: parseFloat(String(data.price)) || 0,
             stock: parseInt(String(data.stock), 10) || 0,
             discount: parseInt(String(data.discount), 10) || 0,
-            brand_id: data.brand_id ? parseInt(data.brand_id, 10) : null,
+            brand_id:
+                data.brand_id === '_none'
+                    ? null
+                    : data.brand_id
+                      ? parseInt(data.brand_id, 10)
+                      : null,
             is_active: data.is_active,
         };
         onSubmit(payload);
@@ -270,7 +275,9 @@ export default function ProductForm({
                                     <SelectValue placeholder="Seleccionar marca" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">Sin marca</SelectItem>
+                                    <SelectItem value="_none">
+                                        Sin marca
+                                    </SelectItem>
                                     {brands.map((brand) => (
                                         <SelectItem
                                             key={brand.id}
