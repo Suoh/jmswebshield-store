@@ -79,43 +79,64 @@ export default function AdminSyscomProductsIndex() {
         }
     }, [pageProps]);
 
-    const [categoriaId, setCategoriaId] = useState('all');
-    const [marcaId, setMarcaId] = useState('all');
-    const [search, setSearch] = useState('');
-    const [stock, setStock] = useState('all');
+    const [categoriaId, setCategoriaId] = useState(() => {
+        if (typeof window === 'undefined') {
+            return 'all';
+        }
 
-    /* eslint-disable react-hooks/set-state-in-effect */
-    useEffect(() => {
         const params = new URLSearchParams(window.location.search);
-        setCategoriaId(
-            params.get('categoria_id') ?? categories[0]?.id ?? 'all',
-        );
-        setMarcaId(params.get('marca_id') ?? 'all');
-        setSearch(params.get('search') ?? '');
-        setStock(params.get('stock') ?? 'all');
-    }, [categories]);
-    /* eslint-enable react-hooks/set-state-in-effect */
+
+        return params.get('categoria_id') ?? 'all';
+    });
+    const [marcaId, setMarcaId] = useState(() => {
+        if (typeof window === 'undefined') {
+            return 'all';
+        }
+
+        const params = new URLSearchParams(window.location.search);
+
+        return params.get('marca_id') ?? 'all';
+    });
+    const [search, setSearch] = useState(() => {
+        if (typeof window === 'undefined') {
+            return '';
+        }
+
+        const params = new URLSearchParams(window.location.search);
+
+        return params.get('search') ?? '';
+    });
+    const [stock, setStock] = useState(() => {
+        if (typeof window === 'undefined') {
+            return 'all';
+        }
+
+        const params = new URLSearchParams(window.location.search);
+
+        return params.get('stock') ?? 'all';
+    });
+
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+        undefined,
+    );
+
+    useEffect(() => {
+        return () => {
+            clearTimeout(debounceRef.current);
+        };
+    }, []);
 
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setSelected(new Set());
     }, [syscom_products.data]);
 
-    const filtered = syscom_products.data.filter((product) => {
-        const matchesSearch =
-            !search ||
-            product.nombre.toLowerCase().includes(search.toLowerCase()) ||
-            product.id.toLowerCase().includes(search.toLowerCase()) ||
-            (product.modelo ?? '').toLowerCase().includes(search.toLowerCase());
-
-        return matchesSearch;
-    });
-
     const applyFilters = (
         newCategoriaId: string,
         newMarcaId: string,
         newSearch: string,
         newStock: string,
+        newPage: number = 1,
     ) => {
         const params = new URLSearchParams();
 
@@ -135,8 +156,20 @@ export default function AdminSyscomProductsIndex() {
             params.set('stock', newStock);
         }
 
+        if (newPage > 1) {
+            params.set('page', String(newPage));
+        }
+
         const query = params.toString();
         router.get(`/admin/syscom/products${query ? `?${query}` : ''}`);
+    };
+
+    const handleSearchChange = (value: string) => {
+        setSearch(value);
+        clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => {
+            applyFilters(categoriaId, marcaId, value, stock);
+        }, 300);
     };
 
     const handleCategoriaChange = (value: string) => {
@@ -154,23 +187,26 @@ export default function AdminSyscomProductsIndex() {
         applyFilters(categoriaId, marcaId, search, value);
     };
 
-    const handleSearchChange = (value: string) => {
-        setSearch(value);
+    const handlePageChange = (newPage: number) => {
+        applyFilters(categoriaId, marcaId, search, stock, newPage);
     };
 
-    const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            applyFilters(categoriaId, marcaId, search, stock);
-        }
+    const handleClearFilters = () => {
+        setSearch('');
+        setCategoriaId('all');
+        setMarcaId('all');
+        setStock('all');
+        router.get('/admin/syscom/products');
     };
 
     const toggleAll = () => {
+        const currentData = displayProducts;
         setSelected((prev) => {
-            if (prev.size === filtered.length) {
+            if (prev.size === currentData.length) {
                 return new Set();
             }
 
-            return new Set(filtered.map((p) => p.id));
+            return new Set(currentData.map((p) => p.id));
         });
     };
 
@@ -199,7 +235,7 @@ export default function AdminSyscomProductsIndex() {
             return;
         }
 
-        const productsToImport = filtered
+        const productsToImport = displayProducts
             .filter((p) => selected.has(p.id))
             .map((p) => ({
                 producto_id: p.id,
@@ -236,9 +272,20 @@ export default function AdminSyscomProductsIndex() {
 
     const isImported = (id: string) => imported_syscom_ids.includes(id);
 
-    const selectedCount = filtered.filter(
+    const displayProducts =
+        stock === 'false'
+            ? syscom_products.data.filter((p) => p.stock === 0)
+            : syscom_products.data;
+
+    const selectedCount = displayProducts.filter(
         (p) => selected.has(p.id) && !isImported(p.id),
     ).length;
+
+    const hasActiveFilters =
+        categoriaId !== 'all' ||
+        marcaId !== 'all' ||
+        search !== '' ||
+        stock !== 'all';
 
     return (
         <div className="space-y-4 p-6">
@@ -249,8 +296,8 @@ export default function AdminSyscomProductsIndex() {
                 <div className="flex items-center gap-2">
                     {selectedCount > 0 && (
                         <span className="text-sm text-muted-foreground">
-                            {selectedCount} selected
-                            {selectedCount > 1 ? 's' : ''}
+                            {selectedCount} seleccionad
+                            {selectedCount > 1 ? 'os' : 'a'}
                         </span>
                     )}
                     <Button
@@ -263,7 +310,9 @@ export default function AdminSyscomProductsIndex() {
                                 Importando...
                             </>
                         ) : selectedCount > 0 ? (
-                            `Importar ${selectedCount} seleccionada${selectedCount > 1 ? 's' : ''}`
+                            `Importar ${selectedCount} seleccionad${
+                                selectedCount > 1 ? 'os' : 'a'
+                            }`
                         ) : (
                             'Importar'
                         )}
@@ -306,7 +355,7 @@ export default function AdminSyscomProductsIndex() {
                 </Select>
 
                 <Select value={stock} onValueChange={handleStockChange}>
-                    <SelectTrigger className="w-36">
+                    <SelectTrigger className="w-44">
                         <SelectValue placeholder="Stock" />
                     </SelectTrigger>
                     <SelectContent>
@@ -320,34 +369,47 @@ export default function AdminSyscomProductsIndex() {
                     placeholder="Buscar por nombre, ID o modelo..."
                     value={search}
                     onChange={(e) => handleSearchChange(e.target.value)}
-                    onKeyDown={handleSearchKeyDown}
                     className="max-w-xs"
                 />
+
+                {hasActiveFilters && (
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleClearFilters}
+                    >
+                        Limpiar filtros
+                    </Button>
+                )}
             </div>
 
-            <div className="overflow-hidden rounded-lg border">
+            <div className="overflow-x-auto rounded-lg border">
                 <Table>
                     <TableHeader>
                         <TableRow>
                             <TableHead className="w-10">
                                 <Checkbox
                                     checked={
-                                        filtered.length > 0 &&
-                                        selected.size === filtered.length
+                                        displayProducts.length > 0 &&
+                                        selected.size === displayProducts.length
                                     }
                                     onCheckedChange={toggleAll}
                                 />
                             </TableHead>
-                            <TableHead className="w-16">Img</TableHead>
-                            <TableHead>Producto</TableHead>
-                            <TableHead className="text-center">Stock</TableHead>
-                            <TableHead className="text-right">
+                            <TableHead className="w-14">Img</TableHead>
+                            <TableHead className="w-[260px]">
+                                Producto
+                            </TableHead>
+                            <TableHead className="w-[72px] text-center">
+                                Stock
+                            </TableHead>
+                            <TableHead className="w-[110px] text-right">
                                 Precio Lista
                             </TableHead>
-                            <TableHead className="text-center">
+                            <TableHead className="w-[100px] text-center">
                                 Estado
                             </TableHead>
-                            <TableHead className="w-32 text-right">
+                            <TableHead className="sticky right-0 w-[120px] bg-card text-right">
                                 Tu Precio
                             </TableHead>
                         </TableRow>
@@ -382,21 +444,17 @@ export default function AdminSyscomProductsIndex() {
                                     </TableCell>
                                 </TableRow>
                             ))
-                        ) : filtered.length === 0 ? (
+                        ) : displayProducts.length === 0 ? (
                             <TableRow>
                                 <TableCell
                                     colSpan={7}
                                     className="py-8 text-center text-muted-foreground"
                                 >
-                                    {search ||
-                                    categoriaId !== 'all' ||
-                                    marcaId !== 'all'
-                                        ? 'No se encontraron productos.'
-                                        : 'No hay productos disponibles.'}
+                                    No se encontraron productos.
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            filtered.map((product) => {
+                            displayProducts.map((product) => {
                                 const imported = isImported(product.id);
                                 const selectedProduct =
                                     selected.has(product.id) && !imported;
@@ -432,25 +490,26 @@ export default function AdminSyscomProductsIndex() {
                                                 </div>
                                             )}
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell className="w-[260px] max-w-[260px]">
                                             <div className="flex flex-col gap-0.5">
                                                 <span
                                                     className={
-                                                        imported
-                                                            ? 'font-normal text-muted-foreground'
-                                                            : 'font-medium'
+                                                        'line-clamp-2 text-sm font-medium break-words ' +
+                                                        (imported
+                                                            ? 'text-muted-foreground'
+                                                            : '')
                                                     }
                                                 >
                                                     {product.nombre}
                                                 </span>
-                                                <span className="font-mono text-xs text-muted-foreground">
+                                                <span className="truncate font-mono text-xs text-muted-foreground">
                                                     {product.id}
                                                     {product.modelo &&
                                                         ` · ${product.modelo}`}
                                                 </span>
                                             </div>
                                         </TableCell>
-                                        <TableCell className="text-center">
+                                        <TableCell className="w-[72px] text-center">
                                             <span
                                                 className={
                                                     product.stock > 0
@@ -461,7 +520,7 @@ export default function AdminSyscomProductsIndex() {
                                                 {product.stock}
                                             </span>
                                         </TableCell>
-                                        <TableCell className="text-right">
+                                        <TableCell className="w-[110px] text-right">
                                             {product.precios ? (
                                                 <span className="text-muted-foreground">
                                                     $
@@ -478,7 +537,7 @@ export default function AdminSyscomProductsIndex() {
                                                 </span>
                                             )}
                                         </TableCell>
-                                        <TableCell className="text-center">
+                                        <TableCell className="w-[100px] text-center">
                                             {imported ? (
                                                 <Badge variant="secondary">
                                                     ✓ Importado
@@ -489,7 +548,7 @@ export default function AdminSyscomProductsIndex() {
                                                 </span>
                                             )}
                                         </TableCell>
-                                        <TableCell className="text-right">
+                                        <TableCell className="sticky right-0 w-[120px] bg-card text-right">
                                             {selectedProduct ? (
                                                 <Input
                                                     type="number"
@@ -524,17 +583,41 @@ export default function AdminSyscomProductsIndex() {
             </div>
 
             {syscom_products.last_page > 1 && (
-                <div className="flex items-center justify-center gap-2">
-                    {syscom_products.links.map((link, i) => (
-                        <Button
-                            key={i}
-                            variant={link.active ? 'default' : 'ghost'}
-                            size="sm"
-                            disabled={!link.url}
-                            onClick={() => link.url && router.get(link.url)}
-                            dangerouslySetInnerHTML={{ __html: link.label }}
-                        />
-                    ))}
+                <div className="flex items-center justify-center gap-3">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={syscom_products.current_page <= 1}
+                        onClick={() =>
+                            handlePageChange(syscom_products.current_page - 1)
+                        }
+                    >
+                        Anterior
+                    </Button>
+                    {stock === 'false' ? (
+                        <span className="text-sm text-muted-foreground">
+                            {displayProducts.length} producto
+                            {displayProducts.length !== 1 ? 's' : ''} sin stock
+                        </span>
+                    ) : (
+                        <span className="text-sm text-muted-foreground">
+                            {syscom_products.current_page} de{' '}
+                            {syscom_products.last_page}
+                        </span>
+                    )}
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={
+                            syscom_products.current_page >=
+                            syscom_products.last_page
+                        }
+                        onClick={() =>
+                            handlePageChange(syscom_products.current_page + 1)
+                        }
+                    >
+                        Siguiente
+                    </Button>
                 </div>
             )}
         </div>
