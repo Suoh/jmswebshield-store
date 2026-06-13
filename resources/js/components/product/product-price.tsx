@@ -21,12 +21,6 @@ export default function ProductPrice({
         lg: 'text-base',
     };
 
-    const discountedSizeClasses: Record<PriceSize, string> = {
-        sm: 'text-xs',
-        md: 'text-sm',
-        lg: 'text-base',
-    };
-
     if (discountedPrice) {
         return (
             <div className="flex items-center gap-1.5">
@@ -36,7 +30,7 @@ export default function ProductPrice({
                     ${price}
                 </span>
                 <span
-                    className={`${discountedSizeClasses[size]} font-bold text-primary`}
+                    className={`${textSizeClasses[size]} font-bold text-primary`}
                 >
                     ${discountedPrice}
                 </span>
