@@ -1,7 +1,9 @@
 import { Head, Link, usePage } from '@inertiajs/react';
+import BrandName from '@/components/product/brand-name';
+import ProductAvailabilityBadge from '@/components/product/product-availability-badge';
+import ProductCoverImage from '@/components/product/product-cover-image';
 import ProductImageCarousel from '@/components/product/product-image-carousel';
-import ProductPlaceholderImage from '@/components/product/product-placeholder-image';
-import { Badge } from '@/components/ui/badge';
+import ProductPrice from '@/components/product/product-price';
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -64,15 +66,11 @@ export default function ProductShow({ product }: Props) {
                                 />
                             ) : (
                                 <div className="aspect-[16/9] overflow-hidden rounded-lg">
-                                    {product.cover_image ? (
-                                        <img
-                                            src={product.cover_image}
-                                            alt={product.name}
-                                            className="h-full w-full object-cover"
-                                        />
-                                    ) : (
-                                        <ProductPlaceholderImage className="aspect-[16/9]" />
-                                    )}
+                                    <ProductCoverImage
+                                        coverImage={product.cover_image}
+                                        alt={product.name}
+                                        className="h-full w-full rounded-lg object-cover"
+                                    />
                                 </div>
                             )}
                         </div>
@@ -158,47 +156,21 @@ export default function ProductShow({ product }: Props) {
                                 </h1>
 
                                 <div className="mb-4 flex items-center gap-2">
-                                    <Badge
-                                        variant={
-                                            product.availability ===
-                                            'Disponible'
-                                                ? 'default'
-                                                : 'destructive'
-                                        }
-                                    >
-                                        {product.availability}
-                                    </Badge>
-                                    {product.brand ? (
-                                        <span className="text-sm text-muted-foreground">
-                                            {product.brand.name === 'sinmarca'
-                                                ? 'Sin marca'
-                                                : product.brand.name}
-                                        </span>
-                                    ) : (
-                                        <span className="text-sm text-muted-foreground">
-                                            Sin marca
-                                        </span>
-                                    )}
+                                    <ProductAvailabilityBadge
+                                        availability={product.availability}
+                                    />
+                                    <BrandName brand={product.brand} />
                                 </div>
 
                                 <div className="mb-6">
-                                    {product.discounted_price ? (
-                                        <div className="flex items-baseline gap-3">
-                                            <span className="text-sm text-muted-foreground line-through">
-                                                ${product.price}
-                                            </span>
-                                            <span className="text-3xl font-bold text-primary">
-                                                ${product.discounted_price}
-                                            </span>
-                                            <Badge variant="secondary">
-                                                -{product.discount}%
-                                            </Badge>
-                                        </div>
-                                    ) : (
-                                        <span className="text-3xl font-bold">
-                                            ${product.price}
-                                        </span>
-                                    )}
+                                    <ProductPrice
+                                        price={product.price}
+                                        discountedPrice={
+                                            product.discounted_price
+                                        }
+                                        discount={product.discount}
+                                        size="lg"
+                                    />
                                 </div>
 
                                 <div className="space-y-3 border-t pt-4">

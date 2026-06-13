@@ -15,18 +15,20 @@ const SORT_OPTIONS = [
     { value: 'name-asc', label: 'Nombre: A-Z' },
 ];
 
+const getDefaultSort = (): string => {
+    if (typeof window === 'undefined') {
+        return 'created_at-desc';
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const sort = params.get('sort') ?? 'created_at';
+    const order = params.get('order') ?? 'desc';
+
+    return `${sort}-${order}`;
+};
+
 export default function SortSelect() {
-    const [current, setCurrent] = useState(() => {
-        if (typeof window === 'undefined') {
-            return 'created_at-desc';
-        }
-
-        const params = new URLSearchParams(window.location.search);
-        const sort = params.get('sort') ?? 'created_at';
-        const order = params.get('order') ?? 'desc';
-
-        return `${sort}-${order}`;
-    });
+    const [current, setCurrent] = useState(getDefaultSort);
 
     const handleValueChange = (value: string) => {
         if (!value) {

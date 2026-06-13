@@ -6,40 +6,56 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { useCatalogNavigate } from '@/hooks/use-catalog-url';
 import type { Brand } from '@/types/models';
 
 interface FilterSidebarProps {
     brands: Brand[];
 }
 
+const readBrandsFromUrl = (): Set<string> => {
+    if (typeof window === 'undefined') {
+        return new Set();
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const ids = new Set<string>();
+
+    params.getAll('brand[]').forEach((v) => ids.add(v));
+
+    for (const [key, value] of params.entries()) {
+        if (key.startsWith('brand[') && key.endsWith(']')) {
+            ids.add(value);
+        }
+    }
+
+    return ids;
+};
+
+const readPriceFromUrl = (key: string): string => {
+    if (typeof window === 'undefined') {
+        return '';
+    }
+
+    const params = new URLSearchParams(window.location.search);
+
+    return params.get(key) ?? '';
+};
+
 export default function FilterSidebar({ brands }: FilterSidebarProps) {
-    const [selectedBrands, setSelectedBrands] = useState<Set<string>>(() => {
-        if (typeof window === 'undefined') {
-            return new Set();
-        }
+    const navigate = useCatalogNavigate();
 
-        return new Set(
-            new URLSearchParams(window.location.search).getAll('brand[]'),
-        );
-    });
-    const [priceMin, setPriceMin] = useState(() => {
-        if (typeof window === 'undefined') {
-            return '';
-        }
+    const [selectedBrands, setSelectedBrands] = useState<Set<string>>(() =>
+        readBrandsFromUrl(),
+    );
 
-        return (
-            new URLSearchParams(window.location.search).get('price_min') ?? ''
-        );
-    });
-    const [priceMax, setPriceMax] = useState(() => {
-        if (typeof window === 'undefined') {
-            return '';
-        }
+    const [priceMin, setPriceMin] = useState(() =>
+        readPriceFromUrl('price_min'),
+    );
+    const [priceMax, setPriceMax] = useState(() =>
+        readPriceFromUrl('price_max'),
+    );
 
-        return (
-            new URLSearchParams(window.location.search).get('price_max') ?? ''
-        );
-    });
     const [stock, setStock] = useState(() => {
         if (typeof window === 'undefined') {
             return 'all';
@@ -57,34 +73,14 @@ export default function FilterSidebar({ brands }: FilterSidebarProps) {
             newPriceMax: string,
             newStock: string,
         ) => {
-            const params = new URLSearchParams(window.location.search);
-            params.delete('page');
-
-            params.delete('brand[]');
-            newBrands.forEach((b) => params.append('brand[]', b));
-
-            if (newPriceMin) {
-                params.set('price_min', newPriceMin);
-            } else {
-                params.delete('price_min');
-            }
-
-            if (newPriceMax) {
-                params.set('price_max', newPriceMax);
-            } else {
-                params.delete('price_max');
-            }
-
-            if (newStock && newStock !== 'all') {
-                params.set('stock', newStock);
-            } else {
-                params.delete('stock');
-            }
-
-            const query = params.toString();
-            router.get(`/products${query ? `?${query}` : ''}`);
+            navigate({
+                'brand[]': newBrands.size > 0 ? newBrands : undefined,
+                price_min: newPriceMin || undefined,
+                price_max: newPriceMax || undefined,
+                stock: newStock === 'all' ? undefined : newStock,
+            });
         },
-        [],
+        [navigate],
     );
 
     const handleBrandToggle = (brandId: string) => {
@@ -97,22 +93,22 @@ export default function FilterSidebar({ brands }: FilterSidebarProps) {
         }
 
         setSelectedBrands(newBrands);
-        applyFilters(newBrands, priceMin, priceMax, stock);
     };
 
     const handlePriceMinChange = (value: string) => {
         setPriceMin(value);
-        applyFilters(selectedBrands, value, priceMax, stock);
     };
 
     const handlePriceMaxChange = (value: string) => {
         setPriceMax(value);
-        applyFilters(selectedBrands, priceMin, value, stock);
     };
 
     const handleStockChange = (value: string) => {
         setStock(value);
-        applyFilters(selectedBrands, priceMin, priceMax, value);
+    };
+
+    const handleApplyFilters = () => {
+        applyFilters(selectedBrands, priceMin, priceMax, stock);
     };
 
     const handleClearAll = () => {
@@ -238,6 +234,15 @@ export default function FilterSidebar({ brands }: FilterSidebarProps) {
                     Limpiar filtros
                 </Button>
             )}
+
+            <Button
+                variant="default"
+                size="sm"
+                onClick={handleApplyFilters}
+                className="w-full"
+            >
+                Aplicar filtros
+            </Button>
         </aside>
     );
 }

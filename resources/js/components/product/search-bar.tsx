@@ -1,7 +1,8 @@
 import { router } from '@inertiajs/react';
 import { SearchIcon, X } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
+import { useDebounce } from '@/hooks/use-debounce';
 
 export default function SearchBar() {
     const [value, setValue] = useState(() => {
@@ -11,15 +12,10 @@ export default function SearchBar() {
 
         return new URLSearchParams(window.location.search).get('search') ?? '';
     });
-    const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(
-        undefined,
-    );
 
-    useEffect(() => {
-        return () => clearTimeout(debounceRef.current);
-    }, []);
+    const debouncedValue = useDebounce(value, 500);
 
-    const applySearch = useCallback((newValue: string) => {
+    const navigate = useCallback((newValue: string) => {
         const params = new URLSearchParams(window.location.search);
 
         if (newValue) {
@@ -33,25 +29,34 @@ export default function SearchBar() {
         router.get(`/products${query ? `?${query}` : ''}`);
     }, []);
 
+    useEffect(() => {
+        const urlValue =
+            typeof window !== 'undefined'
+                ? (new URLSearchParams(window.location.search).get('search') ??
+                  '')
+                : '';
+
+        if (debouncedValue !== urlValue) {
+            navigate(debouncedValue);
+        }
+    }, [debouncedValue, navigate]);
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newValue = e.target.value;
-        setValue(newValue);
-        clearTimeout(debounceRef.current);
-        debounceRef.current = setTimeout(() => {
-            applySearch(newValue);
-        }, 300);
+        setValue(e.target.value);
     };
 
     const handleClear = () => {
         setValue('');
-        applySearch('');
+        navigate('');
     };
 
     return (
         <div className="relative">
             <SearchIcon className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-                type="search"
+                type="text"
+                role="searchbox"
+                aria-label="Buscar productos..."
                 placeholder="Buscar productos..."
                 value={value}
                 onChange={handleChange}
