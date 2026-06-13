@@ -1,26 +1,171 @@
-import { Head } from '@inertiajs/react';
-import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
+import { Head, Link } from '@inertiajs/react';
+import {
+    ArrowRight,
+    Boxes,
+    CheckCircle2,
+    DownloadCloud,
+    PackageSearch,
+    Tag,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import { dashboard } from '@/routes';
+
+const adminSections = [
+    {
+        title: 'Productos',
+        href: '/admin/products',
+        description:
+            'Administrá el catálogo local: precios, stock, imágenes, descuentos y estado de publicación.',
+        cta: 'Gestionar productos',
+        icon: PackageSearch,
+    },
+    {
+        title: 'Marcas',
+        href: '/admin/brands',
+        description:
+            'Creá y editá marcas locales para mantener el catálogo ordenado antes de publicar productos.',
+        cta: 'Gestionar marcas',
+        icon: Tag,
+    },
+    {
+        title: 'SYSCOM Marcas',
+        href: '/admin/syscom/brands',
+        description:
+            'Buscá marcas disponibles en SYSCOM e importalas para vincularlas con productos externos.',
+        cta: 'Importar marcas',
+        icon: DownloadCloud,
+    },
+    {
+        title: 'SYSCOM Productos',
+        href: '/admin/syscom/products',
+        description:
+            'Explorá productos de SYSCOM, asigná precios de venta e importalos al catálogo local.',
+        cta: 'Importar productos',
+        icon: Boxes,
+    },
+];
+
+const workflowSteps = [
+    'Creá o importá las marcas necesarias para que los productos queden correctamente vinculados.',
+    'Buscá productos en SYSCOM usando categoría, marca o texto libre.',
+    'Asigná precio de venta a cada producto seleccionado e importalo al catálogo local.',
+    'Revisá descripción, imágenes, stock, descuento y estado activo antes de publicarlo.',
+];
 
 export default function Dashboard() {
     return (
         <>
-            <Head title="Dashboard" />
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
+            <Head title="Panel de administración" />
+            <div className="flex h-full flex-1 flex-col gap-8 overflow-x-auto p-4 md:p-6">
+                <section className="overflow-hidden rounded-3xl border bg-card p-6 shadow-sm md:p-8">
+                    <div className="max-w-3xl space-y-4">
+                        <span className="inline-flex items-center rounded-full border bg-background/75 px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm">
+                            Panel admin JMS WebShield Store
+                        </span>
+                        <div className="space-y-3">
+                            <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
+                                Gestioná el catálogo desde un solo punto
+                            </h1>
+                            <p className="text-base leading-7 text-muted-foreground md:text-lg">
+                                Usá este panel como punto de partida para crear
+                                marcas, importar información desde SYSCOM y
+                                preparar productos listos para publicar.
+                            </p>
+                        </div>
                     </div>
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                </div>
-                <div className="relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
-                    <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                </div>
+                </section>
+
+                <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                    {adminSections.map((section) => (
+                        <Card
+                            key={section.title}
+                            className="border-sidebar-border/70 transition hover:-translate-y-0.5 hover:shadow-md dark:border-sidebar-border"
+                        >
+                            <CardHeader>
+                                <div className="mb-3 flex size-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                                    <section.icon className="size-5" />
+                                </div>
+                                <CardTitle>{section.title}</CardTitle>
+                                <CardDescription>
+                                    {section.description}
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <Button
+                                    asChild
+                                    variant="outline"
+                                    className="w-full"
+                                >
+                                    <Link href={section.href} prefetch>
+                                        {section.cta}
+                                        <ArrowRight className="ml-2 size-4" />
+                                    </Link>
+                                </Button>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </section>
+
+                <section className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
+                    <Card className="border-sidebar-border/70 dark:border-sidebar-border">
+                        <CardHeader>
+                            <CardTitle>Flujo de trabajo recomendado</CardTitle>
+                            <CardDescription>
+                                Seguí estos pasos para pasar de datos externos a
+                                productos publicados sin perder consistencia.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <ol className="space-y-4">
+                                {workflowSteps.map((step, index) => (
+                                    <li
+                                        key={step}
+                                        className="flex gap-3 rounded-2xl border bg-muted/35 p-4"
+                                    >
+                                        <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+                                            {index + 1}
+                                        </span>
+                                        <p className="text-sm leading-6 text-muted-foreground">
+                                            {step}
+                                        </p>
+                                    </li>
+                                ))}
+                            </ol>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="border-sidebar-border/70 bg-primary text-primary-foreground dark:border-sidebar-border">
+                        <CardHeader>
+                            <div className="mb-3 flex size-11 items-center justify-center rounded-2xl bg-primary-foreground/15">
+                                <CheckCircle2 className="size-5" />
+                            </div>
+                            <CardTitle>Atajo sugerido</CardTitle>
+                            <CardDescription className="text-primary-foreground/75">
+                                Si ya tenés marcas cargadas, empezá directo en
+                                productos SYSCOM para importar inventario nuevo.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Button
+                                asChild
+                                variant="secondary"
+                                className="w-full"
+                            >
+                                <Link href="/admin/syscom/products" prefetch>
+                                    Buscar productos SYSCOM
+                                    <ArrowRight className="ml-2 size-4" />
+                                </Link>
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </section>
             </div>
         </>
     );
@@ -29,7 +174,7 @@ export default function Dashboard() {
 Dashboard.layout = {
     breadcrumbs: [
         {
-            title: 'Dashboard',
+            title: 'Panel de administración',
             href: dashboard(),
         },
     ],
