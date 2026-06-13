@@ -146,6 +146,19 @@
     body {
         @apply bg-background text-foreground;
     }
+
+    html {
+        background-color: transparent;
+    }
+
+    [data-slot='sidebar-wrapper'] {
+        background-color: transparent !important;
+    }
+
+    [data-slot='sidebar-inset'] {
+        background-color: transparent !important;
+    }
+
     button:not(:disabled),
     [role='button']:not(:disabled) {
         cursor: pointer;
