@@ -1,113 +1,79 @@
 import { Head, Link } from '@inertiajs/react';
-import ProductPlaceholderImage from '@/components/product/product-placeholder-image';
-import { Badge } from '@/components/ui/badge';
+import FilterSidebar from '@/components/product/filter-sidebar';
+import ProductCard from '@/components/product/product-card';
+import ProductListRow from '@/components/product/product-list-row';
+import SearchBar from '@/components/product/search-bar';
+import SortSelect from '@/components/product/sort-select';
+import ViewToggle from '@/components/product/view-toggle';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import type { Product, PaginatedData } from '@/types/models';
+import type { Brand, PaginatedData, Product } from '@/types/models';
 
 interface Props {
     products: PaginatedData<Product>;
+    brands: Brand[];
 }
 
-export default function ProductIndex({ products }: Props) {
+export default function ProductIndex({ products, brands }: Props) {
+    const view =
+        typeof window !== 'undefined'
+            ? (new URLSearchParams(window.location.search).get('view') ??
+              'grid')
+            : 'grid';
+
     return (
         <>
             <Head title="Catálogo de productos" />
-            <div className="container mx-auto px-4 py-8">
-                <h1 className="mb-8 text-3xl font-bold">
-                    Catálogo de productos
-                </h1>
+            <div className="container mx-auto px-4 py-6">
+                <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+                    <aside className="w-full shrink-0 rounded-lg bg-sidebar p-4 lg:w-56">
+                        <FilterSidebar brands={brands} />
+                    </aside>
 
-                {products.data.length === 0 ? (
-                    <div className="flex min-h-[400px] items-center justify-center">
-                        <p className="text-lg text-muted-foreground">
-                            No hay productos disponibles
-                        </p>
-                    </div>
-                ) : (
-                    <>
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
-                            {products.data.map((product) => (
-                                <Link
-                                    key={product.id}
-                                    href={`/products/${product.id}`}
-                                    className="group"
-                                >
-                                    <Card className="h-full transition-shadow hover:shadow-lg">
-                                        <div className="relative aspect-[4/3] overflow-hidden rounded-t-lg">
-                                            {product.cover_image ? (
-                                                <img
-                                                    src={product.cover_image}
-                                                    alt={product.name}
-                                                    className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                                                />
-                                            ) : (
-                                                <ProductPlaceholderImage />
-                                            )}
-                                            <Badge
-                                                variant={
-                                                    product.availability ===
-                                                    'Disponible'
-                                                        ? 'default'
-                                                        : 'destructive'
-                                                }
-                                                className="absolute top-1.5 right-1.5 text-xs"
-                                            >
-                                                {product.availability}
-                                            </Badge>
-                                        </div>
-                                        <CardContent className="p-3">
-                                            <h2 className="mb-1 line-clamp-1 text-sm font-semibold">
-                                                {product.name}
-                                            </h2>
-                                            {product.short_description && (
-                                                <p className="mb-1 line-clamp-1 text-xs text-muted-foreground">
-                                                    {product.short_description.replace(
-                                                        /<[^>]*>/g,
-                                                        '',
-                                                    )}
-                                                </p>
-                                            )}
-                                            {product.brand && (
-                                                <p className="mb-1 text-xs text-muted-foreground">
-                                                    {product.brand.name ===
-                                                    'sinmarca'
-                                                        ? 'Sin marca'
-                                                        : product.brand.name}
-                                                </p>
-                                            )}
-                                            {!product.brand && (
-                                                <p className="mb-1 text-xs text-muted-foreground">
-                                                    Sin marca
-                                                </p>
-                                            )}
-                                            <div className="flex items-center gap-1.5">
-                                                {product.discounted_price ? (
-                                                    <>
-                                                        <span className="text-xs text-muted-foreground line-through">
-                                                            ${product.price}
-                                                        </span>
-                                                        <span className="text-sm font-bold text-primary">
-                                                            $
-                                                            {
-                                                                product.discounted_price
-                                                            }
-                                                        </span>
-                                                    </>
-                                                ) : (
-                                                    <span className="text-sm font-bold">
-                                                        ${product.price}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-                                </Link>
-                            ))}
+                    <div className="min-w-0 flex-1">
+                        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="max-w-md min-w-0 flex-1">
+                                <SearchBar />
+                            </div>
+                            <div className="flex shrink-0 items-center gap-3">
+                                <SortSelect />
+                                <ViewToggle />
+                            </div>
                         </div>
 
+                        {products.data.length === 0 ? (
+                            <div className="flex min-h-[300px] items-center justify-center">
+                                <div className="space-y-2 text-center">
+                                    <p className="text-lg font-medium">
+                                        No hay productos disponibles
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">
+                                        Probá cambiando los filtros o la
+                                        búsqueda
+                                    </p>
+                                </div>
+                            </div>
+                        ) : view === 'list' ? (
+                            <div className="space-y-3">
+                                {products.data.map((product) => (
+                                    <ProductListRow
+                                        key={product.id}
+                                        product={product}
+                                    />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+                                {products.data.map((product) => (
+                                    <ProductCard
+                                        key={product.id}
+                                        product={product}
+                                    />
+                                ))}
+                            </div>
+                        )}
+
                         {products.last_page > 1 && (
-                            <div className="mt-8 flex justify-center gap-2">
+                            <div className="mt-8 flex flex-wrap justify-center gap-2">
                                 {products.links.map((link, index) => (
                                     <Button
                                         key={index}
@@ -127,8 +93,8 @@ export default function ProductIndex({ products }: Props) {
                                 ))}
                             </div>
                         )}
-                    </>
-                )}
+                    </div>
+                </div>
             </div>
         </>
     );

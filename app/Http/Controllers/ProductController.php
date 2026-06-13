@@ -18,7 +18,7 @@ class ProductController extends Controller
         if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search): void {
-                $like = '%' . strtolower($search) . '%';
+                $like = '%'.strtolower($search).'%';
                 $q->whereRaw('LOWER(name) LIKE ?', [$like])
                     ->orWhereRaw('LOWER(short_description) LIKE ?', [$like])
                     ->orWhereRaw('LOWER(model) LIKE ?', [$like]);
