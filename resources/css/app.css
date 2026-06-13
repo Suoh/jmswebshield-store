@@ -2,8 +2,6 @@
 
 @import 'tw-animate-css';
 
-@import 'tw-animate-css';
-
 @import 'shadcn/tailwind.css';
 
 @import '@fontsource-variable/plus-jakarta-sans';
@@ -138,17 +136,24 @@
     --sidebar-ring: oklch(0.72 0.13 250);
 }
 
+html {
+    background-color: oklch(0.93 0.005 250);
+}
+
 @layer base {
-    * {
-        @apply border-border outline-ring/50;
+    body * {
+        border-color: var(--border);
+        outline-color: color-mix(in oklch, var(--ring) 50%, transparent);
     }
 
     body {
-        @apply bg-background text-foreground;
+        background-color: var(--background);
+        color: var(--foreground);
     }
 
     html {
-        background-color: transparent;
+        background-color: var(--background);
+        font-family: var(--font-sans);
     }
 
     [data-slot='sidebar-wrapper'] {
@@ -162,9 +167,6 @@
     button:not(:disabled),
     [role='button']:not(:disabled) {
         cursor: pointer;
-    }
-    html {
-        @apply font-sans;
     }
 }
 
