@@ -149,7 +149,7 @@ export default function AdminSyscomBrandsIndex() {
                 />
             </div>
 
-            <div className="overflow-hidden rounded-lg border">
+            <div className="overflow-hidden rounded-lg border bg-card">
                 <Table>
                     <TableHeader>
                         <TableRow>
