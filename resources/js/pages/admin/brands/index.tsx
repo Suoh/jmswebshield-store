@@ -80,7 +80,7 @@ export default function AdminBrandsIndex() {
                 />
             </div>
 
-            <div className="overflow-hidden rounded-lg border">
+            <div className="overflow-hidden rounded-lg border bg-card">
                 <Table>
                     <TableHeader>
                         <TableRow>
