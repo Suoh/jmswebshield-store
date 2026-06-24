@@ -27,6 +27,9 @@ The source of truth for this project is at:
 - Real stack and architecture decisions
 - Business rules
 - Complete setup guide
+- `04 - Auditoría y hallazgos` — Findings from code review: vulnerabilities,
+  duplicated code, performance issues, and pending patterns. **Update after
+  every change, refactor, or merge** (mark resolved findings, add new ones).
 
 ## 📝 Session log (MANDATORY)
 
@@ -39,7 +42,10 @@ At the end of every session (or after any significant phase progress), **update*
 - Instructions received from the user
 - Completed tasks (with checkboxes)
 - Next steps
-Also update `nn - Stack & roadmap` checking completed steps or updating information
+Also update `nn - Stack & roadmap` checking completed steps or updating information.
+After any change, refactor, or merge, **review and update** `04 - Auditoría y hallazgos`
+marking which findings were resolved, partially addressed, or remain open, and
+adding any new issues introduced by the change.
 
 ## Developer Commands
 
