@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { Card, CardContent } from '@/components/ui/card';
+import { stripHtml } from '@/lib/format';
 import type { Product } from '@/types/models';
 import BrandName from './brand-name';
 import ProductAvailabilityBadge from './product-availability-badge';
@@ -31,7 +32,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                     </h3>
                     {product.short_description && (
                         <p className="line-clamp-1 text-xs text-muted-foreground">
-                            {product.short_description.replace(/<[^>]*>/g, '')}
+                            {stripHtml(product.short_description)}
                         </p>
                     )}
                     <BrandName brand={product.brand} />

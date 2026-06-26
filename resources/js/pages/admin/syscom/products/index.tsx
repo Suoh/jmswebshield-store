@@ -22,6 +22,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { formatPrice } from '@/lib/format';
 import type { PaginatedData } from '@/types/models';
 
 interface SyscomProduct {
@@ -523,13 +524,10 @@ export default function AdminSyscomProductsIndex() {
                                         <TableCell className="w-[110px] text-right">
                                             {product.precios ? (
                                                 <span className="text-muted-foreground">
-                                                    $
-                                                    {Number(
+                                                    {formatPrice(
                                                         product.precios
                                                             .precio_lista,
-                                                    ).toLocaleString('es-MX', {
-                                                        minimumFractionDigits: 2,
-                                                    })}
+                                                    )}
                                                 </span>
                                             ) : (
                                                 <span className="text-muted-foreground">

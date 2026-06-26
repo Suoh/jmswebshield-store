@@ -7,10 +7,6 @@ export function useDebounce<T>(value: T, delay: number): T {
     );
 
     useEffect(() => {
-        return () => clearTimeout(timerRef.current);
-    }, []);
-
-    useEffect(() => {
         clearTimeout(timerRef.current);
         timerRef.current = setTimeout(() => {
             setDebouncedValue(value);

@@ -8,11 +8,7 @@ use App\Models\User;
 use App\Services\Syscom\SyscomService;
 use Mockery;
 
-beforeEach(function () {
-    $this->withoutVite();
-    $this->admin = User::factory()->create(['email' => 'admin@test.com']);
-    config(['app.admin_email' => 'admin@test.com']);
-});
+beforeEach(fn () => actingAsAdmin());
 
 describe('Syscom Product Import Controller', function () {
     describe('index', function () {
