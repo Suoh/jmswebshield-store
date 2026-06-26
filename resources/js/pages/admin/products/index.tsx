@@ -1,5 +1,5 @@
 import { Link, router, usePage } from '@inertiajs/react';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 import {
     AlertDialog,
@@ -22,6 +22,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import StatusBadge from '@/components/ui/status-badge';
 import {
     Table,
     TableBody,
@@ -30,6 +31,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { useFlashToast } from '@/hooks/use-flash-toast';
 import { formatPrice } from '@/lib/format';
 import type { PaginatedData, Product, Brand } from '@/types/models';
 
@@ -61,15 +63,7 @@ export default function AdminProductsIndex() {
     } | null>(null);
     const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    useEffect(() => {
-        if (flash?.success) {
-            toast.success(flash.success);
-        }
-
-        if (flash?.error) {
-            toast.error(flash.error);
-        }
-    }, [flash]);
+    useFlashToast(flash);
 
     const applyFilters = (
         newSearch?: string,
@@ -330,15 +324,13 @@ export default function AdminProductsIndex() {
                                         {product.stock}
                                     </TableCell>
                                     <TableCell className="text-center">
-                                        <span
-                                            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                                        <StatusBadge
+                                            variant={
                                                 product.is_active
-                                                    ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                                                    : 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
-                                            }`}
-                                        >
-                                            {product.is_active ? 'Sí' : 'No'}
-                                        </span>
+                                                    ? 'active'
+                                                    : 'inactive'
+                                            }
+                                        />
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex items-center justify-end gap-2">

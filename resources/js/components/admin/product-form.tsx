@@ -39,10 +39,24 @@ interface Brand {
     slug: string;
 }
 
+export interface ProductFormPayload {
+    name: string;
+    short_description: string;
+    full_description: string;
+    price: number;
+    stock: number;
+    discount: number;
+    sku: string;
+    brand_id: number | null;
+    model: string;
+    image_url: string;
+    is_active: boolean;
+}
+
 interface ProductFormProps {
     product?: Product;
     brands: Brand[];
-    onSubmit: (data: Partial<Product>) => void;
+    onSubmit: (data: ProductFormPayload) => void;
 }
 
 export default function ProductForm({

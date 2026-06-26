@@ -1,5 +1,5 @@
 import { router, usePage } from '@inertiajs/react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { useFlashToast } from '@/hooks/use-flash-toast';
 import type { PaginatedData } from '@/types/models';
 
 interface SyscomBrand {
@@ -35,7 +36,14 @@ export default function AdminSyscomBrandsIndex() {
     const [search, setSearch] = useState('');
     const [isImporting, setIsImporting] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const prevFlash = useRef<string | null>(null);
+
+    useFlashToast(
+        (
+            pageProps as unknown as {
+                props: { flash?: { success?: string; error?: string } };
+            }
+        ).props.flash,
+    );
 
     useEffect(() => {
         const unbindStart = router.on('start', () => setIsLoading(true));
@@ -46,17 +54,6 @@ export default function AdminSyscomBrandsIndex() {
             unbindFinish();
         };
     }, []);
-
-    useEffect(() => {
-        const { flash } = pageProps as unknown as {
-            flash: { success?: string; error?: string };
-        };
-
-        if (flash.success && flash.success !== prevFlash.current) {
-            prevFlash.current = flash.success;
-            toast.success(flash.success);
-        }
-    }, [pageProps]);
 
     const filtered = syscom_brands.data.filter((brand) =>
         brand.nombre.toLowerCase().includes(search.toLowerCase()),

@@ -2,6 +2,16 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import type { DropResult } from '@hello-pangea/dnd';
 import { router } from '@inertiajs/react';
 import { useState, useCallback } from 'react';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -26,6 +36,7 @@ export default function ProductImageUploader({
     const [uploadProgress, setUploadProgress] = useState(0);
     const [uploadError, setUploadError] = useState<string | null>(null);
     const [localImages, setLocalImages] = useState<ProductImage[]>(images);
+    const [deleteImageId, setDeleteImageId] = useState<number | null>(null);
 
     const handleFileSelect = useCallback(
         (files: FileList | null) => {
@@ -135,24 +146,22 @@ export default function ProductImageUploader({
         [localImages, onImagesChange, productId],
     );
 
-    const handleDelete = useCallback(
-        (imageId: number) => {
-            if (!confirm('¿Eliminar esta imagen?')) {
-                return;
-            }
+    const handleDelete = useCallback(() => {
+        if (deleteImageId === null) {
+            return;
+        }
 
-            router.delete(`/admin/products/${productId}/images/${imageId}`, {
-                onSuccess: () => {
-                    const updated = localImages.filter(
-                        (img) => img.id !== imageId,
-                    );
-                    setLocalImages(updated);
-                    onImagesChange?.(updated);
-                },
-            });
-        },
-        [localImages, onImagesChange, productId],
-    );
+        router.delete(`/admin/products/${productId}/images/${deleteImageId}`, {
+            onSuccess: () => {
+                const updated = localImages.filter(
+                    (img) => img.id !== deleteImageId,
+                );
+                setLocalImages(updated);
+                onImagesChange?.(updated);
+                setDeleteImageId(null);
+            },
+        });
+    }, [localImages, onImagesChange, productId, deleteImageId]);
 
     const handleSetCover = useCallback(
         (imageId: number) => {
@@ -347,31 +356,69 @@ export default function ProductImageUploader({
                                                             </svg>
                                                         </Button>
                                                     )}
-                                                    <Button
-                                                        variant="destructive"
-                                                        size="sm"
-                                                        className="h-6 px-2 text-xs"
-                                                        onClick={() =>
-                                                            handleDelete(
-                                                                image.id,
-                                                            )
-                                                        }
-                                                        title="Eliminar imagen"
-                                                    >
-                                                        <svg
-                                                            className="size-3"
-                                                            fill="none"
-                                                            viewBox="0 0 24 24"
-                                                            stroke="currentColor"
+                                                    <AlertDialog>
+                                                        <Button
+                                                            variant="destructive"
+                                                            size="sm"
+                                                            className="h-6 px-2 text-xs"
+                                                            onClick={() =>
+                                                                setDeleteImageId(
+                                                                    image.id,
+                                                                )
+                                                            }
+                                                            title="Eliminar imagen"
                                                         >
-                                                            <path
-                                                                strokeLinecap="round"
-                                                                strokeLinejoin="round"
-                                                                strokeWidth={2}
-                                                                d="M6 18L18 6M6 6l12 12"
-                                                            />
-                                                        </svg>
-                                                    </Button>
+                                                            <svg
+                                                                className="size-3"
+                                                                fill="none"
+                                                                viewBox="0 0 24 24"
+                                                                stroke="currentColor"
+                                                            >
+                                                                <path
+                                                                    strokeLinecap="round"
+                                                                    strokeLinejoin="round"
+                                                                    strokeWidth={
+                                                                        2
+                                                                    }
+                                                                    d="M6 18L18 6M6 6l12 12"
+                                                                />
+                                                            </svg>
+                                                        </Button>
+                                                        <AlertDialogContent>
+                                                            <AlertDialogHeader>
+                                                                <AlertDialogTitle>
+                                                                    Eliminar
+                                                                    imagen
+                                                                </AlertDialogTitle>
+                                                                <AlertDialogDescription>
+                                                                    ¿Estás
+                                                                    seguro de
+                                                                    que deseas
+                                                                    eliminar
+                                                                    esta imagen?
+                                                                </AlertDialogDescription>
+                                                            </AlertDialogHeader>
+                                                            <AlertDialogFooter>
+                                                                <AlertDialogCancel
+                                                                    onClick={() =>
+                                                                        setDeleteImageId(
+                                                                            null,
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    Cancelar
+                                                                </AlertDialogCancel>
+                                                                <AlertDialogAction
+                                                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                                    onClick={
+                                                                        handleDelete
+                                                                    }
+                                                                >
+                                                                    Eliminar
+                                                                </AlertDialogAction>
+                                                            </AlertDialogFooter>
+                                                        </AlertDialogContent>
+                                                    </AlertDialog>
                                                 </div>
 
                                                 <div className="absolute right-0 bottom-0 left-0 bg-gradient-to-t from-black/60 to-transparent p-2">

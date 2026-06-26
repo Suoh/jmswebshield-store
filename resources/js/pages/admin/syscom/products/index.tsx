@@ -22,6 +22,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { useFlashToast } from '@/hooks/use-flash-toast';
 import { formatPrice } from '@/lib/format';
 import type { PaginatedData } from '@/types/models';
 
@@ -57,7 +58,14 @@ export default function AdminSyscomProductsIndex() {
     const [prices, setPrices] = useState<Map<string, string>>(new Map());
     const [isImporting, setIsImporting] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const prevFlash = useRef<string | null>(null);
+
+    useFlashToast(
+        (
+            pageProps as unknown as {
+                props: { flash?: { success?: string; error?: string } };
+            }
+        ).props.flash,
+    );
 
     useEffect(() => {
         const unbindStart = router.on('start', () => setIsLoading(true));
@@ -68,17 +76,6 @@ export default function AdminSyscomProductsIndex() {
             unbindFinish();
         };
     }, []);
-
-    useEffect(() => {
-        const { flash } = pageProps as unknown as {
-            flash: { success?: string; error?: string };
-        };
-
-        if (flash.success && flash.success !== prevFlash.current) {
-            prevFlash.current = flash.success;
-            toast.success(flash.success);
-        }
-    }, [pageProps]);
 
     const [categoriaId, setCategoriaId] = useState(() => {
         if (typeof window === 'undefined') {

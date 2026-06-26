@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\ProductImageAction;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ProductImage;
@@ -40,7 +41,7 @@ class ProductImageController extends Controller
             'is_cover' => $isCover,
         ]);
 
-        return redirect()->back()->with('success', 'Imagen subida exitosamente.');
+        return redirect()->back()->with('success', ProductImageAction::Uploaded->value);
     }
 
     public function batchStore(Request $request, int $productId): JsonResponse
@@ -111,7 +112,7 @@ class ProductImageController extends Controller
             ProductImage::where('id', $imageId)->update(['position' => $position]);
         }
 
-        return redirect()->back()->with('success', 'Imágenes reordenadas.');
+        return redirect()->back()->with('success', ProductImageAction::Reordered->value);
     }
 
     public function setCover(int $productId, int $imageId): RedirectResponse
@@ -122,7 +123,7 @@ class ProductImageController extends Controller
         $product->images()->update(['is_cover' => false]);
         $image->update(['is_cover' => true]);
 
-        return redirect()->back()->with('success', 'Imagen de portada actualizada.');
+        return redirect()->back()->with('success', ProductImageAction::CoverSet->value);
     }
 
     public function destroy(int $productId, int $imageId): RedirectResponse
@@ -144,6 +145,6 @@ class ProductImageController extends Controller
 
         Storage::disk('public')->delete($imagePath);
 
-        return redirect()->back()->with('success', 'Imagen eliminada.');
+        return redirect()->back()->with('success', ProductImageAction::Deleted->value);
     }
 }
