@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\SortOrder;
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use App\Models\Product;
@@ -23,7 +24,7 @@ class ProductController extends Controller
             $query->onlyTrashed();
         }
 
-        $products = $query->orderBy('created_at', 'desc')->paginate(15);
+        $products = $query->orderBy('created_at', SortOrder::Desc->value)->paginate(15);
         $brands = Brand::orderBy('name')->get();
 
         return Inertia::render('admin/products/index', [

@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\Admin\Syscom;
 
+use App\Enums\ImportStatus;
 use App\Http\Controllers\Controller;
-use App\Models\Brand;
 use App\Models\Product;
+use App\Services\Syscom\ProductImporter;
 use App\Services\Syscom\SyscomService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -66,66 +67,11 @@ class ProductController extends Controller
             'products.*.price' => 'required|numeric|min:0.01',
         ]);
 
-        $products = $validated['products'];
-        $imported = 0;
-        $skipped = 0;
-        $failed = 0;
+        $result = app(ProductImporter::class)->import($validated['products']);
 
-        $brandsData = $this->syscomService->getBrands(1);
-        $brandLookup = [];
-        foreach ($brandsData['data'] ?? [] as $brand) {
-            $brandLookup[$brand['id']] = $brand['nombre'];
-        }
-
-        $existingSyscomIds = Product::importedSyscomIds()->flip()->toArray();
-
-        $localBrands = Brand::whereHasSyscomId()
-            ->get()
-            ->keyBy(fn ($b) => $b->metadata['syscom_id'] ?? '');
-
-        foreach ($products as $item) {
-            $productoId = $item['producto_id'];
-            $adminPrice = (float) $item['price'];
-
-            if (isset($existingSyscomIds[$productoId])) {
-                $skipped++;
-
-                continue;
-            }
-
-            try {
-                $localData = $this->syscomService->getProductDetail($productoId, $adminPrice);
-            } catch (\Exception $e) {
-                $failed++;
-
-                continue;
-            }
-
-            $marcaId = $localData['metadata']['syscom_marca_id'] ?? null;
-            $brandId = null;
-
-            if ($marcaId) {
-                $brand = $localBrands->get($marcaId);
-                if (! $brand && isset($brandLookup[$marcaId])) {
-                    $brandName = $brandLookup[$marcaId];
-                    $brand = Brand::firstOrCreate(
-                        ['slug' => $marcaId],
-                        [
-                            'name' => $brandName,
-                            'metadata' => ['syscom_id' => $marcaId],
-                        ],
-                    );
-                    $localBrands->put($marcaId, $brand);
-                }
-                $brandId = $brand?->id;
-            }
-
-            $localData['brand_id'] = $brandId;
-            Product::create($localData);
-
-            $existingSyscomIds[$productoId] = true;
-            $imported++;
-        }
+        $imported = $result[ImportStatus::Imported->value];
+        $skipped = $result[ImportStatus::Skipped->value];
+        $failed = $result[ImportStatus::Failed->value];
 
         return back()->with('success', "Productos importados: $imported, omitidos: $skipped, fallidos: $failed.");
     }

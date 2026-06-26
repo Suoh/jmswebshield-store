@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\SortOrder;
+use App\Enums\StockFilter;
 use App\Models\Brand;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -38,15 +40,16 @@ class ProductController extends Controller
             $query->where('price', '<=', (float) $request->input('price_max'));
         }
 
-        if ($request->input('stock') === 'in_stock') {
+        if ($request->input('stock') === StockFilter::InStock->value) {
             $query->where('stock', '>', 0);
         }
 
         $allowedSorts = ['created_at', 'price', 'name'];
         $sort = $request->input('sort', 'created_at');
-        $order = $request->input('order', 'desc');
+        $order = $request->input('order', SortOrder::Desc->value);
         $sort = in_array($sort, $allowedSorts) ? $sort : 'created_at';
-        $order = in_array($order, ['asc', 'desc']) ? $order : 'desc';
+        $allowedOrders = array_column(SortOrder::cases(), 'value');
+        $order = in_array($order, $allowedOrders) ? $order : SortOrder::Desc->value;
         $query->orderBy($sort, $order);
 
         $products = $query->paginate(12)->withQueryString();
