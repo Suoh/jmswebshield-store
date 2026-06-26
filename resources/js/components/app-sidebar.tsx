@@ -18,13 +18,11 @@ const adminNavItems: NavItem[] = [
         title: 'Marcas',
         href: '/admin/brands',
         icon: Tag,
-        prefetch: true,
     },
     {
         title: 'Productos',
         href: '/admin/products',
         icon: Package,
-        prefetch: true,
     },
     {
         title: 'SYSCOM Marcas',

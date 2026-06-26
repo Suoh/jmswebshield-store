@@ -4,10 +4,12 @@ namespace Tests\Feature\Services\Syscom;
 
 use App\Services\Syscom\SyscomClient;
 use App\Services\Syscom\SyscomService;
+use Illuminate\Support\Facades\Cache;
 use Mockery;
 
 beforeEach(function () {
     $this->withoutVite();
+    Cache::flush();
 });
 
 describe('SyscomService', function () {
@@ -111,6 +113,56 @@ describe('SyscomService', function () {
 
             expect($result)->toHaveKey('data')
                 ->and($result['current_page'])->toBe(2);
+        });
+    });
+
+    describe('caching', function () {
+        it('caches getCategories for subsequent calls', function () {
+            $mockClient = Mockery::mock(SyscomClient::class);
+            $mockClient->shouldReceive('getCategories')
+                ->once()
+                ->andReturn([['id' => 'cat-1', 'nombre' => 'Category 1']]);
+
+            $service = new SyscomService($mockClient);
+
+            $first = $service->getCategories();
+            $second = $service->getCategories();
+
+            expect($first)->toBe($second)
+                ->and($first)->toHaveCount(1)
+                ->and($first[0]['id'])->toBe('cat-1');
+        });
+
+        it('caches getBrands page 1 for subsequent calls', function () {
+            $mockClient = Mockery::mock(SyscomClient::class);
+            $mockClient->shouldReceive('getBrands')
+                ->with(1)
+                ->once()
+                ->andReturn([['id' => 'brand-cached', 'nombre' => 'Brand Cached']]);
+
+            $service = new SyscomService($mockClient);
+
+            $first = $service->getBrands(1);
+            $second = $service->getBrands(1);
+
+            expect($first)->toBe($second)
+                ->and($first['data'][0]['id'])->toBe('brand-cached');
+        });
+
+        it('does not cache getBrands for pages other than 1', function () {
+            $mockClient = Mockery::mock(SyscomClient::class);
+            $mockClient->shouldReceive('getBrands')
+                ->with(2)
+                ->twice()
+                ->andReturn([['id' => 'brand-2', 'nombre' => 'Page 2 Brand']]);
+
+            $service = new SyscomService($mockClient);
+
+            $first = $service->getBrands(2);
+            $second = $service->getBrands(2);
+
+            expect($first['data'][0]['id'])->toBe('brand-2')
+                ->and($second['data'][0]['id'])->toBe('brand-2');
         });
     });
 

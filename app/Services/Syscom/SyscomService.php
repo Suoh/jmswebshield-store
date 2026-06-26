@@ -2,6 +2,8 @@
 
 namespace App\Services\Syscom;
 
+use Illuminate\Support\Facades\Cache;
+
 class SyscomService
 {
     private SyscomClient $client;
@@ -13,14 +15,24 @@ class SyscomService
 
     public function getCategories(): array
     {
-        return $this->client->getCategories();
+        return Cache::remember('syscom_categories', 3600, function () {
+            return $this->client->getCategories();
+        });
     }
 
     public function getBrands(int $page = 1): array
     {
-        $raw = $this->client->getBrands($page);
+        if ($page !== 1) {
+            $raw = $this->client->getBrands($page);
 
-        return $this->normalizeBrandsResponse($raw);
+            return $this->normalizeBrandsResponse($raw);
+        }
+
+        return Cache::remember('syscom_brands_all', 3600, function () {
+            $raw = $this->client->getBrands(1);
+
+            return $this->normalizeBrandsResponse($raw);
+        });
     }
 
     public function getProducts(array $filters = [], int $page = 1): array

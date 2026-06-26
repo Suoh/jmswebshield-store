@@ -58,17 +58,19 @@ class SyscomClient
         $url = $this->baseUrl.$endpoint;
 
         $retries = 0;
+        $lastException = null;
         while ($retries < self::MAX_RETRIES) {
             try {
                 $response = $this->makeRequest($method, $url, $query, $token);
 
                 return $response->json();
             } catch (\Exception $e) {
+                $lastException = $e;
                 $retries = $this->handleRequestException($e, $retries, $token, $method, $url, $query);
             }
         }
 
-        throw $e;
+        throw $lastException;
     }
 
     private function makeRequest(string $method, string $url, array $query, string $token): Response
