@@ -54,7 +54,9 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                {auth?.isAdmin && <NavMain items={adminNavItems} />}
+                {auth?.isAdmin && (
+                    <NavMain items={adminNavItems} groupLabel="Gestión" />
+                )}
             </SidebarContent>
 
             <SidebarFooter>

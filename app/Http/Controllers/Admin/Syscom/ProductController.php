@@ -127,6 +127,6 @@ class ProductController extends Controller
             $imported++;
         }
 
-        return Inertia::flash('success', "Productos importados: $imported, omitidos: $skipped, fallidos: $failed.")->back()->with('success', "Productos importados: $imported, omitidos: $skipped, fallidos: $failed.");
+        return back()->with('success', "Productos importados: $imported, omitidos: $skipped, fallidos: $failed.");
     }
 }

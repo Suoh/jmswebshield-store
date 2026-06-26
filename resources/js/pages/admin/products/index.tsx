@@ -30,6 +30,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { formatPrice } from '@/lib/format';
 import type { PaginatedData, Product, Brand } from '@/types/models';
 
 interface PageProps {
@@ -323,13 +324,7 @@ export default function AdminProductsIndex() {
                                         {product.brand?.name ?? '-'}
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        $
-                                        {parseFloat(
-                                            product.price,
-                                        ).toLocaleString('es-MX', {
-                                            minimumFractionDigits: 2,
-                                            maximumFractionDigits: 2,
-                                        })}
+                                        {formatPrice(product.price)}
                                     </TableCell>
                                     <TableCell className="text-center">
                                         {product.stock}

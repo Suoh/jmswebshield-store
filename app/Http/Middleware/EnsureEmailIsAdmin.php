@@ -12,6 +12,10 @@ class EnsureEmailIsAdmin
     {
         $adminEmail = config('app.admin_email');
 
+        if ($adminEmail === null && app()->isProduction()) {
+            abort(500, 'ADMIN_EMAIL is not configured.');
+        }
+
         if (! $request->user() || $request->user()->email !== $adminEmail) {
             return response()->json(['message' => 'Forbidden'], 403);
         }

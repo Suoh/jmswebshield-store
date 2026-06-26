@@ -9,9 +9,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
 beforeEach(function () {
-    $this->withoutVite();
-    $this->admin = User::factory()->create(['email' => 'admin@test.com']);
-    config(['app.admin_email' => 'admin@test.com']);
+    actingAsAdmin();
     Storage::fake('public');
 });
 

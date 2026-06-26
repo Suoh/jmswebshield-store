@@ -65,6 +65,6 @@ class BrandController extends Controller
             $imported++;
         }
 
-        return Inertia::flash('success', "Marcas importadas: $imported, omitidas: $skipped.")->back()->with('success', "Marcas importadas: $imported, omitidas: $skipped.");
+        return back()->with('success', "Marcas importadas: $imported, omitidas: $skipped.");
     }
 }

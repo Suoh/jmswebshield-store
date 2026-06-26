@@ -1,6 +1,7 @@
 import { Link } from '@inertiajs/react';
 import { ArrowRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { stripHtml } from '@/lib/format';
 import type { Product } from '@/types/models';
 import BrandName from './brand-name';
 import ProductAvailabilityBadge from './product-availability-badge';
@@ -47,10 +48,7 @@ export default function ProductListRow({ product }: ProductListRowProps) {
                             </Link>
                             {product.short_description && (
                                 <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">
-                                    {product.short_description.replace(
-                                        /<[^>]*>/g,
-                                        '',
-                                    )}
+                                    {stripHtml(product.short_description)}
                                 </p>
                             )}
                             {product.model && (

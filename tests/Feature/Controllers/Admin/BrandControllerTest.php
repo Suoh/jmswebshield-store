@@ -6,11 +6,7 @@ use App\Models\Brand;
 use App\Models\Product;
 use App\Models\User;
 
-beforeEach(function () {
-    $this->withoutVite();
-    $this->admin = User::factory()->create(['email' => 'admin@test.com']);
-    config(['app.admin_email' => 'admin@test.com']);
-});
+beforeEach(fn () => actingAsAdmin());
 
 describe('Admin BrandController', function () {
     describe('index', function () {
