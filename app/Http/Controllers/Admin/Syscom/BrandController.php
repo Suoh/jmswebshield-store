@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\Admin\Syscom;
 
+use App\Enums\ImportStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
-use App\Services\Syscom\SyscomMapper;
+use App\Services\Syscom\BrandImporter;
 use App\Services\Syscom\SyscomService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -39,31 +40,10 @@ class BrandController extends Controller
             'brands.*.name' => 'required|string',
         ]);
 
-        $brands = $validated['brands'];
-        $imported = 0;
-        $skipped = 0;
+        $result = app(BrandImporter::class)->import($validated['brands']);
 
-        $existingSyscomIds = Brand::importedSyscomIds()->flip()->toArray();
-
-        foreach ($brands as $brand) {
-            $syscomId = $brand['syscom_id'];
-            $name = $brand['name'];
-
-            if (isset($existingSyscomIds[$syscomId])) {
-                $skipped++;
-
-                continue;
-            }
-
-            $localData = SyscomMapper::toLocalBrand([
-                'id' => $syscomId,
-                'nombre' => $name,
-            ]);
-
-            Brand::create($localData);
-            $existingSyscomIds[$syscomId] = true;
-            $imported++;
-        }
+        $imported = $result[ImportStatus::Imported->value];
+        $skipped = $result[ImportStatus::Skipped->value];
 
         return back()->with('success', "Marcas importadas: $imported, omitidas: $skipped.");
     }
