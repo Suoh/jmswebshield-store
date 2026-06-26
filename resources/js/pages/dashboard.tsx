@@ -103,7 +103,7 @@ export default function Dashboard() {
                                     variant="outline"
                                     className="w-full"
                                 >
-                                    <Link href={section.href} prefetch>
+                                    <Link href={section.href}>
                                         {section.cta}
                                         <ArrowRight className="ml-2 size-4" />
                                     </Link>
@@ -158,7 +158,7 @@ export default function Dashboard() {
                                 variant="secondary"
                                 className="w-full"
                             >
-                                <Link href="/admin/syscom/products" prefetch>
+                                <Link href="/admin/syscom/products">
                                     Buscar productos SYSCOM
                                     <ArrowRight className="ml-2 size-4" />
                                 </Link>

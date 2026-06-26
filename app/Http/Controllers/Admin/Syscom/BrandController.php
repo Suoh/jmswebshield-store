@@ -23,14 +23,7 @@ class BrandController extends Controller
 
         $syscomBrands = $this->syscomService->getBrands($page);
 
-        $importedSyscomIds = Brand::query()
-            ->whereNotNull('metadata')
-            ->whereRaw("json_extract(metadata, '$.syscom_id') IS NOT NULL")
-            ->get()
-            ->pluck('metadata.syscom_id')
-            ->reject(fn ($v) => $v === null || $v === '')
-            ->values()
-            ->all();
+        $importedSyscomIds = Brand::importedSyscomIds()->all();
 
         return Inertia::render('admin/syscom/brands/index', [
             'syscom_brands' => $syscomBrands,
@@ -50,14 +43,7 @@ class BrandController extends Controller
         $imported = 0;
         $skipped = 0;
 
-        $existingSyscomIds = Brand::query()
-            ->whereNotNull('metadata')
-            ->whereRaw("json_extract(metadata, '$.syscom_id') IS NOT NULL")
-            ->get()
-            ->pluck('metadata.syscom_id')
-            ->reject(fn ($v) => $v === null || $v === '')
-            ->flip()
-            ->toArray();
+        $existingSyscomIds = Brand::importedSyscomIds()->flip()->toArray();
 
         foreach ($brands as $brand) {
             $syscomId = $brand['syscom_id'];

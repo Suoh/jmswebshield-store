@@ -48,14 +48,7 @@ class ProductController extends Controller
 
         $syscomProducts = $this->syscomService->getProducts($filters, $page);
 
-        $importedSyscomIds = Product::query()
-            ->whereNotNull('metadata')
-            ->whereRaw("json_extract(metadata, '$.syscom_id') IS NOT NULL")
-            ->get()
-            ->pluck('metadata.syscom_id')
-            ->reject(fn ($v) => $v === null || $v === '')
-            ->values()
-            ->all();
+        $importedSyscomIds = Product::importedSyscomIds()->all();
 
         return Inertia::render('admin/syscom/products/index', [
             'syscom_products' => $syscomProducts,
@@ -84,18 +77,9 @@ class ProductController extends Controller
             $brandLookup[$brand['id']] = $brand['nombre'];
         }
 
-        $existingSyscomIds = Product::query()
-            ->whereNotNull('metadata')
-            ->whereRaw("json_extract(metadata, '$.syscom_id') IS NOT NULL")
-            ->get()
-            ->pluck('metadata.syscom_id')
-            ->reject(fn ($v) => $v === null || $v === '')
-            ->flip()
-            ->toArray();
+        $existingSyscomIds = Product::importedSyscomIds()->flip()->toArray();
 
-        $localBrands = Brand::query()
-            ->whereNotNull('metadata')
-            ->whereRaw("json_extract(metadata, '$.syscom_id') IS NOT NULL")
+        $localBrands = Brand::whereHasSyscomId()
             ->get()
             ->keyBy(fn ($b) => $b->metadata['syscom_id'] ?? '');
 
