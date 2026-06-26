@@ -1,5 +1,6 @@
 import { router, usePage } from '@inertiajs/react';
 import ProductForm from '@/components/admin/product-form';
+import type { ProductFormPayload } from '@/components/admin/product-form';
 import type { Brand } from '@/types/models';
 
 interface PageProps {
@@ -10,9 +11,8 @@ interface PageProps {
 export default function AdminProductsCreate() {
     const { brands } = usePage<PageProps>().props;
 
-    const handleSubmit = (data: unknown) => {
-        // @ts-expect-error Inertia router accepts various data types
-        router.post('/admin/products', data);
+    const handleSubmit = (data: ProductFormPayload) => {
+        router.post('/admin/products', data as unknown as FormData);
     };
 
     return (

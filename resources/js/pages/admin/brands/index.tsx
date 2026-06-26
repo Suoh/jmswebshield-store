@@ -1,6 +1,17 @@
 import { Link, router, usePage } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { toast } from 'sonner';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -11,6 +22,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { useFlashToast } from '@/hooks/use-flash-toast';
 import type { PaginatedData } from '@/types/models';
 
 interface Brand {
@@ -32,26 +44,25 @@ interface PageProps {
 export default function AdminBrandsIndex() {
     const { brands, flash } = usePage<PageProps>().props;
     const [search, setSearch] = useState('');
+    const [deleteTarget, setDeleteTarget] = useState<{
+        id: number;
+        name: string;
+    } | null>(null);
 
-    useEffect(() => {
-        if (flash?.success) {
-            toast.success(flash.success);
-        }
+    useFlashToast(flash);
 
-        if (flash?.error) {
-            toast.error(flash.error);
+    const confirmDelete = () => {
+        if (deleteTarget) {
+            handleDelete(deleteTarget.id);
+            setDeleteTarget(null);
         }
-    }, [flash]);
+    };
 
     const filtered = brands.data.filter((brand) =>
         brand.name.toLowerCase().includes(search.toLowerCase()),
     );
 
-    const handleDelete = (id: number, name: string) => {
-        if (!confirm(`¿Eliminar la marca "${name}"?`)) {
-            return;
-        }
-
+    const handleDelete = (id: number) => {
         router.delete(`/admin/brands/${id}`, {
             onSuccess: () => {
                 toast.success('Marca eliminada.');
@@ -131,19 +142,50 @@ export default function AdminBrandsIndex() {
                                                     Editar
                                                 </Link>
                                             </Button>
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className="text-destructive hover:text-destructive"
-                                                onClick={() =>
-                                                    handleDelete(
-                                                        brand.id,
-                                                        brand.name,
-                                                    )
-                                                }
-                                            >
-                                                Eliminar
-                                            </Button>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="text-destructive hover:text-destructive"
+                                                        onClick={() =>
+                                                            setDeleteTarget({
+                                                                id: brand.id,
+                                                                name: brand.name,
+                                                            })
+                                                        }
+                                                    >
+                                                        Eliminar
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>
+                                                            Eliminar marca
+                                                        </AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            ¿Estás seguro de que
+                                                            deseas eliminar la
+                                                            marca "{brand.name}
+                                                            "? Esta acción no se
+                                                            puede deshacer.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>
+                                                            Cancelar
+                                                        </AlertDialogCancel>
+                                                        <AlertDialogAction
+                                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                            onClick={
+                                                                confirmDelete
+                                                            }
+                                                        >
+                                                            Eliminar
+                                                        </AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
                                         </div>
                                     </TableCell>
                                 </TableRow>

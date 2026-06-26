@@ -1,8 +1,8 @@
 import { router, usePage } from '@inertiajs/react';
-import { useEffect } from 'react';
-import { toast } from 'sonner';
 import ProductForm from '@/components/admin/product-form';
+import type { ProductFormPayload } from '@/components/admin/product-form';
 import ProductImageUploader from '@/components/admin/product-image-uploader';
+import { useFlashToast } from '@/hooks/use-flash-toast';
 import type { Brand, Product } from '@/types/models';
 
 interface PageProps {
@@ -18,19 +18,13 @@ interface PageProps {
 export default function AdminProductsEdit() {
     const { product, brands, flash } = usePage<PageProps>().props;
 
-    useEffect(() => {
-        if (flash?.success) {
-            toast.success(flash.success);
-        }
+    useFlashToast(flash);
 
-        if (flash?.error) {
-            toast.error(flash.error);
-        }
-    }, [flash]);
-
-    const handleSubmit = (data: unknown) => {
-        // @ts-expect-error Inertia router accepts various data types
-        router.put(`/admin/products/${product.id}`, data);
+    const handleSubmit = (data: ProductFormPayload) => {
+        router.put(
+            `/admin/products/${product.id}`,
+            data as unknown as FormData,
+        );
     };
 
     return (
