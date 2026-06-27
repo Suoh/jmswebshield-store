@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\SortOrder;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\ProductRequest;
 use App\Models\Brand;
 use App\Models\Product;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -48,24 +48,9 @@ class ProductController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(ProductRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'short_description' => 'nullable|string',
-            'full_description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
-            'stock' => 'nullable|integer|min:0',
-            'discount' => 'nullable|integer|min:0|max:100',
-            'sku' => 'nullable|string|unique:products,sku',
-            'brand_id' => 'nullable|exists:brands,id',
-            'model' => 'nullable|string',
-            'image_url' => 'nullable|url',
-            'metadata' => 'nullable|array',
-            'is_active' => 'boolean',
-        ]);
-
-        Product::create($validated);
+        Product::create($request->validated());
 
         return redirect()->route('admin.products.index')->with('success', 'Producto creado exitosamente.');
     }
@@ -81,26 +66,11 @@ class ProductController extends Controller
         ]);
     }
 
-    public function update(Request $request, int $id): RedirectResponse
+    public function update(ProductRequest $request, int $id): RedirectResponse
     {
         $product = Product::findOrFail($id);
 
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'short_description' => 'nullable|string',
-            'full_description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
-            'stock' => 'nullable|integer|min:0',
-            'discount' => 'nullable|integer|min:0|max:100',
-            'sku' => "nullable|string|unique:products,sku,{$id}",
-            'brand_id' => 'nullable|exists:brands,id',
-            'model' => 'nullable|string',
-            'image_url' => 'nullable|url',
-            'metadata' => 'nullable|array',
-            'is_active' => 'boolean',
-        ]);
-
-        $product->update($validated);
+        $product->update($request->validated());
 
         return redirect()->route('admin.products.index')->with('success', 'Producto actualizado exitosamente.');
     }

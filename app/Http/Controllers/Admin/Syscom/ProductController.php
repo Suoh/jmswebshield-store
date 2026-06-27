@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Syscom;
 
 use App\Enums\ImportStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Syscom\ImportProductsRequest;
 use App\Models\Product;
 use App\Services\Syscom\ProductImporter;
 use App\Services\Syscom\SyscomService;
@@ -59,15 +60,9 @@ class ProductController extends Controller
         ]);
     }
 
-    public function import(Request $request): RedirectResponse
+    public function import(ImportProductsRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'products' => 'required|array|min:1|max:50',
-            'products.*.producto_id' => 'required|string',
-            'products.*.price' => 'required|numeric|min:0.01',
-        ]);
-
-        $result = app(ProductImporter::class)->import($validated['products']);
+        $result = app(ProductImporter::class)->import($request->validated('products'));
 
         $imported = $result[ImportStatus::Imported->value];
         $skipped = $result[ImportStatus::Skipped->value];
