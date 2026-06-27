@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
+import { Pagination } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
 import {
@@ -245,18 +246,7 @@ export default function AdminSyscomBrandsIndex() {
             </div>
 
             {syscom_brands.last_page > 1 && (
-                <div className="flex items-center justify-center gap-2">
-                    {syscom_brands.links.map((link, i) => (
-                        <Button
-                            key={i}
-                            variant={link.active ? 'default' : 'ghost'}
-                            size="sm"
-                            disabled={!link.url}
-                            onClick={() => link.url && router.get(link.url)}
-                            dangerouslySetInnerHTML={{ __html: link.label }}
-                        />
-                    ))}
-                </div>
+                <Pagination links={syscom_brands.links} className="mt-0" />
             )}
         </div>
     );

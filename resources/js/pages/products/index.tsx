@@ -1,11 +1,11 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import FilterSidebar from '@/components/product/filter-sidebar';
 import ProductCard from '@/components/product/product-card';
 import ProductListRow from '@/components/product/product-list-row';
 import SearchBar from '@/components/product/search-bar';
 import SortSelect from '@/components/product/sort-select';
 import ViewToggle from '@/components/product/view-toggle';
-import { Button } from '@/components/ui/button';
+import { Pagination } from '@/components/ui/pagination';
 import type { Brand, PaginatedData, Product } from '@/types/models';
 
 interface Props {
@@ -73,25 +73,10 @@ export default function ProductIndex({ products, brands }: Props) {
                         )}
 
                         {products.last_page > 1 && (
-                            <div className="mt-8 flex flex-wrap justify-center gap-2">
-                                {products.links.map((link, index) => (
-                                    <Button
-                                        key={index}
-                                        variant={
-                                            link.active ? 'default' : 'outline'
-                                        }
-                                        size="sm"
-                                        asChild
-                                    >
-                                        <Link
-                                            href={link.url || '#'}
-                                            dangerouslySetInnerHTML={{
-                                                __html: link.label,
-                                            }}
-                                        />
-                                    </Button>
-                                ))}
-                            </div>
+                            <Pagination
+                                links={products.links}
+                                className="mt-8 flex-wrap"
+                            />
                         )}
                     </div>
                 </div>
