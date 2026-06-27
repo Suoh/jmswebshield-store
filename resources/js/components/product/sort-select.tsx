@@ -1,5 +1,5 @@
 import { router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useMemo } from 'react';
 import {
     Select,
     SelectContent,
@@ -7,6 +7,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { useUrlFilter } from '@/hooks/use-url-filter';
 
 const SORT_OPTIONS = [
     { value: 'created_at-desc', label: 'Más recientes' },
@@ -15,27 +16,20 @@ const SORT_OPTIONS = [
     { value: 'name-asc', label: 'Nombre: A-Z' },
 ];
 
-const getDefaultSort = (): string => {
-    if (typeof window === 'undefined') {
-        return 'created_at-desc';
-    }
-
-    const params = new URLSearchParams(window.location.search);
-    const sort = params.get('sort') ?? 'created_at';
-    const order = params.get('order') ?? 'desc';
-
-    return `${sort}-${order}`;
-};
-
 export default function SortSelect() {
-    const [current, setCurrent] = useState(getDefaultSort);
+    const [sortParam] = useUrlFilter('sort', 'created_at');
+    const [orderParam] = useUrlFilter('order', 'desc');
+
+    const currentValue = useMemo(
+        () => `${sortParam}-${orderParam}`,
+        [sortParam, orderParam],
+    );
 
     const handleValueChange = (value: string) => {
         if (!value) {
             return;
         }
 
-        setCurrent(value);
         const [newSort, newOrder] = value.split('-');
         const params = new URLSearchParams(window.location.search);
         params.set('sort', newSort);
@@ -46,7 +40,7 @@ export default function SortSelect() {
     };
 
     return (
-        <Select value={current} onValueChange={handleValueChange}>
+        <Select value={currentValue} onValueChange={handleValueChange}>
             <SelectTrigger className="w-[200px]">
                 <SelectValue placeholder="Ordenar por" />
             </SelectTrigger>

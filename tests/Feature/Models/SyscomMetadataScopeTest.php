@@ -169,3 +169,64 @@ it('brand importedSyscomIds returns empty collection when none match', function 
 
     expect($ids)->toHaveCount(0);
 });
+
+it('brand whereHasMetadataKey returns only brands with given key in metadata', function () {
+    Brand::factory()->create([
+        'name' => 'With Partner',
+        'slug' => 'with-partner',
+        'metadata' => ['partner_id' => 'p-001'],
+    ]);
+    Brand::factory()->create([
+        'name' => 'Without Partner',
+        'slug' => 'without-partner',
+        'metadata' => ['other' => 'val'],
+    ]);
+    Brand::factory()->create([
+        'name' => 'Null Meta',
+        'slug' => 'null-meta',
+        'metadata' => null,
+    ]);
+
+    $results = Brand::whereHasMetadataKey('partner_id')->get();
+
+    expect($results)->toHaveCount(1)
+        ->and($results[0]->name)->toBe('With Partner');
+});
+
+it('brand whereHasMetadataKey excludes empty values', function () {
+    Brand::factory()->create([
+        'name' => 'Empty',
+        'slug' => 'empty',
+        'metadata' => ['key' => ''],
+    ]);
+    Brand::factory()->create([
+        'name' => 'Valid',
+        'slug' => 'valid',
+        'metadata' => ['key' => 'actual-value'],
+    ]);
+
+    $results = Brand::whereHasMetadataKey('key')->get();
+
+    expect($results)->toHaveCount(1)
+        ->and($results[0]->name)->toBe('Valid');
+});
+
+it('product whereHasMetadataKey returns only products with given key in metadata', function () {
+    Product::factory()->create([
+        'name' => 'With Ref',
+        'metadata' => ['external_ref' => 'ref-001'],
+    ]);
+    Product::factory()->create([
+        'name' => 'Without Ref',
+        'metadata' => ['other' => 'val'],
+    ]);
+    Product::factory()->create([
+        'name' => 'Null Meta',
+        'metadata' => null,
+    ]);
+
+    $results = Product::whereHasMetadataKey('external_ref')->get();
+
+    expect($results)->toHaveCount(1)
+        ->and($results[0]->name)->toBe('With Ref');
+});

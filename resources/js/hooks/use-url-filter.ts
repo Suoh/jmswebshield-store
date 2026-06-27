@@ -1,7 +1,11 @@
 import { router } from '@inertiajs/react';
 import { useCallback, useMemo } from 'react';
 
-export function useUrlFilter(key: string, defaultValue: string) {
+export function useUrlFilter(
+    key: string,
+    defaultValue: string,
+    basePath?: string,
+) {
     const value = useMemo<string>(() => {
         if (typeof window === 'undefined') {
             return defaultValue;
@@ -15,6 +19,11 @@ export function useUrlFilter(key: string, defaultValue: string) {
 
     const navigate = useCallback(
         (newValue: string) => {
+            const path =
+                basePath ??
+                (typeof window !== 'undefined'
+                    ? window.location.pathname
+                    : '/');
             const params = new URLSearchParams(window.location.search);
             params.delete('page');
 
@@ -25,9 +34,9 @@ export function useUrlFilter(key: string, defaultValue: string) {
             }
 
             const query = params.toString();
-            router.get(`/products${query ? `?${query}` : ''}`);
+            router.get(`${path}${query ? `?${query}` : ''}`);
         },
-        [key, defaultValue],
+        [key, defaultValue, basePath],
     );
 
     return [value, navigate] as const;

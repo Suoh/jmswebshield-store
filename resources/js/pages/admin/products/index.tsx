@@ -33,6 +33,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { useFlashToast } from '@/hooks/use-flash-toast';
+import { useUrlFilter } from '@/hooks/use-url-filter';
 import { formatPrice } from '@/lib/format';
 import type { Brand, PaginatedData, Product } from '@/types';
 
@@ -54,9 +55,21 @@ interface PageProps {
 
 export default function AdminProductsIndex() {
     const { products, brands, filters, flash } = usePage<PageProps>().props;
-    const [search, setSearch] = useState(filters.search ?? '');
-    const [brandId, setBrandId] = useState(filters.brand_id ?? 'all');
-    const [isActive, setIsActive] = useState(filters.is_active ?? 'all');
+    const [searchUrl, setSearchUrl] = useUrlFilter(
+        'search',
+        '',
+        '/admin/products',
+    );
+    const [brandId, setBrandId] = useUrlFilter(
+        'brand_id',
+        'all',
+        '/admin/products',
+    );
+    const [isActive, setIsActive] = useUrlFilter(
+        'is_active',
+        'all',
+        '/admin/products',
+    );
     const [showTrashed, setShowTrashed] = useState(filters.trashed === '1');
     const [deleteTarget, setDeleteTarget] = useState<{
         id: number;
@@ -66,52 +79,17 @@ export default function AdminProductsIndex() {
 
     useFlashToast(flash);
 
-    const applyFilters = (
-        newSearch?: string,
-        newBrandId?: string,
-        newIsActive?: string,
-        newTrashed?: boolean,
-    ) => {
-        const params: Record<string, string> = {};
-
-        if (newSearch !== undefined && newSearch) {
-            params.search = newSearch;
-        }
-
-        if (newBrandId !== undefined && newBrandId && newBrandId !== 'all') {
-            params.brand_id = newBrandId;
-        }
-
-        if (newIsActive !== undefined && newIsActive && newIsActive !== 'all') {
-            params.is_active = newIsActive;
-        }
-
-        if (newTrashed !== undefined) {
-            params.trashed = newTrashed ? '1' : '';
-        }
-
-        router.get('/admin/products', params, {
-            preserveState: true,
-            replace: true,
-        });
-    };
-
     const handleSearchChange = (value: string) => {
-        setSearch(value);
-
         if (searchTimeout.current) {
             clearTimeout(searchTimeout.current);
         }
 
         searchTimeout.current = setTimeout(() => {
-            applyFilters(value, brandId, isActive, showTrashed);
+            setSearchUrl(value);
         }, 300);
     };
 
     const clearFilters = () => {
-        setSearch('');
-        setBrandId('all');
-        setIsActive('all');
         router.get(
             '/admin/products',
             {},
@@ -163,7 +141,7 @@ export default function AdminProductsIndex() {
     };
 
     const hasFilters =
-        search ||
+        searchUrl ||
         (brandId && brandId !== 'all') ||
         (isActive && isActive !== 'all') ||
         showTrashed;
@@ -179,11 +157,24 @@ export default function AdminProductsIndex() {
                             checked={showTrashed}
                             onChange={(e) => {
                                 setShowTrashed(e.target.checked);
-                                applyFilters(
-                                    search,
-                                    brandId,
-                                    isActive,
-                                    e.target.checked,
+                                const params = new URLSearchParams(
+                                    window.location.search,
+                                );
+
+                                if (e.target.checked) {
+                                    params.set('trashed', '1');
+                                } else {
+                                    params.delete('trashed');
+                                }
+
+                                params.delete('page');
+                                const query = params.toString();
+                                router.get(
+                                    `/admin/products${query ? `?${query}` : ''}`,
+                                    {
+                                        preserveState: true,
+                                        replace: true,
+                                    },
                                 );
                             }}
                             className="rounded border-input"
@@ -206,7 +197,8 @@ export default function AdminProductsIndex() {
                     <Input
                         id="search"
                         placeholder="Buscar por nombre..."
-                        value={search}
+                        defaultValue={searchUrl}
+                        key={searchUrl}
                         onChange={(e) => handleSearchChange(e.target.value)}
                     />
                 </div>
@@ -217,9 +209,7 @@ export default function AdminProductsIndex() {
                     </Label>
                     <Select
                         value={brandId}
-                        onValueChange={(val) =>
-                            applyFilters(search, val, isActive, showTrashed)
-                        }
+                        onValueChange={(val) => setBrandId(val)}
                     >
                         <SelectTrigger id="brand_filter">
                             <SelectValue placeholder="Todas las marcas" />
@@ -246,9 +236,7 @@ export default function AdminProductsIndex() {
                     </Label>
                     <Select
                         value={isActive}
-                        onValueChange={(val) =>
-                            applyFilters(search, brandId, val, showTrashed)
-                        }
+                        onValueChange={(val) => setIsActive(val)}
                     >
                         <SelectTrigger id="is_active_filter">
                             <SelectValue placeholder="Todos" />

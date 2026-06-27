@@ -17,6 +17,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { useFlashToast } from '@/hooks/use-flash-toast';
+import { useToggleAll } from '@/hooks/use-toggle-all';
 import type { PaginatedData, SyscomBrand } from '@/types';
 
 interface PageProps {
@@ -28,7 +29,6 @@ interface PageProps {
 export default function AdminSyscomBrandsIndex() {
     const pageProps = usePage<PageProps>();
     const { syscom_brands, imported_syscom_ids } = pageProps.props;
-    const [selected, setSelected] = useState<Set<string>>(new Set());
     const [search, setSearch] = useState('');
     const [isImporting, setIsImporting] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -55,25 +55,10 @@ export default function AdminSyscomBrandsIndex() {
         brand.nombre.toLowerCase().includes(search.toLowerCase()),
     );
 
-    const toggleAll = () => {
-        if (selected.size === filtered.length) {
-            setSelected(new Set());
-        } else {
-            setSelected(new Set(filtered.map((b) => b.id)));
-        }
-    };
-
-    const toggleOne = (id: string) => {
-        const next = new Set(selected);
-
-        if (next.has(id)) {
-            next.delete(id);
-        } else {
-            next.add(id);
-        }
-
-        setSelected(next);
-    };
+    const { selected, toggleAll, toggleOne, reset } = useToggleAll({
+        items: filtered,
+        getId: (b) => b.id,
+    });
 
     const handleImport = () => {
         if (selected.size === 0) {
@@ -91,7 +76,7 @@ export default function AdminSyscomBrandsIndex() {
             {
                 onSuccess: () => {
                     setIsImporting(false);
-                    setSelected(new Set());
+                    reset();
                     router.reload({ only: ['syscom_brands'] });
                 },
                 onError: () => {
