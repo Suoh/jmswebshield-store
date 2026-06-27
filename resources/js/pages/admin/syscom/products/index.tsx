@@ -24,25 +24,11 @@ import {
 } from '@/components/ui/table';
 import { useFlashToast } from '@/hooks/use-flash-toast';
 import { formatPrice } from '@/lib/format';
-import type { PaginatedData } from '@/types/models';
-
-interface SyscomProduct {
-    id: string;
-    nombre: string;
-    descripcion_corta: string | null;
-    stock: number;
-    modelo: string | null;
-    marca_id: string | null;
-    precios: {
-        precio_lista: number;
-        precio_descuento: number | null;
-    } | null;
-    imagen: string | null;
-}
+import type { PaginatedData, SyscomCategory, SyscomProduct } from '@/types';
 
 interface PageProps {
     syscom_products: PaginatedData<SyscomProduct>;
-    categories: Array<{ id: string; nombre: string }>;
+    categories: SyscomCategory[];
     brands: Array<{ id: string; nombre: string }>;
     imported_syscom_ids: string[];
     flash?: { success?: string; error?: string };

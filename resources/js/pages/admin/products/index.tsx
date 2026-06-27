@@ -34,7 +34,7 @@ import {
 } from '@/components/ui/table';
 import { useFlashToast } from '@/hooks/use-flash-toast';
 import { formatPrice } from '@/lib/format';
-import type { PaginatedData, Product, Brand } from '@/types/models';
+import type { Brand, PaginatedData, Product } from '@/types';
 
 interface PageProps {
     products: PaginatedData<Product>;
