@@ -15,6 +15,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Pagination } from '@/components/ui/pagination';
 import {
     Select,
     SelectContent,
@@ -445,20 +446,7 @@ export default function AdminProductsIndex() {
                 </Table>
             </div>
 
-            {products.last_page > 1 && (
-                <div className="mt-4 flex items-center justify-center gap-2">
-                    {products.links.map((link, i) => (
-                        <Button
-                            key={i}
-                            variant={link.active ? 'default' : 'ghost'}
-                            size="sm"
-                            disabled={!link.url}
-                            onClick={() => link.url && router.get(link.url)}
-                            dangerouslySetInnerHTML={{ __html: link.label }}
-                        />
-                    ))}
-                </div>
-            )}
+            {products.last_page > 1 && <Pagination links={products.links} />}
         </div>
     );
 }

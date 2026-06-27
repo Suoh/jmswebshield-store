@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Pagination } from '@/components/ui/pagination';
 import {
     Table,
     TableBody,
@@ -195,20 +196,7 @@ export default function AdminBrandsIndex() {
                 </Table>
             </div>
 
-            {brands.last_page > 1 && (
-                <div className="mt-4 flex items-center justify-center gap-2">
-                    {brands.links.map((link, i) => (
-                        <Button
-                            key={i}
-                            variant={link.active ? 'default' : 'ghost'}
-                            size="sm"
-                            disabled={!link.url}
-                            onClick={() => link.url && router.get(link.url)}
-                            dangerouslySetInnerHTML={{ __html: link.label }}
-                        />
-                    ))}
-                </div>
-            )}
+            {brands.last_page > 1 && <Pagination links={brands.links} />}
         </div>
     );
 }
