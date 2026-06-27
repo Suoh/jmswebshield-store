@@ -15,15 +15,15 @@ class ProductController extends Controller
     public function index(Request $request): Response
     {
         $query = Product::where('is_active', true)
-            ->with(['brand', 'images' => fn ($q) => $q->orderBy('position')]);
+            ->with(['brand', 'images' => fn ($q) => $q->where('is_cover', true)]);
 
         if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search): void {
-                $like = '%'.strtolower($search).'%';
-                $q->whereRaw('LOWER(name) LIKE ?', [$like])
-                    ->orWhereRaw('LOWER(short_description) LIKE ?', [$like])
-                    ->orWhereRaw('LOWER(model) LIKE ?', [$like]);
+                $term = "%{$search}%";
+                $q->whereLike('name', $term, caseSensitive: false)
+                    ->orWhereLike('short_description', $term, caseSensitive: false)
+                    ->orWhereLike('model', $term, caseSensitive: false);
             });
         }
 
