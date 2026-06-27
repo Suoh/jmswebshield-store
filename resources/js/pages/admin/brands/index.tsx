@@ -24,14 +24,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { useFlashToast } from '@/hooks/use-flash-toast';
-import type { PaginatedData } from '@/types/models';
-
-interface Brand {
-    id: number;
-    name: string;
-    slug: string;
-    products_count: number;
-}
+import type { Brand, PaginatedData } from '@/types';
 
 interface PageProps {
     brands: PaginatedData<Brand>;

@@ -17,12 +17,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { useFlashToast } from '@/hooks/use-flash-toast';
-import type { PaginatedData } from '@/types/models';
-
-interface SyscomBrand {
-    id: string;
-    nombre: string;
-}
+import type { PaginatedData, SyscomBrand } from '@/types';
 
 interface PageProps {
     syscom_brands: PaginatedData<SyscomBrand>;
