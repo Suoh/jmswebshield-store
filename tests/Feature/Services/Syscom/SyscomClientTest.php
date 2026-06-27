@@ -2,6 +2,10 @@
 
 namespace Tests\Feature\Services\Syscom;
 
+use App\Exceptions\Syscom\SyscomApiException;
+use App\Exceptions\Syscom\SyscomAuthException;
+use App\Exceptions\Syscom\SyscomRateLimitException;
+use App\Exceptions\Syscom\SyscomRequestException;
 use App\Services\Syscom\SyscomClient;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -198,6 +202,49 @@ describe('SyscomClient', function () {
             expect($product)->toHaveKey('id', '12345')
                 ->toHaveKey('nombre', 'Router RBK852')
                 ->toHaveKey('stock', 25);
+        });
+    });
+
+    describe('custom exceptions', function () {
+        it('throws SyscomAuthException when token endpoint fails', function () {
+            Http::fake([
+                'syscom-api.example.com/oauth/token' => Http::response(['error' => 'invalid'], 401),
+            ]);
+
+            config(['services.syscom.base_url' => 'https://syscom-api.example.com']);
+            config(['services.syscom.client_id' => 'client']);
+            config(['services.syscom.client_secret' => 'secret']);
+
+            $client = new SyscomClient;
+
+            expect(fn () => $client->getAccessToken())
+                ->toThrow(SyscomAuthException::class);
+        });
+
+        it('throws SyscomRequestException on non-401/429 API errors', function () {
+            Http::fake([
+                'syscom-api.example.com/oauth/token' => Http::response(['access_token' => 'token'], 200),
+                'syscom-api.example.com/api/v1/categorias' => Http::response(['error' => 'server'], 500),
+            ]);
+
+            config(['services.syscom.base_url' => 'https://syscom-api.example.com']);
+            config(['services.syscom.client_id' => 'client']);
+            config(['services.syscom.client_secret' => 'secret']);
+
+            $client = new SyscomClient;
+
+            expect(fn () => $client->getCategories())
+                ->toThrow(SyscomRequestException::class);
+        });
+
+        it('all SYSCOM exceptions are catchable as SyscomApiException', function () {
+            $auth = new SyscomAuthException('auth failed');
+            $rate = new SyscomRateLimitException(retryAfter: 5);
+            $req = new SyscomRequestException('req failed');
+
+            expect($auth)->toBeInstanceOf(SyscomApiException::class);
+            expect($rate)->toBeInstanceOf(SyscomApiException::class);
+            expect($req)->toBeInstanceOf(SyscomApiException::class);
         });
     });
 });
