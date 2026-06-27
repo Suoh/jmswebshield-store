@@ -23,6 +23,8 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { useFlashToast } from '@/hooks/use-flash-toast';
+import { useToggleAll } from '@/hooks/use-toggle-all';
+import { useUrlFilter } from '@/hooks/use-url-filter';
 import { formatPrice } from '@/lib/format';
 import type { PaginatedData, SyscomCategory, SyscomProduct } from '@/types';
 
@@ -40,7 +42,6 @@ export default function AdminSyscomProductsIndex() {
     const { syscom_products, categories, brands, imported_syscom_ids } =
         pageProps.props;
 
-    const [selected, setSelected] = useState<Set<string>>(new Set());
     const [prices, setPrices] = useState<Map<string, string>>(new Map());
     const [isImporting, setIsImporting] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -63,42 +64,26 @@ export default function AdminSyscomProductsIndex() {
         };
     }, []);
 
-    const [categoriaId, setCategoriaId] = useState(() => {
-        if (typeof window === 'undefined') {
-            return 'all';
-        }
-
-        const params = new URLSearchParams(window.location.search);
-
-        return params.get('categoria_id') ?? 'all';
-    });
-    const [marcaId, setMarcaId] = useState(() => {
-        if (typeof window === 'undefined') {
-            return 'all';
-        }
-
-        const params = new URLSearchParams(window.location.search);
-
-        return params.get('marca_id') ?? 'all';
-    });
-    const [search, setSearch] = useState(() => {
-        if (typeof window === 'undefined') {
-            return '';
-        }
-
-        const params = new URLSearchParams(window.location.search);
-
-        return params.get('search') ?? '';
-    });
-    const [stock, setStock] = useState(() => {
-        if (typeof window === 'undefined') {
-            return 'all';
-        }
-
-        const params = new URLSearchParams(window.location.search);
-
-        return params.get('stock') ?? 'all';
-    });
+    const [categoriaId, setCategoriaId] = useUrlFilter(
+        'categoria_id',
+        'all',
+        '/admin/syscom/products',
+    );
+    const [marcaId, setMarcaId] = useUrlFilter(
+        'marca_id',
+        'all',
+        '/admin/syscom/products',
+    );
+    const [searchUrl, setSearchUrl] = useUrlFilter(
+        'search',
+        '',
+        '/admin/syscom/products',
+    );
+    const [stock, setStock] = useUrlFilter(
+        'stock',
+        'all',
+        '/admin/syscom/products',
+    );
 
     const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(
         undefined,
@@ -110,102 +95,37 @@ export default function AdminSyscomProductsIndex() {
         };
     }, []);
 
-    useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setSelected(new Set());
-    }, [syscom_products.data]);
-
-    const applyFilters = (
-        newCategoriaId: string,
-        newMarcaId: string,
-        newSearch: string,
-        newStock: string,
-        newPage: number = 1,
-    ) => {
-        const params = new URLSearchParams();
-
-        if (newCategoriaId && newCategoriaId !== 'all') {
-            params.set('categoria_id', newCategoriaId);
-        }
-
-        if (newMarcaId && newMarcaId !== 'all') {
-            params.set('marca_id', newMarcaId);
-        }
-
-        if (newSearch) {
-            params.set('search', newSearch);
-        }
-
-        if (newStock && newStock !== 'all') {
-            params.set('stock', newStock);
-        }
-
-        if (newPage > 1) {
-            params.set('page', String(newPage));
-        }
-
-        const query = params.toString();
-        router.get(`/admin/syscom/products${query ? `?${query}` : ''}`);
-    };
-
     const handleSearchChange = (value: string) => {
-        setSearch(value);
         clearTimeout(debounceRef.current);
         debounceRef.current = setTimeout(() => {
-            applyFilters(categoriaId, marcaId, value, stock);
+            setSearchUrl(value);
         }, 300);
     };
 
     const handleCategoriaChange = (value: string) => {
         setCategoriaId(value);
-        applyFilters(value, marcaId, search, stock);
     };
 
     const handleMarcaChange = (value: string) => {
         setMarcaId(value);
-        applyFilters(categoriaId, value, search, stock);
     };
 
     const handleStockChange = (value: string) => {
         setStock(value);
-        applyFilters(categoriaId, marcaId, search, value);
     };
 
     const handlePageChange = (newPage: number) => {
-        applyFilters(categoriaId, marcaId, search, stock, newPage);
+        const params = new URLSearchParams(window.location.search);
+        params.set('page', String(newPage));
+        const query = params.toString();
+        router.get(`/admin/syscom/products${query ? `?${query}` : ''}`);
     };
 
     const handleClearFilters = () => {
-        setSearch('');
         setCategoriaId('all');
         setMarcaId('all');
+        setSearchUrl('');
         setStock('all');
-        router.get('/admin/syscom/products');
-    };
-
-    const toggleAll = () => {
-        const currentData = displayProducts;
-        setSelected((prev) => {
-            if (prev.size === currentData.length) {
-                return new Set();
-            }
-
-            return new Set(currentData.map((p) => p.id));
-        });
-    };
-
-    const toggleOne = (id: string) => {
-        setSelected((prev) => {
-            const next = new Set(prev);
-
-            if (next.has(id)) {
-                next.delete(id);
-            } else {
-                next.add(id);
-            }
-
-            return next;
-        });
     };
 
     const handlePriceChange = (id: string, value: string) => {
@@ -242,7 +162,7 @@ export default function AdminSyscomProductsIndex() {
             {
                 onSuccess: () => {
                     setIsImporting(false);
-                    setSelected(new Set());
+                    reset();
                     setPrices(new Map());
                     router.reload({ only: ['syscom_products'] });
                 },
@@ -261,6 +181,11 @@ export default function AdminSyscomProductsIndex() {
             ? syscom_products.data.filter((p) => p.stock === 0)
             : syscom_products.data;
 
+    const { selected, toggleAll, toggleOne, reset } = useToggleAll({
+        items: displayProducts,
+        getId: (p) => p.id,
+    });
+
     const selectedCount = displayProducts.filter(
         (p) => selected.has(p.id) && !isImported(p.id),
     ).length;
@@ -268,7 +193,7 @@ export default function AdminSyscomProductsIndex() {
     const hasActiveFilters =
         categoriaId !== 'all' ||
         marcaId !== 'all' ||
-        search !== '' ||
+        searchUrl !== '' ||
         stock !== 'all';
 
     return (
@@ -351,7 +276,8 @@ export default function AdminSyscomProductsIndex() {
 
                 <Input
                     placeholder="Buscar por nombre, ID o modelo..."
-                    value={search}
+                    defaultValue={searchUrl}
+                    key={searchUrl}
                     onChange={(e) => handleSearchChange(e.target.value)}
                     className="max-w-xs"
                 />

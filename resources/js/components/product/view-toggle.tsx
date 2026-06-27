@@ -1,20 +1,16 @@
-import { router } from '@inertiajs/react';
 import { LayoutGrid, List } from 'lucide-react';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { useUrlFilter } from '@/hooks/use-url-filter';
 
 export default function ViewToggle() {
-    const [view] = useUrlFilter('view', 'grid');
+    const [view, setView] = useUrlFilter('view', 'grid');
 
     const handleValueChange = (value: string) => {
         if (!value) {
             return;
         }
 
-        const params = new URLSearchParams(window.location.search);
-        params.set('view', value);
-        const query = params.toString();
-        router.get(`/products${query ? `?${query}` : ''}`);
+        setView(value);
     };
 
     return (

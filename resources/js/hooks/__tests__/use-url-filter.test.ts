@@ -17,6 +17,7 @@ describe('useUrlFilter', () => {
         vi.stubGlobal('window', {
             location: {
                 search: '',
+                pathname: '/products',
             },
         });
     });
@@ -32,6 +33,7 @@ describe('useUrlFilter', () => {
         vi.stubGlobal('window', {
             location: {
                 search: '?view=list',
+                pathname: '/products',
             },
         });
 
@@ -58,6 +60,7 @@ describe('useUrlFilter', () => {
         vi.stubGlobal('window', {
             location: {
                 search: '?sort=price-asc',
+                pathname: '/products',
             },
         });
 
@@ -77,6 +80,7 @@ describe('useUrlFilter', () => {
         vi.stubGlobal('window', {
             location: {
                 search: '?sort=created_at-desc&page=2',
+                pathname: '/products',
             },
         });
 
@@ -90,5 +94,20 @@ describe('useUrlFilter', () => {
         const url = mockRouterGet.mock.calls[0][0];
         expect(url).toContain('sort=price-asc');
         expect(url).not.toContain('page=');
+    });
+
+    it('uses custom basePath when provided', () => {
+        const { result } = renderHook(() =>
+            useUrlFilter('categoria_id', 'all', '/admin/syscom/products'),
+        );
+
+        const [, navigate] = result.current;
+        navigate('cat-1');
+
+        expect(mockRouterGet).toHaveBeenCalledWith(
+            expect.stringContaining(
+                '/admin/syscom/products?categoria_id=cat-1',
+            ),
+        );
     });
 });

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasMetadata;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -11,7 +12,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 
 #[Fillable([
     'name',
@@ -29,7 +29,7 @@ use Illuminate\Support\Facades\DB;
 ])]
 class Product extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, HasMetadata, SoftDeletes;
 
     protected $appends = ['cover_image', 'availability', 'discounted_price'];
 
@@ -56,15 +56,7 @@ class Product extends Model
 
     public function scopeWhereHasSyscomId(Builder $query): void
     {
-        $query->whereNotNull('metadata');
-
-        if (DB::connection()->getDriverName() === 'pgsql') {
-            $query->whereRaw("metadata->>'syscom_id' IS NOT NULL");
-            $query->whereRaw("metadata->>'syscom_id' != ''");
-        } else {
-            $query->whereRaw("json_extract(metadata, '$.syscom_id') IS NOT NULL");
-            $query->whereRaw("json_extract(metadata, '$.syscom_id') != ''");
-        }
+        $this->scopeWhereHasMetadataKey($query, 'syscom_id');
     }
 
     public static function importedSyscomIds(): Collection
