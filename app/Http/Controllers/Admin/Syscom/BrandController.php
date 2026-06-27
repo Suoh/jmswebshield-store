@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Syscom;
 
 use App\Enums\ImportStatus;
+use App\Exceptions\Syscom\SyscomApiException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Syscom\ImportBrandsRequest;
 use App\Models\Brand;
@@ -23,7 +24,13 @@ class BrandController extends Controller
     {
         $page = (int) $request->query('page', 1);
 
-        $syscomBrands = $this->syscomService->getBrands($page);
+        try {
+            $syscomBrands = $this->syscomService->getBrands($page);
+        } catch (SyscomApiException $e) {
+            session()->flash('error', 'No se pudieron cargar las marcas de SYSCOM. Intentalo de nuevo más tarde.');
+
+            $syscomBrands = ['data' => [], 'current_page' => 1, 'last_page' => 1, 'links' => []];
+        }
 
         $importedSyscomIds = Brand::importedSyscomIds()->all();
 

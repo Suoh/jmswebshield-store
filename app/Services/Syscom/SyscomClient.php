@@ -2,6 +2,9 @@
 
 namespace App\Services\Syscom;
 
+use App\Exceptions\Syscom\SyscomApiException;
+use App\Exceptions\Syscom\SyscomAuthException;
+use App\Exceptions\Syscom\SyscomRequestException;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Cache;
@@ -39,15 +42,19 @@ class SyscomClient
 
     private function fetchAccessToken(): string
     {
-        $response = Http::timeout(30)
-            ->asForm()
-            ->post($this->baseUrl.'/oauth/token', [
-                'grant_type' => 'client_credentials',
-                'client_id' => $this->clientId,
-                'client_secret' => $this->clientSecret,
-            ]);
+        try {
+            $response = Http::timeout(30)
+                ->asForm()
+                ->post($this->baseUrl.'/oauth/token', [
+                    'grant_type' => 'client_credentials',
+                    'client_id' => $this->clientId,
+                    'client_secret' => $this->clientSecret,
+                ]);
 
-        $response->throw();
+            $response->throw();
+        } catch (RequestException $e) {
+            throw SyscomAuthException::tokenExpired();
+        }
 
         return $response->json('access_token');
     }
@@ -64,20 +71,30 @@ class SyscomClient
                 $response = $this->makeRequest($method, $url, $query, $token);
 
                 return $response->json();
+            } catch (SyscomApiException $e) {
+                throw $e;
             } catch (\Exception $e) {
                 $lastException = $e;
                 $retries = $this->handleRequestException($e, $retries, $token, $method, $url, $query);
             }
         }
 
-        throw $lastException;
+        if ($lastException instanceof SyscomApiException) {
+            throw $lastException;
+        }
+
+        throw SyscomApiException::fromRequest($url, $lastException);
     }
 
     private function makeRequest(string $method, string $url, array $query, string $token): Response
     {
-        return Http::withToken($token)
+        $response = Http::withToken($token)
             ->timeout(30)
             ->{strtolower($method)}($url, $query);
+
+        $response->throw();
+
+        return $response;
     }
 
     private function handleRequestException(
@@ -91,18 +108,25 @@ class SyscomClient
         if ($e instanceof RequestException) {
             if ($e->response?->status() === 401) {
                 Cache::forget(self::TOKEN_CACHE_KEY);
-                $token = $this->getAccessToken();
+
+                try {
+                    $token = $this->getAccessToken();
+                } catch (SyscomApiException) {
+                    throw SyscomAuthException::tokenExpired();
+                }
 
                 return $retries;
             }
 
             if ($e->response?->status() === 429) {
-                $retryAfter = $e->response?->header('Retry-After');
-                $sleepSeconds = $retryAfter ?? 1;
-                sleep((int) $sleepSeconds);
+                $retryAfter = (int) ($e->response?->header('Retry-After') ?? 1);
+                sleep($retryAfter);
 
                 return $retries + 1;
             }
+
+            $status = $e->response?->status() ?? 0;
+            throw SyscomRequestException::fromStatus($url, $status, $e);
         }
 
         throw $e;

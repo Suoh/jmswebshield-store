@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
+import { Pagination } from '@/components/ui/pagination';
 import {
     Select,
     SelectContent,
@@ -490,42 +491,19 @@ export default function AdminSyscomProductsIndex() {
             </div>
 
             {syscom_products.last_page > 1 && (
-                <div className="flex items-center justify-center gap-3">
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        disabled={syscom_products.current_page <= 1}
-                        onClick={() =>
-                            handlePageChange(syscom_products.current_page - 1)
-                        }
-                    >
-                        Anterior
-                    </Button>
-                    {stock === 'false' ? (
-                        <span className="text-sm text-muted-foreground">
+                <>
+                    {stock === 'false' && (
+                        <div className="text-center text-sm text-muted-foreground">
                             {displayProducts.length} producto
                             {displayProducts.length !== 1 ? 's' : ''} sin stock
-                        </span>
-                    ) : (
-                        <span className="text-sm text-muted-foreground">
-                            {syscom_products.current_page} de{' '}
-                            {syscom_products.last_page}
-                        </span>
+                        </div>
                     )}
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        disabled={
-                            syscom_products.current_page >=
-                            syscom_products.last_page
-                        }
-                        onClick={() =>
-                            handlePageChange(syscom_products.current_page + 1)
-                        }
-                    >
-                        Siguiente
-                    </Button>
-                </div>
+                    <Pagination
+                        currentPage={syscom_products.current_page}
+                        lastPage={syscom_products.last_page}
+                        onPageChange={handlePageChange}
+                    />
+                </>
             )}
         </div>
     );

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Syscom;
 
 use App\Enums\ImportStatus;
+use App\Exceptions\Syscom\SyscomApiException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Syscom\ImportProductsRequest;
 use App\Models\Product;
@@ -34,9 +35,25 @@ class ProductController extends Controller
 
         $page = (int) $request->query('page', 1);
 
-        $categories = $this->syscomService->getCategories();
+        try {
+            $categories = $this->syscomService->getCategories();
+            $brandsData = $this->syscomService->getBrands(1);
+        } catch (SyscomApiException $e) {
+            session()->flash('error', 'No se pudo conectar con SYSCOM. Intentalo de nuevo más tarde.');
 
-        $brandsData = $this->syscomService->getBrands(1);
+            return Inertia::render('admin/syscom/products/index', [
+                'syscom_products' => [
+                    'data' => [],
+                    'current_page' => 1,
+                    'last_page' => 1,
+                    'links' => [],
+                ],
+                'categories' => [],
+                'brands' => [],
+                'imported_syscom_ids' => Product::importedSyscomIds()->all(),
+            ]);
+        }
+
         $brands = $brandsData['data'] ?? [];
 
         if (
@@ -48,7 +65,18 @@ class ProductController extends Controller
             ]);
         }
 
-        $syscomProducts = $this->syscomService->getProducts($filters, $page);
+        try {
+            $syscomProducts = $this->syscomService->getProducts($filters, $page);
+        } catch (SyscomApiException $e) {
+            session()->flash('error', 'No se pudieron cargar los productos de SYSCOM. Intentalo de nuevo más tarde.');
+
+            $syscomProducts = [
+                'data' => [],
+                'current_page' => 1,
+                'last_page' => 1,
+                'links' => [],
+            ];
+        }
 
         $importedSyscomIds = Product::importedSyscomIds()->all();
 

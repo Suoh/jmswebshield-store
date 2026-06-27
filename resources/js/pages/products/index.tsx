@@ -6,6 +6,7 @@ import SearchBar from '@/components/product/search-bar';
 import SortSelect from '@/components/product/sort-select';
 import ViewToggle from '@/components/product/view-toggle';
 import { Pagination } from '@/components/ui/pagination';
+import { useUrlFilter } from '@/hooks/use-url-filter';
 import type { Brand, PaginatedData, Product } from '@/types/models';
 
 interface Props {
@@ -14,11 +15,7 @@ interface Props {
 }
 
 export default function ProductIndex({ products, brands }: Props) {
-    const view =
-        typeof window !== 'undefined'
-            ? (new URLSearchParams(window.location.search).get('view') ??
-              'grid')
-            : 'grid';
+    const [view] = useUrlFilter('view', 'grid');
 
     return (
         <>
