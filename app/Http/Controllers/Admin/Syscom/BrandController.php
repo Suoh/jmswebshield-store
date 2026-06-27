@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Syscom;
 
 use App\Enums\ImportStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Syscom\ImportBrandsRequest;
 use App\Models\Brand;
 use App\Services\Syscom\BrandImporter;
 use App\Services\Syscom\SyscomService;
@@ -32,15 +33,9 @@ class BrandController extends Controller
         ]);
     }
 
-    public function import(Request $request): RedirectResponse
+    public function import(ImportBrandsRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'brands' => 'required|array|min:1|max:50',
-            'brands.*.syscom_id' => 'required|string',
-            'brands.*.name' => 'required|string',
-        ]);
-
-        $result = app(BrandImporter::class)->import($validated['brands']);
+        $result = app(BrandImporter::class)->import($request->validated('brands'));
 
         $imported = $result[ImportStatus::Imported->value];
         $skipped = $result[ImportStatus::Skipped->value];
