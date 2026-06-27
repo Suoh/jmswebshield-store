@@ -2,6 +2,7 @@
 
 use App\Models\Brand;
 use App\Models\Product;
+use App\Models\ProductImage;
 use Illuminate\Support\Facades\Schema;
 
 it('creates the products table with all expected columns', function () {
@@ -117,6 +118,23 @@ it('includes accessors in array output', function () {
         ->and($array)->toHaveKey('availability')
         ->and($array['availability'])->toBe('Disponible')
         ->and($array)->toHaveKey('discounted_price');
+});
+
+it('cover_image accessor uses loaded images relation when available', function () {
+    $product = Product::factory()->create([
+        'image_url' => 'https://example.com/fallback.jpg',
+    ]);
+
+    ProductImage::factory()->create([
+        'product_id' => $product->id,
+        'is_cover' => true,
+        'position' => 0,
+        'path' => 'products/cover.jpg',
+    ]);
+
+    $product->load(['images']);
+
+    expect($product->cover_image)->toBe(asset('storage/products/cover.jpg'));
 });
 
 it('casts attributes correctly', function () {

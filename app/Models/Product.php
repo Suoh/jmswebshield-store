@@ -87,9 +87,12 @@ class Product extends Model
     {
         return Attribute::make(
             get: function (): ?string {
-                $coverImage = $this->images()->where('is_cover', true)->first();
-                if ($coverImage) {
-                    return asset("storage/{$coverImage->path}");
+                $cover = $this->relationLoaded('images')
+                    ? $this->images->firstWhere('is_cover', true)
+                    : $this->images()->where('is_cover', true)->first();
+
+                if ($cover) {
+                    return asset("storage/{$cover->path}");
                 }
 
                 return $this->image_url;
