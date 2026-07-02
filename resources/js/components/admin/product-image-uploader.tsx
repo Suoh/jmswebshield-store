@@ -11,6 +11,7 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
+    AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -371,33 +372,37 @@ export default function ProductImageUploader({
                                                             }
                                                         }}
                                                     >
-                                                        <Button
-                                                            variant="destructive"
-                                                            size="sm"
-                                                            className="h-6 px-2 text-xs"
-                                                            onClick={() =>
-                                                                setDeleteImageId(
-                                                                    image.id,
-                                                                )
-                                                            }
-                                                            title="Eliminar imagen"
+                                                        <AlertDialogTrigger
+                                                            asChild
                                                         >
-                                                            <svg
-                                                                className="size-3"
-                                                                fill="none"
-                                                                viewBox="0 0 24 24"
-                                                                stroke="currentColor"
+                                                            <Button
+                                                                variant="destructive"
+                                                                size="sm"
+                                                                className="h-6 px-2 text-xs"
+                                                                onClick={() =>
+                                                                    setDeleteImageId(
+                                                                        image.id,
+                                                                    )
+                                                                }
+                                                                title="Eliminar imagen"
                                                             >
-                                                                <path
-                                                                    strokeLinecap="round"
-                                                                    strokeLinejoin="round"
-                                                                    strokeWidth={
-                                                                        2
-                                                                    }
-                                                                    d="M6 18L18 6M6 6l12 12"
-                                                                />
-                                                            </svg>
-                                                        </Button>
+                                                                <svg
+                                                                    className="size-3"
+                                                                    fill="none"
+                                                                    viewBox="0 0 24 24"
+                                                                    stroke="currentColor"
+                                                                >
+                                                                    <path
+                                                                        strokeLinecap="round"
+                                                                        strokeLinejoin="round"
+                                                                        strokeWidth={
+                                                                            2
+                                                                        }
+                                                                        d="M6 18L18 6M6 6l12 12"
+                                                                    />
+                                                                </svg>
+                                                            </Button>
+                                                        </AlertDialogTrigger>
                                                         <AlertDialogContent>
                                                             <AlertDialogHeader>
                                                                 <AlertDialogTitle>
