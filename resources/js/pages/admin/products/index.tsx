@@ -13,6 +13,7 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { DataTable } from '@/components/ui/data-table';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Pagination } from '@/components/ui/pagination';
@@ -24,14 +25,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import StatusBadge from '@/components/ui/status-badge';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
+import { TableCell, TableRow } from '@/components/ui/table';
 import { useFlashToast } from '@/hooks/use-flash-toast';
 import { useUrlFilter } from '@/hooks/use-url-filter';
 import { formatPrice } from '@/lib/format';
@@ -260,181 +254,183 @@ export default function AdminProductsIndex() {
                 )}
             </form>
 
-            <div className="overflow-x-auto rounded-lg border bg-card">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Nombre</TableHead>
-                            <TableHead>SKU</TableHead>
-                            <TableHead>Marca</TableHead>
-                            <TableHead className="text-right">Precio</TableHead>
-                            <TableHead className="text-center">Stock</TableHead>
-                            <TableHead className="text-center">
-                                Activo
-                            </TableHead>
-                            <TableHead className="text-right">
-                                Acciones
-                            </TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {products.data.length === 0 ? (
-                            <TableRow>
-                                <TableCell
-                                    colSpan={7}
-                                    className="py-8 text-center text-muted-foreground"
-                                >
-                                    No hay productos registrados.
-                                </TableCell>
-                            </TableRow>
-                        ) : (
-                            products.data.map((product) => (
-                                <TableRow key={product.id}>
-                                    <TableCell className="font-medium">
-                                        <div className="flex items-center gap-2">
-                                            {product.deleted_at && (
-                                                <span className="rounded bg-destructive/10 px-1.5 py-0.5 text-xs text-destructive">
-                                                    Eliminado
-                                                </span>
-                                            )}
-                                            {product.name}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="text-muted-foreground">
-                                        {product.sku ?? '-'}
-                                    </TableCell>
-                                    <TableCell className="text-muted-foreground">
-                                        {product.brand?.name ?? '-'}
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        {formatPrice(product.price)}
-                                    </TableCell>
-                                    <TableCell className="text-center">
-                                        {product.stock}
-                                    </TableCell>
-                                    <TableCell className="text-center">
-                                        <StatusBadge
-                                            variant={
-                                                product.is_active
-                                                    ? 'active'
-                                                    : 'inactive'
+            <DataTable
+                columns={[
+                    'Nombre',
+                    'SKU',
+                    'Marca',
+                    'Precio',
+                    'Stock',
+                    'Activo',
+                    'Acciones',
+                ]}
+                colSpan={7}
+                emptyTitle="No hay productos registrados."
+                scrollHorizontal
+                footer={
+                    products.last_page > 1 ? (
+                        <Pagination links={products.links} />
+                    ) : null
+                }
+            >
+                {products.data.map((product) => (
+                    <TableRow key={product.id}>
+                        <TableCell className="font-medium">
+                            <div className="flex items-center gap-2">
+                                {product.deleted_at && (
+                                    <span className="rounded bg-destructive/10 px-1.5 py-0.5 text-xs text-destructive">
+                                        Eliminado
+                                    </span>
+                                )}
+                                {product.name}
+                            </div>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                            {product.sku ?? '-'}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                            {product.brand?.name ?? '-'}
+                        </TableCell>
+                        <TableCell className="text-right">
+                            {formatPrice(product.price)}
+                        </TableCell>
+                        <TableCell className="text-center">
+                            {product.stock}
+                        </TableCell>
+                        <TableCell className="text-center">
+                            <StatusBadge
+                                variant={
+                                    product.is_active ? 'active' : 'inactive'
+                                }
+                            />
+                        </TableCell>
+                        <TableCell className="text-right">
+                            <div className="flex items-center justify-end gap-2">
+                                {!product.deleted_at ? (
+                                    <>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            asChild
+                                        >
+                                            <Link
+                                                href={`/admin/products/${product.id}/edit`}
+                                            >
+                                                Editar
+                                            </Link>
+                                        </Button>
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="text-destructive hover:text-destructive"
+                                                    onClick={() =>
+                                                        setDeleteTarget({
+                                                            id: product.id,
+                                                            name: product.name,
+                                                        })
+                                                    }
+                                                >
+                                                    Eliminar
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>
+                                                        Eliminar producto
+                                                    </AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        ¿Estás seguro de que
+                                                        deseas eliminar "
+                                                        {product.name}"? Esta
+                                                        acción no se puede
+                                                        deshacer.
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>
+                                                        Cancelar
+                                                    </AlertDialogCancel>
+                                                    <AlertDialogAction
+                                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                        onClick={confirmDelete}
+                                                    >
+                                                        Eliminar
+                                                    </AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() =>
+                                                handleRestore(product.id)
                                             }
-                                        />
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <div className="flex items-center justify-end gap-2">
-                                            {!product.deleted_at ? (
-                                                <>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        asChild
-                                                    >
-                                                        <Link
-                                                            href={`/admin/products/${product.id}/edit`}
-                                                        >
-                                                            Editar
-                                                        </Link>
-                                                    </Button>
-                                                    <AlertDialog>
-                                                        <AlertDialogTrigger
-                                                            asChild
-                                                        >
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                className="text-destructive hover:text-destructive"
-                                                                onClick={() =>
-                                                                    setDeleteTarget(
-                                                                        {
-                                                                            id: product.id,
-                                                                            name: product.name,
-                                                                        },
-                                                                    )
-                                                                }
-                                                            >
-                                                                Eliminar
-                                                            </Button>
-                                                        </AlertDialogTrigger>
-                                                        <AlertDialogContent>
-                                                            <AlertDialogHeader>
-                                                                <AlertDialogTitle>
-                                                                    Eliminar
-                                                                    producto
-                                                                </AlertDialogTitle>
-                                                                <AlertDialogDescription>
-                                                                    ¿Estás
-                                                                    seguro de
-                                                                    que deseas
-                                                                    eliminar "
-                                                                    {
-                                                                        product.name
-                                                                    }
-                                                                    "? Esta
-                                                                    acción no se
-                                                                    puede
-                                                                    deshacer.
-                                                                </AlertDialogDescription>
-                                                            </AlertDialogHeader>
-                                                            <AlertDialogFooter>
-                                                                <AlertDialogCancel>
-                                                                    Cancelar
-                                                                </AlertDialogCancel>
-                                                                <AlertDialogAction
-                                                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                                                    onClick={
-                                                                        confirmDelete
-                                                                    }
-                                                                >
-                                                                    Eliminar
-                                                                </AlertDialogAction>
-                                                            </AlertDialogFooter>
-                                                        </AlertDialogContent>
-                                                    </AlertDialog>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        onClick={() =>
-                                                            handleRestore(
-                                                                product.id,
-                                                            )
-                                                        }
-                                                    >
-                                                        Restaurar
-                                                    </Button>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        className="text-destructive hover:text-destructive"
+                                        >
+                                            Restaurar
+                                        </Button>
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="text-destructive hover:text-destructive"
+                                                    onClick={() =>
+                                                        setDeleteTarget({
+                                                            id: product.id,
+                                                            name: product.name,
+                                                        })
+                                                    }
+                                                >
+                                                    Eliminar definitivamente
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>
+                                                        Eliminar definitivamente
+                                                    </AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        ¿Eliminar
+                                                        permanentemente "
+                                                        {product.name}"? Esta
+                                                        acción no se puede
+                                                        deshacer.
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>
+                                                        Cancelar
+                                                    </AlertDialogCancel>
+                                                    <AlertDialogAction
+                                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                                         onClick={() => {
-                                                            if (
-                                                                confirm(
-                                                                    '¿Eliminar permanentemente este producto?',
-                                                                )
-                                                            ) {
+                                                            if (deleteTarget) {
                                                                 handleForceDelete(
-                                                                    product.id,
+                                                                    deleteTarget.id,
+                                                                );
+                                                                setDeleteTarget(
+                                                                    null,
                                                                 );
                                                             }
                                                         }}
                                                     >
-                                                        Eliminar definitivamente
-                                                    </Button>
-                                                </>
-                                            )}
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
-                            ))
-                        )}
-                    </TableBody>
-                </Table>
-            </div>
-
-            {products.last_page > 1 && <Pagination links={products.links} />}
+                                                        Eliminar permanentemente
+                                                    </AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    </>
+                                )}
+                            </div>
+                        </TableCell>
+                    </TableRow>
+                ))}
+            </DataTable>
         </div>
     );
 }
