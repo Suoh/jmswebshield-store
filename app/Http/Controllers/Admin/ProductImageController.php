@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Actions\DeleteProductImage;
+use App\Actions\ReorderProductImages;
+use App\Actions\SetCoverImage;
 use App\Enums\ProductImageAction;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
@@ -9,11 +12,16 @@ use App\Models\ProductImage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\File;
 
 class ProductImageController extends Controller
 {
+    public function __construct(
+        private SetCoverImage $setCoverImage,
+        private DeleteProductImage $deleteProductImage,
+        private ReorderProductImages $reorderProductImages,
+    ) {}
+
     public function store(Request $request, int $productId): RedirectResponse
     {
         $product = Product::findOrFail($productId);
@@ -101,15 +109,10 @@ class ProductImageController extends Controller
             'ids.*' => 'integer',
         ]);
 
-        $ids = $validated['ids'];
-        $productImageIds = $product->images()->pluck('id')->toArray();
-
-        if (count($ids) !== count($productImageIds) || array_diff($ids, $productImageIds) !== array_diff($productImageIds, $ids)) {
-            return back()->withInput()->withErrors(['ids' => 'Los IDs proporcionados no coinciden con las imágenes del producto.']);
-        }
-
-        foreach ($ids as $position => $imageId) {
-            ProductImage::where('id', $imageId)->update(['position' => $position]);
+        try {
+            ($this->reorderProductImages)($product, $validated['ids']);
+        } catch (\InvalidArgumentException $e) {
+            return back()->withInput()->withErrors(['ids' => $e->getMessage()]);
         }
 
         return redirect()->back()->with('success', ProductImageAction::Reordered->value);
@@ -118,10 +121,8 @@ class ProductImageController extends Controller
     public function setCover(int $productId, int $imageId): RedirectResponse
     {
         $product = Product::findOrFail($productId);
-        $image = $product->images()->findOrFail($imageId);
 
-        $product->images()->update(['is_cover' => false]);
-        $image->update(['is_cover' => true]);
+        ($this->setCoverImage)($product, $imageId);
 
         return redirect()->back()->with('success', ProductImageAction::CoverSet->value);
     }
@@ -129,21 +130,8 @@ class ProductImageController extends Controller
     public function destroy(int $productId, int $imageId): RedirectResponse
     {
         $product = Product::findOrFail($productId);
-        $image = $product->images()->findOrFail($imageId);
 
-        $wasCover = $image->is_cover;
-        $imagePath = $image->path;
-
-        $image->delete();
-
-        if ($wasCover) {
-            $nextImage = $product->images()->orderBy('position')->first();
-            if ($nextImage) {
-                $nextImage->update(['is_cover' => true]);
-            }
-        }
-
-        Storage::disk('public')->delete($imagePath);
+        ($this->deleteProductImage)($product, $imageId);
 
         return redirect()->back()->with('success', ProductImageAction::Deleted->value);
     }
