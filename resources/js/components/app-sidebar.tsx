@@ -1,5 +1,6 @@
 import { usePage } from '@inertiajs/react';
 import { Box, Download, Package, Tag } from 'lucide-react';
+import BrandLogo from '@/components/brand-logo';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import {
@@ -45,9 +46,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <span className="font-semibold">
-                                JMS WebShield Store
-                            </span>
+                            <BrandLogo size="md" withText={false} />
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>
