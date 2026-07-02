@@ -356,7 +356,21 @@ export default function ProductImageUploader({
                                                             </svg>
                                                         </Button>
                                                     )}
-                                                    <AlertDialog>
+                                                    <AlertDialog
+                                                        open={
+                                                            deleteImageId ===
+                                                            image.id
+                                                        }
+                                                        onOpenChange={(
+                                                            open,
+                                                        ) => {
+                                                            if (!open) {
+                                                                setDeleteImageId(
+                                                                    null,
+                                                                );
+                                                            }
+                                                        }}
+                                                    >
                                                         <Button
                                                             variant="destructive"
                                                             size="sm"
@@ -399,13 +413,7 @@ export default function ProductImageUploader({
                                                                 </AlertDialogDescription>
                                                             </AlertDialogHeader>
                                                             <AlertDialogFooter>
-                                                                <AlertDialogCancel
-                                                                    onClick={() =>
-                                                                        setDeleteImageId(
-                                                                            null,
-                                                                        )
-                                                                    }
-                                                                >
+                                                                <AlertDialogCancel>
                                                                     Cancelar
                                                                 </AlertDialogCancel>
                                                                 <AlertDialogAction
