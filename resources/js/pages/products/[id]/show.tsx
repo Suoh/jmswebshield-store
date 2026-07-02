@@ -34,7 +34,7 @@ export default function ProductShow({ product }: Props) {
     return (
         <>
             <Head title={product.name} />
-            <div className="container mx-auto px-4 py-8">
+            <div className="container mx-auto px-4 py-6">
                 <Breadcrumb className="mb-6">
                     <BreadcrumbList>
                         <BreadcrumbItem>
@@ -55,7 +55,7 @@ export default function ProductShow({ product }: Props) {
                     </BreadcrumbList>
                 </Breadcrumb>
 
-                <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                     <div className="lg:col-span-2">
                         <div className="mb-6">
                             {product.images && product.images.length > 0 ? (
@@ -75,12 +75,12 @@ export default function ProductShow({ product }: Props) {
                         </div>
 
                         {product.full_description && (
-                            <div className="mb-8">
-                                <h2 className="mb-4 text-2xl font-bold">
+                            <div className="mb-6">
+                                <h2 className="mb-3 font-heading text-lg font-semibold">
                                     Descripción
                                 </h2>
                                 <div
-                                    className="prose prose-sm max-w-none text-muted-foreground"
+                                    className="text-sm leading-relaxed text-foreground/80"
                                     dangerouslySetInnerHTML={{
                                         __html: product.full_description,
                                     }}
@@ -105,12 +105,12 @@ export default function ProductShow({ product }: Props) {
 
                                 return (
                                     <div>
-                                        <h2 className="mb-4 text-2xl font-bold">
+                                        <h2 className="mb-3 font-heading text-lg font-semibold">
                                             Especificaciones
                                         </h2>
-                                        <Card>
+                                        <Card className="overflow-hidden transition-all hover:border-primary/40">
                                             <CardContent className="p-0">
-                                                <table className="w-full">
+                                                <table className="w-full text-sm">
                                                     <tbody>
                                                         {entries.map(
                                                             (
@@ -127,10 +127,10 @@ export default function ProductShow({ product }: Props) {
                                                                             : ''
                                                                     }
                                                                 >
-                                                                    <td className="px-4 py-3 font-medium">
+                                                                    <td className="w-1/3 px-3 py-2.5 font-medium">
                                                                         {key}
                                                                     </td>
-                                                                    <td className="px-4 py-3 text-muted-foreground">
+                                                                    <td className="px-3 py-2.5 text-muted-foreground">
                                                                         {String(
                                                                             value,
                                                                         )}
@@ -148,60 +148,58 @@ export default function ProductShow({ product }: Props) {
                     </div>
 
                     <div className="lg:col-span-1">
-                        <Card className="sticky top-4">
-                            <CardContent className="p-6">
-                                <h1 className="mb-4 text-2xl font-bold">
+                        <Card className="sticky top-6 transition-all hover:border-primary/40 hover:shadow-md">
+                            <CardContent className="space-y-4 p-5">
+                                <h1 className="font-heading text-xl font-semibold">
                                     {product.name}
                                 </h1>
 
-                                <div className="mb-4 flex items-center gap-2">
+                                <div className="flex flex-wrap items-center gap-2">
                                     <ProductAvailabilityBadge
                                         availability={product.availability}
                                     />
                                     <BrandName brand={product.brand} />
                                 </div>
 
-                                <div className="mb-6">
-                                    <ProductPrice
-                                        price={product.price}
-                                        discountedPrice={
-                                            product.discounted_price
-                                        }
-                                        discount={product.discount}
-                                        size="lg"
-                                    />
-                                </div>
+                                <ProductPrice
+                                    price={product.price}
+                                    discountedPrice={product.discounted_price}
+                                    discount={product.discount}
+                                    size="md"
+                                />
 
-                                <div className="space-y-3 border-t pt-4">
-                                    {product.model && (
+                                {(product.model || product.stock > 0) && (
+                                    <dl className="space-y-2 border-t pt-3 text-sm">
+                                        {product.model && (
+                                            <div className="flex justify-between">
+                                                <dt className="text-muted-foreground">
+                                                    Modelo
+                                                </dt>
+                                                <dd className="font-medium">
+                                                    {product.model}
+                                                </dd>
+                                            </div>
+                                        )}
                                         <div className="flex justify-between">
-                                            <span className="text-sm text-muted-foreground">
-                                                Modelo:
-                                            </span>
-                                            <span className="text-sm font-medium">
-                                                {product.model}
-                                            </span>
+                                            <dt className="text-muted-foreground">
+                                                Stock
+                                            </dt>
+                                            <dd className="font-medium">
+                                                {product.stock} unidades
+                                            </dd>
                                         </div>
-                                    )}
-                                    <div className="flex justify-between">
-                                        <span className="text-sm text-muted-foreground">
-                                            Stock:
-                                        </span>
-                                        <span className="text-sm font-medium">
-                                            {product.stock} unidades
-                                        </span>
-                                    </div>
-                                </div>
+                                    </dl>
+                                )}
 
                                 {canContact && (
-                                    <div className="mt-6 border-t pt-4">
+                                    <div className="border-t pt-3">
                                         <a
                                             href={whatsappHref}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#25D366] px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-[#20bd5a] focus-visible:ring-2 focus-visible:ring-[#25D366] focus-visible:ring-offset-2 focus-visible:outline-none"
+                                            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#25D366] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#20bd5a] focus-visible:ring-2 focus-visible:ring-[#25D366] focus-visible:ring-offset-2 focus-visible:outline-none"
                                         >
-                                            <WhatsAppIcon className="h-8 w-8" />
+                                            <WhatsAppIcon className="h-7 w-7" />
                                             Consultar por WhatsApp
                                         </a>
                                     </div>
