@@ -13,16 +13,10 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { DataTable } from '@/components/ui/data-table';
 import { Input } from '@/components/ui/input';
 import { Pagination } from '@/components/ui/pagination';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
+import { TableCell, TableRow } from '@/components/ui/table';
 import { useFlashToast } from '@/hooks/use-flash-toast';
 import type { Brand, PaginatedData } from '@/types';
 
@@ -67,6 +61,10 @@ export default function AdminBrandsIndex() {
         });
     };
 
+    const emptyTitle = search
+        ? 'No se encontraron marcas.'
+        : 'No hay marcas registradas.';
+
     return (
         <div className="p-6">
             <div className="mb-6 flex items-center justify-between">
@@ -85,111 +83,82 @@ export default function AdminBrandsIndex() {
                 />
             </div>
 
-            <div className="overflow-hidden rounded-lg border bg-card">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Nombre</TableHead>
-                            <TableHead>Slug</TableHead>
-                            <TableHead className="text-center">
-                                Productos
-                            </TableHead>
-                            <TableHead className="text-right">
-                                Acciones
-                            </TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {filtered.length === 0 ? (
-                            <TableRow>
-                                <TableCell
-                                    colSpan={4}
-                                    className="py-8 text-center text-muted-foreground"
-                                >
-                                    {search
-                                        ? 'No se encontraron marcas.'
-                                        : 'No hay marcas registradas.'}
-                                </TableCell>
-                            </TableRow>
-                        ) : (
-                            filtered.map((brand) => (
-                                <TableRow key={brand.id}>
-                                    <TableCell className="font-medium">
-                                        {brand.name}
-                                    </TableCell>
-                                    <TableCell className="text-muted-foreground">
-                                        {brand.slug}
-                                    </TableCell>
-                                    <TableCell className="text-center">
-                                        {brand.products_count}
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <div className="flex items-center justify-end gap-2">
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                asChild
+            <DataTable
+                columns={['Nombre', 'Slug', 'Productos', 'Acciones']}
+                colSpan={4}
+                emptyTitle={emptyTitle}
+                footer={
+                    brands.last_page > 1 ? (
+                        <Pagination links={brands.links} />
+                    ) : null
+                }
+            >
+                {filtered.map((brand) => (
+                    <TableRow key={brand.id}>
+                        <TableCell className="font-medium">
+                            {brand.name}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                            {brand.slug}
+                        </TableCell>
+                        <TableCell className="text-center">
+                            {brand.products_count}
+                        </TableCell>
+                        <TableCell className="text-right">
+                            <div className="flex items-center justify-end gap-2">
+                                <Button variant="ghost" size="sm" asChild>
+                                    <Link
+                                        href={`/admin/brands/${brand.id}/edit`}
+                                    >
+                                        Editar
+                                    </Link>
+                                </Button>
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="text-destructive hover:text-destructive"
+                                            onClick={() =>
+                                                setDeleteTarget({
+                                                    id: brand.id,
+                                                    name: brand.name,
+                                                })
+                                            }
+                                        >
+                                            Eliminar
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>
+                                                Eliminar marca
+                                            </AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                ¿Estás seguro de que deseas
+                                                eliminar la marca "{brand.name}
+                                                "? Esta acción no se puede
+                                                deshacer.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>
+                                                Cancelar
+                                            </AlertDialogCancel>
+                                            <AlertDialogAction
+                                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                onClick={confirmDelete}
                                             >
-                                                <Link
-                                                    href={`/admin/brands/${brand.id}/edit`}
-                                                >
-                                                    Editar
-                                                </Link>
-                                            </Button>
-                                            <AlertDialog>
-                                                <AlertDialogTrigger asChild>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        className="text-destructive hover:text-destructive"
-                                                        onClick={() =>
-                                                            setDeleteTarget({
-                                                                id: brand.id,
-                                                                name: brand.name,
-                                                            })
-                                                        }
-                                                    >
-                                                        Eliminar
-                                                    </Button>
-                                                </AlertDialogTrigger>
-                                                <AlertDialogContent>
-                                                    <AlertDialogHeader>
-                                                        <AlertDialogTitle>
-                                                            Eliminar marca
-                                                        </AlertDialogTitle>
-                                                        <AlertDialogDescription>
-                                                            ¿Estás seguro de que
-                                                            deseas eliminar la
-                                                            marca "{brand.name}
-                                                            "? Esta acción no se
-                                                            puede deshacer.
-                                                        </AlertDialogDescription>
-                                                    </AlertDialogHeader>
-                                                    <AlertDialogFooter>
-                                                        <AlertDialogCancel>
-                                                            Cancelar
-                                                        </AlertDialogCancel>
-                                                        <AlertDialogAction
-                                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                                            onClick={
-                                                                confirmDelete
-                                                            }
-                                                        >
-                                                            Eliminar
-                                                        </AlertDialogAction>
-                                                    </AlertDialogFooter>
-                                                </AlertDialogContent>
-                                            </AlertDialog>
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
-                            ))
-                        )}
-                    </TableBody>
-                </Table>
-            </div>
-
-            {brands.last_page > 1 && <Pagination links={brands.links} />}
+                                                Eliminar
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            </div>
+                        </TableCell>
+                    </TableRow>
+                ))}
+            </DataTable>
         </div>
     );
 }

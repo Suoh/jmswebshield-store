@@ -4,18 +4,11 @@ import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { DataTable } from '@/components/ui/data-table';
 import { Input } from '@/components/ui/input';
 import { Pagination } from '@/components/ui/pagination';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
+import { TableCell, TableRow } from '@/components/ui/table';
 import { useFlashToast } from '@/hooks/use-flash-toast';
 import { useToggleAll } from '@/hooks/use-toggle-all';
 import type { PaginatedData, SyscomBrand } from '@/types';
@@ -87,6 +80,10 @@ export default function AdminSyscomBrandsIndex() {
         );
     };
 
+    const emptyTitle = search
+        ? 'No se encontraron marcas.'
+        : 'No hay marcas disponibles.';
+
     return (
         <div className="space-y-4 p-6">
             <div className="flex items-center justify-between">
@@ -127,107 +124,73 @@ export default function AdminSyscomBrandsIndex() {
                 />
             </div>
 
-            <div className="overflow-hidden rounded-lg border bg-card">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead className="w-10">
+            <DataTable
+                columns={[
+                    <Checkbox
+                        key="select-all"
+                        checked={
+                            filtered.length > 0 &&
+                            selected.size === filtered.length
+                        }
+                        onCheckedChange={toggleAll}
+                    />,
+                    'SYSCOM ID',
+                    'Nombre',
+                    'Estado',
+                ]}
+                colSpan={4}
+                loading={isLoading}
+                loadingRows={10}
+                emptyTitle={emptyTitle}
+                footer={
+                    syscom_brands.last_page > 1 ? (
+                        <Pagination
+                            links={syscom_brands.links}
+                            className="mt-0"
+                        />
+                    ) : null
+                }
+            >
+                {filtered.map((brand) => {
+                    const isImported = imported_syscom_ids.includes(brand.id);
+                    const isSelected = selected.has(brand.id);
+
+                    return (
+                        <TableRow key={brand.id}>
+                            <TableCell>
                                 <Checkbox
-                                    checked={
-                                        filtered.length > 0 &&
-                                        selected.size === filtered.length
-                                    }
-                                    onCheckedChange={toggleAll}
+                                    checked={isSelected}
+                                    onCheckedChange={() => toggleOne(brand.id)}
+                                    disabled={isImported}
                                 />
-                            </TableHead>
-                            <TableHead>SYSCOM ID</TableHead>
-                            <TableHead>Nombre</TableHead>
-                            <TableHead className="text-center">
-                                Estado
-                            </TableHead>
+                            </TableCell>
+                            <TableCell className="font-mono text-xs text-muted-foreground">
+                                {brand.id}
+                            </TableCell>
+                            <TableCell
+                                className={
+                                    isImported
+                                        ? 'text-muted-foreground'
+                                        : 'font-medium'
+                                }
+                            >
+                                {brand.nombre}
+                            </TableCell>
+                            <TableCell className="text-center">
+                                {isImported ? (
+                                    <Badge variant="secondary">
+                                        ✓ Importada
+                                    </Badge>
+                                ) : (
+                                    <span className="text-xs text-muted-foreground">
+                                        Pendiente
+                                    </span>
+                                )}
+                            </TableCell>
                         </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {isLoading ? (
-                            Array.from({ length: 10 }).map((_, i) => (
-                                <TableRow key={i}>
-                                    <TableCell>
-                                        <Skeleton className="h-4 w-4" />
-                                    </TableCell>
-                                    <TableCell>
-                                        <Skeleton className="h-4 w-20" />
-                                    </TableCell>
-                                    <TableCell>
-                                        <Skeleton className="h-4 w-40" />
-                                    </TableCell>
-                                    <TableCell className="text-center">
-                                        <Skeleton className="mx-auto h-4 w-16" />
-                                    </TableCell>
-                                </TableRow>
-                            ))
-                        ) : filtered.length === 0 ? (
-                            <TableRow>
-                                <TableCell
-                                    colSpan={4}
-                                    className="py-8 text-center text-muted-foreground"
-                                >
-                                    {search
-                                        ? 'No se encontraron marcas.'
-                                        : 'No hay marcas disponibles.'}
-                                </TableCell>
-                            </TableRow>
-                        ) : (
-                            filtered.map((brand) => {
-                                const isImported = imported_syscom_ids.includes(
-                                    brand.id,
-                                );
-                                const isSelected = selected.has(brand.id);
-
-                                return (
-                                    <TableRow key={brand.id}>
-                                        <TableCell>
-                                            <Checkbox
-                                                checked={isSelected}
-                                                onCheckedChange={() =>
-                                                    toggleOne(brand.id)
-                                                }
-                                                disabled={isImported}
-                                            />
-                                        </TableCell>
-                                        <TableCell className="font-mono text-xs text-muted-foreground">
-                                            {brand.id}
-                                        </TableCell>
-                                        <TableCell
-                                            className={
-                                                isImported
-                                                    ? 'text-muted-foreground'
-                                                    : 'font-medium'
-                                            }
-                                        >
-                                            {brand.nombre}
-                                        </TableCell>
-                                        <TableCell className="text-center">
-                                            {isImported ? (
-                                                <Badge variant="secondary">
-                                                    ✓ Importada
-                                                </Badge>
-                                            ) : (
-                                                <span className="text-xs text-muted-foreground">
-                                                    Pendiente
-                                                </span>
-                                            )}
-                                        </TableCell>
-                                    </TableRow>
-                                );
-                            })
-                        )}
-                    </TableBody>
-                </Table>
-            </div>
-
-            {syscom_brands.last_page > 1 && (
-                <Pagination links={syscom_brands.links} className="mt-0" />
-            )}
+                    );
+                })}
+            </DataTable>
         </div>
     );
 }

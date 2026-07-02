@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { DataTable } from '@/components/ui/data-table';
 import { Input } from '@/components/ui/input';
 import { Pagination } from '@/components/ui/pagination';
 import {
@@ -13,16 +14,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
+import { TableCell, TableRow } from '@/components/ui/table';
 import { useFlashToast } from '@/hooks/use-flash-toast';
 import { useToggleAll } from '@/hooks/use-toggle-all';
 import { useUrlFilter } from '@/hooks/use-url-filter';
@@ -294,217 +287,163 @@ export default function AdminSyscomProductsIndex() {
                 )}
             </div>
 
-            <div className="overflow-x-auto rounded-lg border bg-card">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead className="w-10">
-                                <Checkbox
-                                    checked={
-                                        displayProducts.length > 0 &&
-                                        selected.size === displayProducts.length
-                                    }
-                                    onCheckedChange={toggleAll}
-                                />
-                            </TableHead>
-                            <TableHead className="w-14">Img</TableHead>
-                            <TableHead className="w-[260px]">
-                                Producto
-                            </TableHead>
-                            <TableHead className="w-[72px] text-center">
-                                Stock
-                            </TableHead>
-                            <TableHead className="w-[110px] text-right">
-                                Precio Lista
-                            </TableHead>
-                            <TableHead className="w-[100px] text-center">
-                                Estado
-                            </TableHead>
-                            <TableHead className="sticky right-0 w-[120px] bg-card text-right">
-                                Tu Precio
-                            </TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {isLoading ? (
-                            Array.from({ length: 10 }).map((_, i) => (
-                                <TableRow key={i}>
-                                    <TableCell>
-                                        <Skeleton className="h-4 w-4" />
-                                    </TableCell>
-                                    <TableCell>
-                                        <Skeleton className="h-10 w-10 rounded-md" />
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex flex-col gap-1">
-                                            <Skeleton className="h-4 w-48" />
-                                            <Skeleton className="h-3 w-24" />
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="text-center">
-                                        <Skeleton className="mx-auto h-4 w-8" />
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <Skeleton className="ml-auto h-4 w-20" />
-                                    </TableCell>
-                                    <TableCell className="text-center">
-                                        <Skeleton className="mx-auto h-4 w-16" />
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <Skeleton className="ml-auto h-8 w-28" />
-                                    </TableCell>
-                                </TableRow>
-                            ))
-                        ) : displayProducts.length === 0 ? (
-                            <TableRow>
-                                <TableCell
-                                    colSpan={7}
-                                    className="py-8 text-center text-muted-foreground"
-                                >
-                                    No se encontraron productos.
-                                </TableCell>
-                            </TableRow>
-                        ) : (
-                            displayProducts.map((product) => {
-                                const imported = isImported(product.id);
-                                const selectedProduct =
-                                    selected.has(product.id) && !imported;
+            <DataTable
+                columns={[
+                    <Checkbox
+                        key="select-all"
+                        checked={
+                            displayProducts.length > 0 &&
+                            selected.size === displayProducts.length
+                        }
+                        onCheckedChange={toggleAll}
+                    />,
+                    'Img',
+                    'Producto',
+                    'Stock',
+                    'Precio Lista',
+                    'Estado',
+                    'Tu Precio',
+                ]}
+                colSpan={7}
+                loading={isLoading}
+                loadingRows={10}
+                emptyTitle="No se encontraron productos."
+                scrollHorizontal
+                footer={
+                    syscom_products.last_page > 1 ? (
+                        <>
+                            {stock === 'false' && (
+                                <div className="text-center text-sm text-muted-foreground">
+                                    {displayProducts.length} producto
+                                    {displayProducts.length !== 1
+                                        ? 's'
+                                        : ''}{' '}
+                                    sin stock
+                                </div>
+                            )}
+                            <Pagination
+                                currentPage={syscom_products.current_page}
+                                lastPage={syscom_products.last_page}
+                                onPageChange={handlePageChange}
+                            />
+                        </>
+                    ) : null
+                }
+            >
+                {displayProducts.map((product) => {
+                    const imported = isImported(product.id);
+                    const selectedProduct =
+                        selected.has(product.id) && !imported;
 
-                                return (
-                                    <TableRow
-                                        key={product.id}
+                    return (
+                        <TableRow
+                            key={product.id}
+                            className={imported ? 'opacity-60' : undefined}
+                        >
+                            <TableCell>
+                                <Checkbox
+                                    checked={selectedProduct}
+                                    onCheckedChange={() =>
+                                        toggleOne(product.id)
+                                    }
+                                    disabled={imported}
+                                />
+                            </TableCell>
+                            <TableCell>
+                                {product.imagen ? (
+                                    <img
+                                        src={product.imagen}
+                                        alt={product.nombre}
+                                        className="h-10 w-10 rounded-md object-cover"
+                                    />
+                                ) : (
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-md bg-muted">
+                                        <span className="text-xs text-muted-foreground">
+                                            N/A
+                                        </span>
+                                    </div>
+                                )}
+                            </TableCell>
+                            <TableCell className="w-[260px] max-w-[260px]">
+                                <div className="flex flex-col gap-0.5">
+                                    <span
                                         className={
-                                            imported ? 'opacity-60' : undefined
+                                            'line-clamp-2 text-sm font-medium break-words ' +
+                                            (imported
+                                                ? 'text-muted-foreground'
+                                                : '')
                                         }
                                     >
-                                        <TableCell>
-                                            <Checkbox
-                                                checked={selectedProduct}
-                                                onCheckedChange={() =>
-                                                    toggleOne(product.id)
-                                                }
-                                                disabled={imported}
-                                            />
-                                        </TableCell>
-                                        <TableCell>
-                                            {product.imagen ? (
-                                                <img
-                                                    src={product.imagen}
-                                                    alt={product.nombre}
-                                                    className="h-10 w-10 rounded-md object-cover"
-                                                />
-                                            ) : (
-                                                <div className="flex h-10 w-10 items-center justify-center rounded-md bg-muted">
-                                                    <span className="text-xs text-muted-foreground">
-                                                        N/A
-                                                    </span>
-                                                </div>
-                                            )}
-                                        </TableCell>
-                                        <TableCell className="w-[260px] max-w-[260px]">
-                                            <div className="flex flex-col gap-0.5">
-                                                <span
-                                                    className={
-                                                        'line-clamp-2 text-sm font-medium break-words ' +
-                                                        (imported
-                                                            ? 'text-muted-foreground'
-                                                            : '')
-                                                    }
-                                                >
-                                                    {product.nombre}
-                                                </span>
-                                                <span className="truncate font-mono text-xs text-muted-foreground">
-                                                    {product.id}
-                                                    {product.modelo &&
-                                                        ` · ${product.modelo}`}
-                                                </span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="w-[72px] text-center">
-                                            <span
-                                                className={
-                                                    product.stock > 0
-                                                        ? 'text-green-600 dark:text-green-400'
-                                                        : 'text-red-500'
-                                                }
-                                            >
-                                                {product.stock}
-                                            </span>
-                                        </TableCell>
-                                        <TableCell className="w-[110px] text-right">
-                                            {product.precios ? (
-                                                <span className="text-muted-foreground">
-                                                    {formatPrice(
-                                                        product.precios
-                                                            .precio_lista,
-                                                    )}
-                                                </span>
-                                            ) : (
-                                                <span className="text-muted-foreground">
-                                                    —
-                                                </span>
-                                            )}
-                                        </TableCell>
-                                        <TableCell className="w-[100px] text-center">
-                                            {imported ? (
-                                                <Badge variant="secondary">
-                                                    ✓ Importado
-                                                </Badge>
-                                            ) : (
-                                                <span className="text-xs text-muted-foreground">
-                                                    Pendiente
-                                                </span>
-                                            )}
-                                        </TableCell>
-                                        <TableCell className="sticky right-0 w-[120px] bg-card text-right">
-                                            {selectedProduct ? (
-                                                <Input
-                                                    type="number"
-                                                    placeholder="Precio"
-                                                    value={
-                                                        prices.get(
-                                                            product.id,
-                                                        ) ?? ''
-                                                    }
-                                                    onChange={(e) =>
-                                                        handlePriceChange(
-                                                            product.id,
-                                                            e.target.value,
-                                                        )
-                                                    }
-                                                    className="h-8 w-28 text-right"
-                                                    min="0"
-                                                    step="0.01"
-                                                />
-                                            ) : (
-                                                <span className="text-muted-foreground">
-                                                    —
-                                                </span>
-                                            )}
-                                        </TableCell>
-                                    </TableRow>
-                                );
-                            })
-                        )}
-                    </TableBody>
-                </Table>
-            </div>
-
-            {syscom_products.last_page > 1 && (
-                <>
-                    {stock === 'false' && (
-                        <div className="text-center text-sm text-muted-foreground">
-                            {displayProducts.length} producto
-                            {displayProducts.length !== 1 ? 's' : ''} sin stock
-                        </div>
-                    )}
-                    <Pagination
-                        currentPage={syscom_products.current_page}
-                        lastPage={syscom_products.last_page}
-                        onPageChange={handlePageChange}
-                    />
-                </>
-            )}
+                                        {product.nombre}
+                                    </span>
+                                    <span className="truncate font-mono text-xs text-muted-foreground">
+                                        {product.id}
+                                        {product.modelo &&
+                                            ` · ${product.modelo}`}
+                                    </span>
+                                </div>
+                            </TableCell>
+                            <TableCell className="w-[72px] text-center">
+                                <span
+                                    className={
+                                        product.stock > 0
+                                            ? 'text-green-600 dark:text-green-400'
+                                            : 'text-red-500'
+                                    }
+                                >
+                                    {product.stock}
+                                </span>
+                            </TableCell>
+                            <TableCell className="w-[110px] text-right">
+                                {product.precios ? (
+                                    <span className="text-muted-foreground">
+                                        {formatPrice(
+                                            product.precios.precio_lista,
+                                        )}
+                                    </span>
+                                ) : (
+                                    <span className="text-muted-foreground">
+                                        —
+                                    </span>
+                                )}
+                            </TableCell>
+                            <TableCell className="w-[100px] text-center">
+                                {imported ? (
+                                    <Badge variant="secondary">
+                                        ✓ Importado
+                                    </Badge>
+                                ) : (
+                                    <span className="text-xs text-muted-foreground">
+                                        Pendiente
+                                    </span>
+                                )}
+                            </TableCell>
+                            <TableCell className="sticky right-0 w-[120px] bg-card text-right">
+                                {selectedProduct ? (
+                                    <Input
+                                        type="number"
+                                        placeholder="Precio"
+                                        value={prices.get(product.id) ?? ''}
+                                        onChange={(e) =>
+                                            handlePriceChange(
+                                                product.id,
+                                                e.target.value,
+                                            )
+                                        }
+                                        className="h-8 w-28 text-right"
+                                        min="0"
+                                        step="0.01"
+                                    />
+                                ) : (
+                                    <span className="text-muted-foreground">
+                                        —
+                                    </span>
+                                )}
+                            </TableCell>
+                        </TableRow>
+                    );
+                })}
+            </DataTable>
         </div>
     );
 }
