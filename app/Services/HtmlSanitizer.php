@@ -38,7 +38,7 @@ class HtmlSanitizer
                 ->blockElement('object')
                 ->blockElement('embed')
                 ->allowLinkSchemes(['https', 'http', 'mailto', 'tel'])
-                ->allowMediaSchemes(['https'])
+                ->allowMediaSchemes(['http', 'https'])
                 ->forceHttpsUrls(false);
 
             self::$instance = new SymfonySanitizer($config);
