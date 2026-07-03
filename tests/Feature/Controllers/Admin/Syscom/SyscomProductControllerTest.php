@@ -70,7 +70,7 @@ describe('Syscom Product Import Controller', function () {
                 );
         });
 
-        it('redirects with default category when no filters are provided', function () {
+        it('shows all products without category filter when no filters are provided', function () {
             $mockService = Mockery::mock(SyscomService::class);
             $mockService->shouldReceive('getCategories')
                 ->once()
@@ -87,14 +87,21 @@ describe('Syscom Product Import Controller', function () {
                     'last_page' => 1,
                     'total' => 0,
                 ]);
-            // getProducts should NOT be called on redirect
-            $mockService->shouldNotReceive('getProducts');
+            $mockService->shouldReceive('getProducts')
+                ->with([], 1)
+                ->once()
+                ->andReturn([
+                    'data' => [],
+                    'current_page' => 1,
+                    'last_page' => 1,
+                    'total' => 0,
+                ]);
 
             $this->app->instance(SyscomService::class, $mockService);
 
             $response = $this->actingAs($this->admin)->get('/admin/syscom/products');
 
-            $response->assertRedirect('/admin/syscom/products?categoria_id=1');
+            $response->assertOk();
         });
 
         it('passes filters to getProducts with SYSCOM param names', function () {
