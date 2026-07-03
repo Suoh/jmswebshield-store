@@ -4,6 +4,7 @@ use App\Models\Brand;
 use App\Models\Product;
 use App\Models\ProductImage;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 
 it('creates the products table with all expected columns', function () {
     expect(Schema::hasTable('products'))->toBeTrue();
@@ -180,4 +181,51 @@ it('does not delete image files on soft delete', function () {
 
     expect($product->trashed())->toBeTrue();
     Storage::disk('public')->assertExists($img->path);
+});
+
+it('sanitizes full_description on create', function () {
+    $product = Product::create([
+        'name' => 'XSS Product',
+        'full_description' => '<p>Safe</p><script>alert("xss")</script><p>Text</p>',
+        'price' => 99.99,
+    ]);
+
+    expect($product->full_description)
+        ->toContain('<p>Safe</p>')
+        ->toContain('<p>Text</p>')
+        ->not->toContain('<script>');
+});
+
+it('sanitizes full_description on update', function () {
+    $product = Product::factory()->create([
+        'full_description' => '<p>Original</p>',
+    ]);
+
+    $product->update([
+        'full_description' => '<b>Bold</b><iframe src="evil"></iframe>',
+        'name' => $product->name,
+        'price' => $product->price,
+    ]);
+
+    expect($product->fresh()->full_description)
+        ->toContain('<b>Bold</b>')
+        ->not->toContain('<iframe>');
+});
+
+it('sets full_description to null when sanitized result is empty', function () {
+    $product = Product::create([
+        'name' => 'Empty HTML',
+        'full_description' => '<script>only script</script>',
+        'price' => 99.99,
+    ]);
+
+    expect($product->full_description)->toBeNull();
+});
+
+it('keeps full_description unchanged when null', function () {
+    $product = Product::factory()->create([
+        'full_description' => null,
+    ]);
+
+    expect($product->full_description)->toBeNull();
 });

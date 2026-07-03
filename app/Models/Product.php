@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasMetadata;
+use App\Services\HtmlSanitizer;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -90,6 +91,13 @@ class Product extends Model
             get: fn () => $this->discount > 0
                 ? number_format($this->price * (1 - $this->discount / 100), 2, '.', '')
                 : null,
+        );
+    }
+
+    protected function fullDescription(): Attribute
+    {
+        return Attribute::make(
+            set: fn (?string $value) => HtmlSanitizer::sanitize($value),
         );
     }
 
