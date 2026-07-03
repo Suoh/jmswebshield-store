@@ -4,6 +4,7 @@ import {
     Boxes,
     CheckCircle2,
     DownloadCloud,
+    Grid3X3,
     PackageSearch,
     Store,
     Tag,
@@ -37,11 +38,27 @@ const adminSections = [
         icon: Tag,
     },
     {
+        title: 'Categorías',
+        href: '/admin/categories',
+        description:
+            'Organizá tus productos en categorías locales para facilitar la navegación del catálogo.',
+        cta: 'Gestionar categorías',
+        icon: Grid3X3,
+    },
+    {
         title: 'SYSCOM Marcas',
         href: '/admin/syscom/brands',
         description:
             'Buscá marcas disponibles en SYSCOM e importalas para vincularlas con productos externos.',
         cta: 'Importar marcas',
+        icon: DownloadCloud,
+    },
+    {
+        title: 'SYSCOM Categorías',
+        href: '/admin/syscom/categories',
+        description:
+            'Importá categorías desde SYSCOM para mantener el catálogo sincronizado con el proveedor.',
+        cta: 'Importar categorías',
         icon: DownloadCloud,
     },
     {
