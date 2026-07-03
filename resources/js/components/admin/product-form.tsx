@@ -1,4 +1,5 @@
 import { useForm } from '@inertiajs/react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -18,6 +19,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { getOrCreateSessionId } from '@/lib/editor-image-upload';
 
 import type { Category } from '@/types/models';
 
@@ -56,6 +58,7 @@ export interface ProductFormPayload {
     model: string;
     image_url: string;
     is_active: boolean;
+    editor_image_ids: number[];
 }
 
 interface ProductFormProps {
@@ -71,6 +74,8 @@ export default function ProductForm({
     categories,
     onSubmit,
 }: ProductFormProps) {
+    const [editorImageIds, setEditorImageIds] = useState<number[]>([]);
+    const [sessionId] = useState(() => getOrCreateSessionId(product?.id));
     const { data, setData, errors, processing } = useForm({
         name: product?.name ?? '',
         short_description: product?.short_description ?? '',
@@ -101,6 +106,7 @@ export default function ProductForm({
                       : null,
             category_ids: data.category_ids,
             is_active: data.is_active,
+            editor_image_ids: editorImageIds,
         };
         onSubmit(payload);
     };
@@ -167,6 +173,17 @@ export default function ProductForm({
                                     setData('full_description', html)
                                 }
                                 placeholder="Descripción detallada del producto"
+                                imageUploadEndpoint="/admin/editor-images"
+                                imageSessionId={sessionId}
+                                onImageUploaded={(imageId) =>
+                                    setEditorImageIds((prev) => {
+                                        if (prev.includes(imageId)) {
+return prev;
+}
+
+                                        return [...prev, imageId];
+                                    })
+                                }
                             />
                             {errors.full_description && (
                                 <p className="text-sm text-destructive">

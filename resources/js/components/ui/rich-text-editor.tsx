@@ -2,6 +2,7 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import LinkExtension from '@tiptap/extension-link';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import ImageExtension from '@tiptap/extension-image';
 import PlaceholderExtension from '@tiptap/extension-placeholder';
 import { common, createLowlight } from 'lowlight';
 import { Button } from '@/components/ui/button';
@@ -19,9 +20,12 @@ import {
     Link,
     Undo,
     Redo,
+    Image,
+    Loader2,
 } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { cn } from '@/lib/utils';
+import { uploadEditorImage } from '@/lib/editor-image-upload';
 
 const lowlight = createLowlight(common);
 
@@ -38,6 +42,9 @@ interface RichTextEditorProps {
     onChange: (html: string) => void;
     placeholder?: string;
     className?: string;
+    imageUploadEndpoint?: string;
+    imageSessionId?: string;
+    onImageUploaded?: (imageId: number) => void;
 }
 
 export function RichTextEditor({
@@ -45,7 +52,17 @@ export function RichTextEditor({
     onChange,
     placeholder = 'Escribe el contenido...',
     className,
+    imageUploadEndpoint,
+    imageSessionId,
+    onImageUploaded,
 }: RichTextEditorProps) {
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [imageUploading, setImageUploading] = useState(false);
+    const [imageUploadError, setImageUploadError] = useState<string | null>(
+        null,
+    );
+    const uploadedIdsRef = useRef<Set<number>>(new Set());
+
     const editor = useEditor({
         extensions: [
             StarterKit.configure({
@@ -65,6 +82,10 @@ export function RichTextEditor({
             CodeBlockLowlight.configure({
                 lowlight,
             }),
+            ImageExtension.configure({
+                inline: false,
+                allowBase64: false,
+            }),
             PlaceholderExtension.configure({
                 placeholder,
             }),
@@ -73,6 +94,30 @@ export function RichTextEditor({
         onUpdate: ({ editor }) => {
             onChange(editor.getHTML());
         },
+        editorProps: {
+            handlePaste: (_view, event) => {
+                if (
+                    !imageUploadEndpoint ||
+                    !imageSessionId
+                ) {
+                    return false;
+                }
+
+                const items = event.clipboardData?.items;
+                if (!items) return false;
+
+                for (const item of items) {
+                    if (item.type.startsWith('image/')) {
+                        event.preventDefault();
+                        const file = item.getAsFile();
+                        if (file) handleImageUpload(file);
+                        return true;
+                    }
+                }
+
+                return false;
+            },
+        },
     });
 
     useEffect(() => {
@@ -80,6 +125,59 @@ export function RichTextEditor({
             editor.commands.setContent(value);
         }
     }, [value, editor]);
+
+    const handleImageUpload = useCallback(
+        async (file: File) => {
+            if (!imageUploadEndpoint || !imageSessionId) return;
+
+            setImageUploading(true);
+            setImageUploadError(null);
+
+            try {
+                const result = await uploadEditorImage(
+                    file,
+                    imageSessionId,
+                    imageUploadEndpoint,
+                );
+                uploadedIdsRef.current.add(result.id);
+                editor
+                    ?.chain()
+                    .focus()
+                    .setImage({ src: result.url, alt: file.name })
+                    .run();
+                onImageUploaded?.(result.id);
+            } catch (err) {
+                setImageUploadError(
+                    err instanceof Error
+                        ? err.message
+                        : 'Error al subir la imagen',
+                );
+            } finally {
+                setImageUploading(false);
+            }
+        },
+        [imageUploadEndpoint, imageSessionId, editor, onImageUploaded],
+    );
+
+    const handleImageButtonClick = useCallback(() => {
+        fileInputRef.current?.click();
+    }, []);
+
+    const handleFileChange = useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+            const file = e.target.files?.[0];
+            if (file) {
+                handleImageUpload(file);
+            }
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
+        },
+        [handleImageUpload],
+    );
+
+    const showImageButton =
+        imageUploadEndpoint && imageSessionId;
 
     const toolbarButtons: ToolbarButton[] = [
         {
@@ -144,6 +242,17 @@ export function RichTextEditor({
             action: () => editor.chain().focus().setHorizontalRule().run(),
             isActive: () => false,
         },
+        ...(showImageButton
+            ? [
+                  {
+                      label: 'Imagen',
+                      icon: imageUploading ? Loader2 : Image,
+                      action: handleImageButtonClick,
+                      isActive: () => false,
+                      disabled: () => imageUploading,
+                  } satisfies ToolbarButton,
+              ]
+            : []),
         {
             label: 'Enlace',
             icon: Link,
@@ -183,6 +292,15 @@ export function RichTextEditor({
                 className,
             )}
         >
+            {showImageButton && (
+                <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="hidden"
+                    onChange={handleFileChange}
+                />
+            )}
             {editor && (
                 <>
                     <div className="flex flex-wrap items-center gap-0.5 border-b border-input/50 bg-muted/30 px-2 py-1.5">
@@ -200,12 +318,20 @@ export function RichTextEditor({
                                     e.preventDefault();
                                     item.action();
                                 }}
-                                className="size-8"
+                                className={cn(
+                                    'size-8',
+                                    item.icon === Loader2 && 'animate-spin',
+                                )}
                             >
                                 <item.icon className="size-3.5" />
                             </Button>
                         ))}
                     </div>
+                    {imageUploadError && (
+                        <div className="bg-destructive/10 px-3 py-1.5 text-xs text-destructive">
+                            {imageUploadError}
+                        </div>
+                    )}
                     <EditorContent
                         editor={editor}
                         role="textbox"
