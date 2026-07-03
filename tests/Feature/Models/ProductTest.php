@@ -212,14 +212,16 @@ it('sanitizes full_description on update', function () {
         ->not->toContain('<iframe>');
 });
 
-it('sets full_description to null when sanitized result is empty', function () {
+it('strips script tags while preserving text content', function () {
     $product = Product::create([
-        'name' => 'Empty HTML',
+        'name' => 'Script text',
         'full_description' => '<script>only script</script>',
         'price' => 99.99,
     ]);
 
-    expect($product->full_description)->toBeNull();
+    expect($product->full_description)
+        ->not->toContain('<script>')
+        ->toContain('only script');
 });
 
 it('keeps full_description unchanged when null', function () {
