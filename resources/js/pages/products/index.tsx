@@ -7,14 +7,15 @@ import SortSelect from '@/components/product/sort-select';
 import ViewToggle from '@/components/product/view-toggle';
 import { Pagination } from '@/components/ui/pagination';
 import { useUrlFilter } from '@/hooks/use-url-filter';
-import type { Brand, PaginatedData, Product } from '@/types/models';
+import type { Brand, Category, PaginatedData, Product } from '@/types/models';
 
 interface Props {
     products: PaginatedData<Product>;
     brands: Brand[];
+    categories: Category[];
 }
 
-export default function ProductIndex({ products, brands }: Props) {
+export default function ProductIndex({ products, brands, categories }: Props) {
     const [view] = useUrlFilter('view', 'grid');
 
     return (
@@ -23,7 +24,10 @@ export default function ProductIndex({ products, brands }: Props) {
             <div className="container mx-auto px-4 py-6">
                 <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
                     <aside className="w-full shrink-0 rounded-lg bg-sidebar p-4 lg:w-56">
-                        <FilterSidebar brands={brands} />
+                        <FilterSidebar
+                            brands={brands}
+                            categories={categories}
+                        />
                     </aside>
 
                     <div className="min-w-0 flex-1">

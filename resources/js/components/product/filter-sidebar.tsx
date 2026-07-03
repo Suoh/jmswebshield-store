@@ -8,14 +8,20 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useUrlFilter } from '@/hooks/use-url-filter';
 import { useUrlSetFilter } from '@/hooks/use-url-set-filter';
-import type { Brand } from '@/types/models';
+import type { Brand, Category } from '@/types/models';
 
 interface FilterSidebarProps {
     brands: Brand[];
+    categories: Category[];
 }
 
-export default function FilterSidebar({ brands }: FilterSidebarProps) {
+export default function FilterSidebar({
+    brands,
+    categories,
+}: FilterSidebarProps) {
     const [selectedBrands, setSelectedBrands] = useUrlSetFilter('brand[]');
+    const [selectedCategories, setSelectedCategories] =
+        useUrlSetFilter('category[]');
     const [priceMinValue, setPriceMin] = useUrlFilter('price_min', '');
     const [priceMaxValue, setPriceMax] = useUrlFilter('price_max', '');
     const [stock, setStock] = useUrlFilter('stock', 'all');
@@ -33,6 +39,18 @@ export default function FilterSidebar({ brands }: FilterSidebarProps) {
         }
 
         setSelectedBrands(newBrands);
+    };
+
+    const handleCategoryToggle = (categoryId: string) => {
+        const newCategories = new Set(selectedCategories);
+
+        if (newCategories.has(categoryId)) {
+            newCategories.delete(categoryId);
+        } else {
+            newCategories.add(categoryId);
+        }
+
+        setSelectedCategories(newCategories);
     };
 
     const applyPriceMin = () => {
@@ -59,6 +77,7 @@ export default function FilterSidebar({ brands }: FilterSidebarProps) {
 
     const hasActiveFilters =
         selectedBrands.size > 0 ||
+        selectedCategories.size > 0 ||
         priceMinValue !== '' ||
         priceMaxValue !== '' ||
         stock !== 'all';
@@ -93,6 +112,41 @@ export default function FilterSidebar({ brands }: FilterSidebarProps) {
                                     </span>
                                 </label>
                             ))}
+                        </div>
+                    </div>
+
+                    <Separator />
+
+                    <div>
+                        <Label className="mb-2 block text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                            Categoría
+                        </Label>
+                        <div className="max-h-48 space-y-2 overflow-y-auto">
+                            {categories.map((category) => (
+                                <label
+                                    key={category.id}
+                                    className="group flex cursor-pointer items-center gap-2"
+                                >
+                                    <Checkbox
+                                        checked={selectedCategories.has(
+                                            String(category.id),
+                                        )}
+                                        onCheckedChange={() =>
+                                            handleCategoryToggle(
+                                                String(category.id),
+                                            )
+                                        }
+                                    />
+                                    <span className="text-sm transition-colors group-hover:text-primary">
+                                        {category.name}
+                                    </span>
+                                </label>
+                            ))}
+                            {categories.length === 0 && (
+                                <p className="py-2 text-center text-sm text-muted-foreground">
+                                    No hay categorías disponibles
+                                </p>
+                            )}
                         </div>
                     </div>
 

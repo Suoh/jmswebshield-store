@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\SortOrder;
 use App\Enums\StockFilter;
 use App\Models\Brand;
+use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -15,7 +16,7 @@ class ProductController extends Controller
     public function index(Request $request): Response
     {
         $query = Product::where('is_active', true)
-            ->with(['brand', 'images' => fn ($q) => $q->where('is_cover', true)]);
+            ->with(['brand', 'categories', 'images' => fn ($q) => $q->where('is_cover', true)]);
 
         if ($request->filled('search')) {
             $search = $request->input('search');
@@ -30,6 +31,11 @@ class ProductController extends Controller
         if ($request->has('brand')) {
             $brands = (array) $request->input('brand');
             $query->whereIn('brand_id', array_filter($brands, fn ($v) => is_numeric($v)));
+        }
+
+        if ($request->has('category')) {
+            $categoryIds = (array) $request->input('category');
+            $query->whereHas('categories', fn ($q) => $q->whereIn('categories.id', array_filter($categoryIds, fn ($v) => is_numeric($v))));
         }
 
         if ($request->filled('price_min')) {
@@ -55,16 +61,18 @@ class ProductController extends Controller
         $products = $query->paginate(12)->withQueryString();
 
         $brands = Brand::orderBy('name')->get(['id', 'name', 'slug']);
+        $categories = Category::orderBy('name')->get(['id', 'name', 'slug']);
 
         return Inertia::render('products/index', [
             'products' => $products,
             'brands' => $brands,
+            'categories' => $categories,
         ]);
     }
 
     public function show(Product $product): Response
     {
-        $product->load(['brand', 'images' => fn ($q) => $q->orderBy('position')]);
+        $product->load(['brand', 'categories', 'images' => fn ($q) => $q->orderBy('position')]);
 
         return Inertia::render('products/[id]/show', [
             'product' => $product,
