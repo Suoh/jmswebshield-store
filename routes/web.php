@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\BrandController as AdminBrandController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\EditorImageController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\ProductImageController;
 use App\Http\Controllers\Admin\Syscom\BrandController as SyscomBrandController;
@@ -36,6 +37,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::put('products/{product}/images/reorder', [ProductImageController::class, 'reorder'])->name('products.images.reorder');
     Route::put('products/{product}/images/{image}/cover', [ProductImageController::class, 'setCover'])->name('products.images.setCover');
     Route::delete('products/{product}/images/{image}', [ProductImageController::class, 'destroy'])->name('products.images.destroy');
+
+    Route::post('editor-images', [EditorImageController::class, 'store'])->name('editor-images.store');
+    Route::delete('editor-images/{editorImage}', [EditorImageController::class, 'destroy'])->name('editor-images.destroy');
+    Route::post('products/{product}/editor-images/link', [EditorImageController::class, 'link'])->name('products.editor-images.link');
 
     Route::get('syscom/brands', [SyscomBrandController::class, 'index'])->name('syscom.brands.index');
     Route::post('syscom/brands/import', [SyscomBrandController::class, 'import'])->name('syscom.brands.import');

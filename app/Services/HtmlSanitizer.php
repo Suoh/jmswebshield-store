@@ -2,18 +2,12 @@
 
 namespace App\Services;
 
+use Symfony\Component\HtmlSanitizer\HtmlSanitizer as SymfonySanitizer;
+use Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig;
+
 class HtmlSanitizer
 {
-    private const ALLOWED_TAGS = '<b><i><strong><em><u><p><br><ul><ol><li><a><h3><h4><span><hr>';
-
-    private const STRIP_PATTERNS = [
-        '/\s+on\w+\s*=\s*(["\'])[^"\']*\1/iu',
-        '/\s+on\w+\s*=\s*[^\s>]+/iu',
-        '/href\s*=\s*(["\'])javascript:[^"\']*\1/iu',
-        '/href\s*=\s*javascript:[^\s>]+/iu',
-        '/\s+style\s*=\s*(["\'])[^"\']*\1/iu',
-        '/\s+style\s*=\s*[^\s>]+/iu',
-    ];
+    private static ?SymfonySanitizer $instance = null;
 
     public static function sanitize(?string $html): ?string
     {
@@ -21,12 +15,35 @@ class HtmlSanitizer
             return null;
         }
 
-        $sanitized = strip_tags($html, self::ALLOWED_TAGS);
+        $sanitized = self::getSanitizer()->sanitize($html);
 
-        foreach (self::STRIP_PATTERNS as $pattern) {
-            $sanitized = preg_replace($pattern, '', $sanitized);
+        if ($sanitized === null || trim($sanitized) === '') {
+            return null;
         }
 
-        return trim($sanitized) !== '' ? $sanitized : null;
+        return $sanitized;
+    }
+
+    private static function getSanitizer(): SymfonySanitizer
+    {
+        if (self::$instance === null) {
+            $config = (new HtmlSanitizerConfig)
+                ->allowSafeElements()
+                ->allowElement('img', ['src', 'alt', 'class'])
+                ->dropAttribute('on*', '*')
+                ->dropAttribute('style', '*')
+                ->blockElement('script')
+                ->blockElement('style')
+                ->blockElement('iframe')
+                ->blockElement('object')
+                ->blockElement('embed')
+                ->allowLinkSchemes(['https', 'http', 'mailto', 'tel'])
+                ->allowMediaSchemes(['https'])
+                ->forceHttpsUrls(false);
+
+            self::$instance = new SymfonySanitizer($config);
+        }
+
+        return self::$instance;
     }
 }
