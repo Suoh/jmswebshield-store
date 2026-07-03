@@ -200,6 +200,27 @@ describe('Admin ProductController', function () {
 
             $response->assertInvalid(['brand_id']);
         });
+
+        it('sanitizes XSS in full_description on store', function () {
+            $response = $this->actingAs($this->admin)->post('/admin/products', [
+                'name' => 'XSS Test',
+                'price' => 99.99,
+                'sku' => 'XSS-001',
+                'full_description' => '<p>Safe</p><script>alert(1)</script>',
+                'is_active' => true,
+            ]);
+
+            $response->assertRedirect('/admin/products');
+
+            $this->assertDatabaseHas('products', [
+                'sku' => 'XSS-001',
+            ]);
+
+            $product = Product::where('sku', 'XSS-001')->first();
+            expect($product->full_description)
+                ->toContain('<p>Safe</p>')
+                ->not->toContain('<script>');
+        });
     });
 
     describe('edit', function () {
@@ -299,6 +320,25 @@ describe('Admin ProductController', function () {
             ]);
 
             $response->assertInvalid(['discount']);
+        });
+
+        it('sanitizes XSS in full_description on update', function () {
+            $product = Product::factory()->create([
+                'full_description' => '<p>Original</p>',
+            ]);
+
+            $response = $this->actingAs($this->admin)->put("/admin/products/{$product->id}", [
+                'name' => 'Updated XSS',
+                'price' => 149.99,
+                'sku' => $product->sku,
+                'full_description' => '<b>Bold</b><iframe src="x"></iframe>',
+            ]);
+
+            $response->assertRedirect('/admin/products');
+
+            expect($product->fresh()->full_description)
+                ->toContain('<b>Bold</b>')
+                ->not->toContain('<iframe>');
         });
     });
 

@@ -2,6 +2,7 @@
 
 namespace App\Services\Syscom;
 
+use App\Services\HtmlSanitizer;
 use Illuminate\Support\Str;
 
 class SyscomMapper
@@ -32,19 +33,6 @@ class SyscomMapper
 
     public const PRICE_DESCUENTO = 'precio_descuento';
 
-    private const ALLOWED_HTML_TAGS = '<b><i><strong><em><u><p><br><ul><ol><li><a><h3><h4><span><hr>';
-
-    private static function sanitizeHtml(?string $html): ?string
-    {
-        if ($html === null) {
-            return null;
-        }
-
-        $sanitized = strip_tags($html, self::ALLOWED_HTML_TAGS);
-
-        return trim($sanitized) !== '' ? $sanitized : null;
-    }
-
     public static function toLocalBrand(array $syscomBrand): array
     {
         $name = $syscomBrand[self::BRAND_NAME] ?? '';
@@ -65,8 +53,8 @@ class SyscomMapper
 
         return [
             'name' => $syscomProduct[self::PRODUCT_NAME] ?? '',
-            'short_description' => self::sanitizeHtml($syscomProduct[self::PRODUCT_SHORT_DESC] ?? null),
-            'full_description' => self::sanitizeHtml($syscomProduct[self::PRODUCT_FULL_DESC] ?? null),
+            'short_description' => HtmlSanitizer::sanitize($syscomProduct[self::PRODUCT_SHORT_DESC] ?? null),
+            'full_description' => HtmlSanitizer::sanitize($syscomProduct[self::PRODUCT_FULL_DESC] ?? null),
             'stock' => (int) ($syscomProduct[self::PRODUCT_STOCK] ?? 0),
             'price' => (float) $adminPrice,
             'model' => $syscomProduct[self::PRODUCT_MODEL] ?? null,
