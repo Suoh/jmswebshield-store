@@ -159,6 +159,7 @@ describe('Syscom Product Import Controller', function () {
     describe('import', function () {
         it('imports single product successfully', function () {
             $mockService = Mockery::mock(SyscomService::class);
+            $mockService->shouldReceive('getCategories')->andReturn([]);
             $mockService->shouldReceive('getBrands')
                 ->with(1)
                 ->once()
@@ -216,6 +217,7 @@ describe('Syscom Product Import Controller', function () {
 
         it('imports multiple products in batch', function () {
             $mockService = Mockery::mock(SyscomService::class);
+            $mockService->shouldReceive('getCategories')->andReturn([]);
             $mockService->shouldReceive('getBrands')
                 ->with(1)
                 ->once()
@@ -295,6 +297,7 @@ describe('Syscom Product Import Controller', function () {
             ]);
 
             $mockService = Mockery::mock(SyscomService::class);
+            $mockService->shouldReceive('getCategories')->andReturn([]);
             $mockService->shouldReceive('getBrands')
                 ->andReturn(['data' => [], 'current_page' => 1, 'last_page' => 1, 'total' => 0]);
 
@@ -314,6 +317,7 @@ describe('Syscom Product Import Controller', function () {
 
         it('skips failed products and continues batch import', function () {
             $mockService = Mockery::mock(SyscomService::class);
+            $mockService->shouldReceive('getCategories')->andReturn([]);
             $mockService->shouldReceive('getBrands')
                 ->andReturn(['data' => [], 'current_page' => 1, 'last_page' => 1, 'total' => 0]);
             $mockService->shouldReceive('getProductDetail')
@@ -358,6 +362,7 @@ describe('Syscom Product Import Controller', function () {
 
         it('fails when price is missing', function () {
             $mockService = Mockery::mock(SyscomService::class);
+            $mockService->shouldReceive('getCategories')->andReturn([]);
             $mockService->shouldReceive('getBrands')->andReturn(['data' => [], 'current_page' => 1, 'last_page' => 1, 'total' => 0]);
             $this->app->instance(SyscomService::class, $mockService);
 
@@ -373,6 +378,7 @@ describe('Syscom Product Import Controller', function () {
 
         it('fails when price is negative', function () {
             $mockService = Mockery::mock(SyscomService::class);
+            $mockService->shouldReceive('getCategories')->andReturn([]);
             $mockService->shouldReceive('getBrands')->andReturn(['data' => [], 'current_page' => 1, 'last_page' => 1, 'total' => 0]);
             $this->app->instance(SyscomService::class, $mockService);
 
@@ -388,6 +394,7 @@ describe('Syscom Product Import Controller', function () {
 
         it('fails when more than 50 products provided', function () {
             $mockService = Mockery::mock(SyscomService::class);
+            $mockService->shouldReceive('getCategories')->andReturn([]);
             $mockService->shouldReceive('getBrands')->andReturn(['data' => [], 'current_page' => 1, 'last_page' => 1, 'total' => 0]);
             $this->app->instance(SyscomService::class, $mockService);
 

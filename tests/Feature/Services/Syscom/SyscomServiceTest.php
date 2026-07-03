@@ -179,7 +179,7 @@ describe('SyscomService', function () {
                     'total_existencia' => 15,
                     'modelo' => 'RBK953',
                     'marca' => 'tp-link',
-                    'categoria_id' => '1',
+                    'categorias' => ['cat-001', 'cat-002'],
                     'precios' => [
                         'precio_lista' => 20000.00,
                         'precio_descuento' => 18000.00,
@@ -196,6 +196,7 @@ describe('SyscomService', function () {
                 ->toHaveKey('model', 'RBK953')
                 ->toHaveKey('is_active', true)
                 ->and($result['metadata'])->toHaveKey('syscom_id', '12345')
+                ->and($result['metadata'])->toHaveKey('syscom_categoria_ids', ['cat-001', 'cat-002'])
                 ->and($result['metadata'])->toHaveKey('syscom_precios')
                 ->and($result['metadata']['syscom_precios'])->toHaveKey('precio_lista', 20000.00)
                 ->and($result['metadata']['syscom_precios'])->toHaveKey('precio_descuento', 18000.00);
@@ -213,7 +214,7 @@ describe('SyscomService', function () {
                     'total_existencia' => 1,
                     'modelo' => null,
                     'marca' => null,
-                    'categoria_id' => null,
+                    'categorias' => [],
                     'precios' => [
                         'precio_lista' => 99999.99,
                         'precio_descuento' => 89999.99,

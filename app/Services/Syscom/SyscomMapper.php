@@ -27,6 +27,8 @@ class SyscomMapper
 
     public const PRODUCT_CATEGORY_ID = 'categoria_id';
 
+    public const PRODUCT_CATEGORIES = 'categorias';
+
     public const PRODUCT_IMAGE = 'imagen';
 
     public const PRICE_LISTA = 'precio_lista';
@@ -47,9 +49,24 @@ class SyscomMapper
         ];
     }
 
+    public static function toLocalCategory(array $syscomCategory): array
+    {
+        $name = $syscomCategory[self::BRAND_NAME] ?? '';
+        $slug = Str::slug($name);
+
+        return [
+            'name' => $name,
+            'slug' => $slug,
+            'metadata' => [
+                'syscom_id' => $syscomCategory[self::BRAND_ID] ?? '',
+            ],
+        ];
+    }
+
     public static function toLocalProduct(array $syscomProduct, float $adminPrice): array
     {
         $prices = $syscomProduct['precios'] ?? [];
+        $categorias = $syscomProduct[self::PRODUCT_CATEGORIES] ?? [];
 
         return [
             'name' => $syscomProduct[self::PRODUCT_NAME] ?? '',
@@ -64,6 +81,7 @@ class SyscomMapper
             'metadata' => [
                 'syscom_id' => $syscomProduct[self::PRODUCT_ID] ?? '',
                 'syscom_marca_id' => $syscomProduct[self::PRODUCT_BRAND_ID] ?? null,
+                'syscom_categoria_ids' => $categorias,
                 'syscom_precios' => [
                     'precio_lista' => $prices[self::PRICE_LISTA] ?? null,
                     'precio_descuento' => $prices[self::PRICE_DESCUENTO] ?? null,
