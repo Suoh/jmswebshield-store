@@ -22,6 +22,7 @@ function makeImage(overrides: Partial<ProductImage> = {}): ProductImage {
         path: 'products/1/test.png',
         position: 0,
         is_cover: false,
+        url: 'http://localhost/storage/products/1/test.png',
         created_at: '2026-07-02T00:00:00.000000Z',
         updated_at: '2026-07-02T00:00:00.000000Z',
         ...overrides,

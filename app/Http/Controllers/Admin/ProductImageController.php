@@ -92,6 +92,7 @@ class ProductImageController extends Controller
                 'path' => $image->path,
                 'position' => $image->position,
                 'is_cover' => $image->is_cover,
+                'url' => $image->url,
                 'created_at' => $image->created_at?->toISOString() ?? '',
                 'updated_at' => $image->updated_at?->toISOString() ?? '',
             ];

@@ -55,7 +55,7 @@ export default function ProductImageCarousel({
                         {images.map((image, index) => (
                             <div key={image.id} className="flex-[0_0_100%]">
                                 <img
-                                    src={`/storage/${image.path}`}
+                                    src={image.url}
                                     alt={`${productName} - imagen ${index + 1}`}
                                     className="aspect-[16/9] w-full object-cover"
                                 />
@@ -98,7 +98,7 @@ export default function ProductImageCarousel({
                             )}
                         >
                             <img
-                                src={`/storage/${image.path}`}
+                                src={image.url}
                                 alt={`Miniatura ${index + 1}`}
                                 className="size-16 object-cover"
                             />

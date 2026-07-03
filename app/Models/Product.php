@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 
 #[Fillable([
     'name',
@@ -52,6 +53,15 @@ class Product extends Model
     public function images(): HasMany
     {
         return $this->hasMany(ProductImage::class)->orderBy('position');
+    }
+
+    protected static function booted(): void
+    {
+        static::forceDeleting(function (self $product): void {
+            foreach ($product->images as $image) {
+                Storage::disk('public')->delete($image->path);
+            }
+        });
     }
 
     public function scopeWhereHasSyscomId(Builder $query): void

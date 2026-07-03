@@ -152,3 +152,32 @@ it('casts attributes correctly', function () {
         ->and($product->is_active)->toBeBool()
         ->and($product->stock)->toBeInt();
 });
+
+it('deletes image files from disk on forceDelete', function () {
+    Storage::fake('public');
+
+    $product = Product::factory()->create();
+    $img1 = ProductImage::factory()->create(['product_id' => $product->id, 'path' => 'products/img1.jpg']);
+    $img2 = ProductImage::factory()->create(['product_id' => $product->id, 'path' => 'products/img2.jpg']);
+
+    Storage::disk('public')->put($img1->path, 'fake-data');
+    Storage::disk('public')->put($img2->path, 'fake-data');
+
+    $product->forceDelete();
+
+    Storage::disk('public')->assertMissing($img1->path);
+    Storage::disk('public')->assertMissing($img2->path);
+});
+
+it('does not delete image files on soft delete', function () {
+    Storage::fake('public');
+
+    $product = Product::factory()->create();
+    $img = ProductImage::factory()->create(['product_id' => $product->id, 'path' => 'products/soft-delete-test.jpg']);
+    Storage::disk('public')->put($img->path, 'fake-data');
+
+    $product->delete();
+
+    expect($product->trashed())->toBeTrue();
+    Storage::disk('public')->assertExists($img->path);
+});

@@ -215,6 +215,30 @@ describe('Admin ProductImageController', function () {
         });
     });
 
+    describe('batchStore', function () {
+        it('returns url for each uploaded image', function () {
+            $product = Product::factory()->create();
+            $files = [
+                UploadedFile::fake()->image('batch1.jpg', 400, 300),
+                UploadedFile::fake()->image('batch2.jpg', 400, 300),
+            ];
+
+            $response = $this->actingAs($this->admin)->post(
+                "/admin/products/{$product->id}/images/batch",
+                ['images' => $files]
+            );
+
+            $response->assertStatus(201);
+            $images = $response->json('images');
+
+            expect($images)->toHaveCount(2);
+            foreach ($images as $image) {
+                expect($image)->toHaveKey('url')
+                    ->and($image['url'])->toBe(asset('storage/'.$image['path']));
+            }
+        });
+    });
+
     describe('cover image fallback', function () {
         it('product coverImage returns image_url when no images exist', function () {
             $product = Product::factory()->create(['image_url' => 'https://example.com/img.jpg']);

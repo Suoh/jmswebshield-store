@@ -197,7 +197,7 @@ export default function ProductShow({ product }: Props) {
                                             href={whatsappHref}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#25D366] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#20bd5a] focus-visible:ring-2 focus-visible:ring-[#25D366] focus-visible:ring-offset-2 focus-visible:outline-none"
+                                            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none"
                                         >
                                             <WhatsAppIcon className="h-7 w-7" />
                                             Consultar por WhatsApp
