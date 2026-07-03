@@ -39,12 +39,14 @@ describe('Dashboard', () => {
         expect(button).toHaveAttribute('href', '/products');
     });
 
-    it('renders the four admin section cards', () => {
+    it('renders the six admin section cards', () => {
         render(<Dashboard />);
 
         expect(screen.getByText('Productos')).toBeInTheDocument();
         expect(screen.getByText('Marcas')).toBeInTheDocument();
+        expect(screen.getByText('Categorías')).toBeInTheDocument();
         expect(screen.getByText('SYSCOM Marcas')).toBeInTheDocument();
+        expect(screen.getByText('SYSCOM Categorías')).toBeInTheDocument();
         expect(screen.getByText('SYSCOM Productos')).toBeInTheDocument();
     });
 });

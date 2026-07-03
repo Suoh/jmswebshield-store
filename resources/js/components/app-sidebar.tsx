@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Box, Download, Package, Store, Tag } from 'lucide-react';
+import { Box, Download, Grid3X3, Package, Store, Tag } from 'lucide-react';
 import BrandLogo from '@/components/brand-logo';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -23,6 +23,11 @@ const adminNavItems: NavItem[] = [
         icon: Tag,
     },
     {
+        title: 'Categorías',
+        href: '/admin/categories',
+        icon: Grid3X3,
+    },
+    {
         title: 'Productos',
         href: '/admin/products',
         icon: Package,
@@ -30,6 +35,11 @@ const adminNavItems: NavItem[] = [
     {
         title: 'SYSCOM Marcas',
         href: '/admin/syscom/brands',
+        icon: Download,
+    },
+    {
+        title: 'SYSCOM Categorías',
+        href: '/admin/syscom/categories',
         icon: Download,
     },
     {

@@ -7,6 +7,15 @@ export interface Brand {
     updated_at: string;
 }
 
+export interface Category {
+    id: number;
+    name: string;
+    slug: string;
+    products_count?: number;
+    created_at: string;
+    updated_at: string;
+}
+
 export interface ProductImage {
     id: number;
     product_id: number;
