@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Brand;
+use App\Models\Category;
 use App\Models\Product;
 
 beforeEach(function () {
@@ -270,6 +271,109 @@ it('preserves query string in pagination links', function () {
             ->where('products.current_page', 1)
             ->where('products.total', 25)
             ->where('products.per_page', 12)
+        );
+});
+
+it('passes categories to the catalog index view', function () {
+    $category = Category::factory()->create(['name' => 'Audio']);
+    $brand = Brand::factory()->create();
+    Product::factory()->create(['brand_id' => $brand->id, 'is_active' => true]);
+
+    $response = $this->get('/products');
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('categories')
+            ->where('categories.0.id', $category->id)
+            ->where('categories.0.name', 'Audio')
+        );
+});
+
+it('filters products by single category', function () {
+    $categoryA = Category::factory()->create();
+    $categoryB = Category::factory()->create();
+    $brand = Brand::factory()->create();
+    $productA = Product::factory()->create(['brand_id' => $brand->id, 'is_active' => true]);
+    $productB = Product::factory()->create(['brand_id' => $brand->id, 'is_active' => true]);
+    $productA->categories()->attach($categoryA);
+    $productB->categories()->attach($categoryB);
+
+    $response = $this->get("/products?category[]={$categoryA->id}");
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('products.total', 1)
+            ->where('products.data.0.id', $productA->id)
+        );
+});
+
+it('filters products by multiple categories', function () {
+    $categoryA = Category::factory()->create();
+    $categoryB = Category::factory()->create();
+    $categoryC = Category::factory()->create();
+    $brand = Brand::factory()->create();
+    $productA = Product::factory()->create(['brand_id' => $brand->id, 'is_active' => true]);
+    $productB = Product::factory()->create(['brand_id' => $brand->id, 'is_active' => true]);
+    $productC = Product::factory()->create(['brand_id' => $brand->id, 'is_active' => true]);
+    $productA->categories()->attach($categoryA);
+    $productB->categories()->attach($categoryB);
+    $productC->categories()->attach($categoryC);
+
+    $response = $this->get("/products?category[]={$categoryA->id}&category[]={$categoryB->id}");
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('products.total', 2)
+        );
+});
+
+it('excludes products without categories when category filter is active', function () {
+    $category = Category::factory()->create();
+    $brand = Brand::factory()->create();
+    $productWithCat = Product::factory()->create(['brand_id' => $brand->id, 'is_active' => true]);
+    $productWithoutCat = Product::factory()->create(['brand_id' => $brand->id, 'is_active' => true]);
+    $productWithCat->categories()->attach($category);
+
+    $response = $this->get("/products?category[]={$category->id}");
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('products.total', 1)
+            ->where('products.data.0.id', $productWithCat->id)
+        );
+});
+
+it('combines category filter with brand and price filters', function () {
+    $category = Category::factory()->create();
+    $brandA = Brand::factory()->create();
+    $brandB = Brand::factory()->create();
+    $productA = Product::factory()->create(['price' => 100.00, 'brand_id' => $brandA->id, 'is_active' => true]);
+    $productB = Product::factory()->create(['price' => 500.00, 'brand_id' => $brandB->id, 'is_active' => true]);
+    $productA->categories()->attach($category);
+    $productB->categories()->attach($category);
+
+    $response = $this->get("/products?category[]={$category->id}&brand[]={$brandA->id}&price_max=200");
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('products.total', 1)
+            ->where('products.data.0.id', $productA->id)
+        );
+});
+
+it('loads product categories on show page', function () {
+    $category = Category::factory()->create(['name' => 'Cámaras']);
+    $brand = Brand::factory()->create();
+    $product = Product::factory()->create(['brand_id' => $brand->id]);
+    $product->categories()->attach($category);
+
+    $response = $this->get("/products/{$product->id}");
+
+    $response->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->has('product.categories')
+            ->where('product.categories.0.id', $category->id)
+            ->where('product.categories.0.name', 'Cámaras')
         );
 });
 

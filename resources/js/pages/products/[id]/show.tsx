@@ -161,6 +161,21 @@ export default function ProductShow({ product }: Props) {
                                     <BrandName brand={product.brand} />
                                 </div>
 
+                                {product.categories &&
+                                    product.categories.length > 0 && (
+                                        <div className="flex flex-wrap gap-1.5">
+                                            {product.categories.map((cat) => (
+                                                <Link
+                                                    key={cat.id}
+                                                    href={`/products?category[]=${cat.id}`}
+                                                    className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary transition-colors hover:bg-primary/20"
+                                                >
+                                                    {cat.name}
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    )}
+
                                 <ProductPrice
                                     price={product.price}
                                     discountedPrice={product.discounted_price}
