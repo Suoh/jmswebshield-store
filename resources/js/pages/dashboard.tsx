@@ -5,8 +5,10 @@ import {
     CheckCircle2,
     DownloadCloud,
     PackageSearch,
+    Store,
     Tag,
 } from 'lucide-react';
+import BrandLogo from '@/components/brand-logo';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -66,6 +68,7 @@ export default function Dashboard() {
             <div className="flex h-full flex-1 flex-col gap-8 overflow-x-auto p-4 md:p-6">
                 <section className="overflow-hidden rounded-3xl border bg-card p-6 shadow-sm md:p-8">
                     <div className="max-w-3xl space-y-4">
+                        <BrandLogo size="lg" withText={false} />
                         <span className="inline-flex items-center rounded-full border bg-background/75 px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm">
                             Panel admin JMS WebShield Store
                         </span>
@@ -78,6 +81,12 @@ export default function Dashboard() {
                                 marcas, importar información desde SYSCOM y
                                 preparar productos listos para publicar.
                             </p>
+                            <Button variant="outline" asChild>
+                                <Link href="/products">
+                                    <Store className="mr-2 size-4" />
+                                    Ir a la tienda
+                                </Link>
+                            </Button>
                         </div>
                     </div>
                 </section>
