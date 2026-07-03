@@ -56,15 +56,6 @@ class ProductController extends Controller
 
         $brands = $brandsData['data'] ?? [];
 
-        if (
-            empty($filters)
-            && ! empty($categories)
-        ) {
-            return redirect()->route('admin.syscom.products.index', [
-                'categoria_id' => $categories[0]['id'],
-            ]);
-        }
-
         try {
             $syscomProducts = $this->syscomService->getProducts($filters, $page);
         } catch (SyscomApiException $e) {
