@@ -53,11 +53,11 @@ describe('StorefrontLayout', () => {
     });
 
     it('shows "Panel admin" when user is admin', () => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         mockUsePage.mockReturnValue({
             props: {
                 auth: {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                     
                     user: { id: 1, name: 'Admin' } as any,
                     isAdmin: true,
                 },
@@ -74,11 +74,11 @@ describe('StorefrontLayout', () => {
     });
 
     it('does not show "Panel admin" when user is not admin', () => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         mockUsePage.mockReturnValue({
             props: {
                 auth: {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                     
                     user: { id: 1, name: 'User' } as any,
                     isAdmin: false,
                 },

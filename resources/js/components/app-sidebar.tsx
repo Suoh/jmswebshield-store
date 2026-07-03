@@ -1,5 +1,5 @@
-import { usePage } from '@inertiajs/react';
-import { Box, Download, Package, Tag } from 'lucide-react';
+import { Link, usePage } from '@inertiajs/react';
+import { Box, Download, Package, Store, Tag } from 'lucide-react';
 import BrandLogo from '@/components/brand-logo';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -7,6 +7,8 @@ import {
     Sidebar,
     SidebarContent,
     SidebarFooter,
+    SidebarGroup,
+    SidebarGroupLabel,
     SidebarHeader,
     SidebarMenu,
     SidebarMenuButton,
@@ -56,6 +58,22 @@ export function AppSidebar() {
                 {auth?.isAdmin && (
                     <NavMain items={adminNavItems} groupLabel="Gestión" />
                 )}
+                <SidebarGroup className="px-2 py-0">
+                    <SidebarGroupLabel>Tienda</SidebarGroupLabel>
+                    <SidebarMenu>
+                        <SidebarMenuItem>
+                            <SidebarMenuButton
+                                asChild
+                                tooltip={{ children: 'Ir a la tienda' }}
+                            >
+                                <Link href="/products" prefetch={false}>
+                                    <Store />
+                                    <span>Ir a la tienda</span>
+                                </Link>
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
+                    </SidebarMenu>
+                </SidebarGroup>
             </SidebarContent>
 
             <SidebarFooter>
