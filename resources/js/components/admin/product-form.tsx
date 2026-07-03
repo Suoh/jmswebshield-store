@@ -56,7 +56,6 @@ export interface ProductFormPayload {
     brand_id: number | null;
     category_ids: number[];
     model: string;
-    image_url: string;
     is_active: boolean;
     editor_image_ids: number[];
 }
@@ -87,7 +86,6 @@ export default function ProductForm({
         brand_id: product?.brand_id?.toString() ?? '',
         category_ids: product?.categories?.map((c) => c.id) ?? [],
         model: product?.model ?? '',
-        image_url: product?.image_url ?? '',
         is_active: product?.is_active ?? true,
     });
 
@@ -382,23 +380,6 @@ return prev;
                             )}
                         </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="image_url">URL de imagen</Label>
-                            <Input
-                                id="image_url"
-                                type="url"
-                                value={data.image_url}
-                                onChange={(e) =>
-                                    setData('image_url', e.target.value)
-                                }
-                                placeholder="https://..."
-                            />
-                            {errors.image_url && (
-                                <p className="text-sm text-destructive">
-                                    {errors.image_url}
-                                </p>
-                            )}
-                        </div>
                     </CardContent>
                 </Card>
 
