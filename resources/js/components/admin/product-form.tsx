@@ -10,6 +10,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import {
     Select,
     SelectContent,
@@ -152,15 +153,12 @@ export default function ProductForm({
                             <Label htmlFor="full_description">
                                 Descripción completa
                             </Label>
-                            <textarea
-                                id="full_description"
+                            <RichTextEditor
                                 value={data.full_description}
-                                onChange={(e) =>
-                                    setData('full_description', e.target.value)
+                                onChange={(html) =>
+                                    setData('full_description', html)
                                 }
                                 placeholder="Descripción detallada del producto"
-                                rows={4}
-                                className="flex min-h-[100px] w-full resize-y rounded-xl border border-input/50 bg-input/50 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                             />
                             {errors.full_description && (
                                 <p className="text-sm text-destructive">
