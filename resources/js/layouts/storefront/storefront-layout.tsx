@@ -1,7 +1,7 @@
 import { usePage } from '@inertiajs/react';
 import BrandLogo from '@/components/brand-logo';
 import { Button } from '@/components/ui/button';
-import { dashboard, login } from '@/routes';
+import { dashboard } from '@/routes';
 
 interface StorefrontLayoutProps {
     children: React.ReactNode;
@@ -19,13 +19,9 @@ export default function StorefrontLayout({ children }: StorefrontLayoutProps) {
                     </a>
 
                     <nav className="flex items-center gap-4">
-                        {auth.user ? (
+                        {auth.user && auth.isAdmin && (
                             <Button variant="ghost" asChild>
                                 <a href={dashboard().url}>Panel admin</a>
-                            </Button>
-                        ) : (
-                            <Button variant="ghost" asChild>
-                                <a href={login().url}>Iniciar sesión</a>
                             </Button>
                         )}
                     </nav>

@@ -5,6 +5,7 @@ import {
     CheckCircle2,
     DownloadCloud,
     PackageSearch,
+    Store,
     Tag,
 } from 'lucide-react';
 import BrandLogo from '@/components/brand-logo';
@@ -80,6 +81,12 @@ export default function Dashboard() {
                                 marcas, importar información desde SYSCOM y
                                 preparar productos listos para publicar.
                             </p>
+                            <Button variant="outline" asChild>
+                                <Link href="/products">
+                                    <Store className="mr-2 size-4" />
+                                    Ir a la tienda
+                                </Link>
+                            </Button>
                         </div>
                     </div>
                 </section>

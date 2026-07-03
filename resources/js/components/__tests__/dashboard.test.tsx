@@ -29,6 +29,16 @@ describe('Dashboard', () => {
         ).toBeInTheDocument();
     });
 
+    it('renders the "Ir a la tienda" button', () => {
+        render(<Dashboard />);
+
+        const button = screen.getByRole('link', {
+            name: /Ir a la tienda/i,
+        });
+        expect(button).toBeInTheDocument();
+        expect(button).toHaveAttribute('href', '/products');
+    });
+
     it('renders the four admin section cards', () => {
         render(<Dashboard />);
 

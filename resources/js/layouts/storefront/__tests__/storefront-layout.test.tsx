@@ -5,7 +5,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const mockUsePage = vi.fn(() => ({
     props: {
-        auth: { user: null },
+        auth: { user: null, isAdmin: false },
     },
 }));
 
@@ -23,7 +23,7 @@ describe('StorefrontLayout', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         mockUsePage.mockReturnValue({
-            props: { auth: { user: null } },
+            props: { auth: { user: null, isAdmin: false } },
         });
     });
 
@@ -40,20 +40,28 @@ describe('StorefrontLayout', () => {
         expect(logoLink).toHaveAttribute('href', '/');
     });
 
-    it('shows "Iniciar sesión" when no user is logged in', () => {
+    it('does not show "Iniciar sesión" when no user is logged in', () => {
         render(
             <StorefrontLayout>
                 <div>Content</div>
             </StorefrontLayout>,
         );
 
-        expect(screen.getByText('Iniciar sesión')).toBeInTheDocument();
+        expect(
+            screen.queryByText('Iniciar sesión'),
+        ).not.toBeInTheDocument();
     });
 
-    it('shows "Panel admin" when user is logged in', () => {
+    it('shows "Panel admin" when user is admin', () => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         mockUsePage.mockReturnValue({
-            props: { auth: { user: { id: 1, name: 'Admin' } as any } },
+            props: {
+                auth: {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    user: { id: 1, name: 'Admin' } as any,
+                    isAdmin: true,
+                },
+            },
         });
 
         render(
@@ -63,6 +71,27 @@ describe('StorefrontLayout', () => {
         );
 
         expect(screen.getByText('Panel admin')).toBeInTheDocument();
+    });
+
+    it('does not show "Panel admin" when user is not admin', () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        mockUsePage.mockReturnValue({
+            props: {
+                auth: {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    user: { id: 1, name: 'User' } as any,
+                    isAdmin: false,
+                },
+            },
+        });
+
+        render(
+            <StorefrontLayout>
+                <div>Content</div>
+            </StorefrontLayout>,
+        );
+
+        expect(screen.queryByText('Panel admin')).not.toBeInTheDocument();
     });
 
     it('renders children content', () => {
