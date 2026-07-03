@@ -27,6 +27,18 @@ export interface ProductImage {
     updated_at: string;
 }
 
+export interface EditorImage {
+    id: number;
+    product_id: number | null;
+    session_id: string | null;
+    path: string;
+    original_name: string | null;
+    size_bytes: number | null;
+    url: string;
+    created_at: string;
+    updated_at: string;
+}
+
 export interface Product {
     id: number;
     name: string;

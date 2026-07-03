@@ -1,10 +1,22 @@
 import '@testing-library/jest-dom/vitest';
 
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
+import { uploadEditorImage } from '@/lib/editor-image-upload';
+
+vi.mock('@/lib/editor-image-upload', () => ({
+    uploadEditorImage: vi.fn(),
+    generateSessionId: vi.fn(() => 'test-session-id'),
+    getSessionStorageKey: vi.fn(() => 'test-key'),
+    getOrCreateSessionId: vi.fn(() => 'test-session-id'),
+}));
 
 describe('RichTextEditor', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
     it('renders the editor container', () => {
         const { container } = render(
             <RichTextEditor value="" onChange={() => {}} />,
@@ -96,5 +108,53 @@ describe('RichTextEditor', () => {
         expect(
             container.querySelector('.my-custom-editor'),
         ).toBeInTheDocument();
+    });
+
+    it('shows image button when endpoint and sessionId are provided', () => {
+        render(
+            <RichTextEditor
+                value=""
+                onChange={() => {}}
+                imageUploadEndpoint="/admin/editor-images"
+                imageSessionId="session-123"
+            />,
+        );
+
+        expect(screen.getByLabelText('Imagen')).toBeInTheDocument();
+    });
+
+    it('does not show image button when props are missing', () => {
+        render(<RichTextEditor value="" onChange={() => {}} />);
+
+        expect(screen.queryByLabelText('Imagen')).not.toBeInTheDocument();
+    });
+
+    it('does not show image button when only endpoint is provided', () => {
+        render(
+            <RichTextEditor
+                value=""
+                onChange={() => {}}
+                imageUploadEndpoint="/admin/editor-images"
+            />,
+        );
+
+        expect(screen.queryByLabelText('Imagen')).not.toBeInTheDocument();
+    });
+
+    it('renders hidden file input when image upload is enabled', () => {
+        const { container } = render(
+            <RichTextEditor
+                value=""
+                onChange={() => {}}
+                imageUploadEndpoint="/admin/editor-images"
+                imageSessionId="session-123"
+            />,
+        );
+
+        const input = container.querySelector(
+            'input[type="file"]',
+        ) as HTMLInputElement;
+        expect(input).toBeInTheDocument();
+        expect(input.accept).toBe('image/jpeg,image/png,image/webp');
     });
 });

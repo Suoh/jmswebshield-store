@@ -39,6 +39,10 @@ class ProductFactory extends Factory
         $blocks[] = '<h3>'.fake()->sentence(3).'</h3>';
         $blocks[] = '<p>'.fake()->paragraph().'</p>';
 
+        if (fake()->boolean(40)) {
+            $blocks[] = '<img src="https://picsum.photos/600/400?random='.fake()->unique()->numberBetween(1, 1000).'" alt="'.fake()->sentence(3).'">';
+        }
+
         if (fake()->boolean(50)) {
             $blocks[] = '<p><strong>'.fake()->sentence(4).'</strong> '.fake()->sentence(6).'</p>';
         }
