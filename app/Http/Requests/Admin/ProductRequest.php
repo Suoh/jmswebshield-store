@@ -35,6 +35,8 @@ class ProductRequest extends FormRequest
                 Rule::unique('products', 'sku')->ignore($productId),
             ],
             'brand_id' => ['nullable', 'exists:brands,id'],
+            'category_ids' => ['nullable', 'array'],
+            'category_ids.*' => ['integer', 'exists:categories,id'],
             'model' => ['nullable', 'string'],
             'image_url' => ['nullable', 'url'],
             'metadata' => ['nullable', 'array'],

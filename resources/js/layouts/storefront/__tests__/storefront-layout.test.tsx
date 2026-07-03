@@ -47,17 +47,13 @@ describe('StorefrontLayout', () => {
             </StorefrontLayout>,
         );
 
-        expect(
-            screen.queryByText('Iniciar sesión'),
-        ).not.toBeInTheDocument();
+        expect(screen.queryByText('Iniciar sesión')).not.toBeInTheDocument();
     });
 
     it('shows "Panel admin" when user is admin', () => {
-         
         mockUsePage.mockReturnValue({
             props: {
                 auth: {
-                     
                     user: { id: 1, name: 'Admin' } as any,
                     isAdmin: true,
                 },
@@ -74,11 +70,9 @@ describe('StorefrontLayout', () => {
     });
 
     it('does not show "Panel admin" when user is not admin', () => {
-         
         mockUsePage.mockReturnValue({
             props: {
                 auth: {
-                     
                     user: { id: 1, name: 'User' } as any,
                     isAdmin: false,
                 },

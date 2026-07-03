@@ -45,6 +45,7 @@ export interface Product {
     updated_at: string;
     deleted_at: string | null;
     brand?: Brand;
+    categories?: Category[];
     images?: ProductImage[];
     availability: string;
     discounted_price: string | null;

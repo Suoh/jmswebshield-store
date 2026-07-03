@@ -6,6 +6,7 @@ use App\Enums\SortOrder;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ProductRequest;
 use App\Models\Brand;
+use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -42,27 +43,35 @@ class ProductController extends Controller
     public function create(): Response
     {
         $brands = Brand::orderBy('name')->get();
+        $categories = Category::orderBy('name')->get(['id', 'name', 'slug']);
 
         return Inertia::render('admin/products/create', [
             'brands' => $brands,
+            'categories' => $categories,
         ]);
     }
 
     public function store(ProductRequest $request): RedirectResponse
     {
-        Product::create($request->validated());
+        $product = Product::create($request->validated());
+
+        if ($request->has('category_ids')) {
+            $product->categories()->sync($request->input('category_ids', []));
+        }
 
         return redirect()->route('admin.products.index')->with('success', 'Producto creado exitosamente.');
     }
 
     public function edit(int $id): Response
     {
-        $product = Product::with(['brand', 'images' => fn ($q) => $q->orderBy('position')])->findOrFail($id);
+        $product = Product::with(['brand', 'images' => fn ($q) => $q->orderBy('position'), 'categories'])->findOrFail($id);
         $brands = Brand::orderBy('name')->get();
+        $categories = Category::orderBy('name')->get(['id', 'name', 'slug']);
 
         return Inertia::render('admin/products/[id]/edit', [
             'product' => $product,
             'brands' => $brands,
+            'categories' => $categories,
         ]);
     }
 
@@ -71,6 +80,10 @@ class ProductController extends Controller
         $product = Product::findOrFail($id);
 
         $product->update($request->validated());
+
+        if ($request->has('category_ids')) {
+            $product->categories()->sync($request->input('category_ids', []));
+        }
 
         return redirect()->route('admin.products.index')->with('success', 'Producto actualizado exitosamente.');
     }

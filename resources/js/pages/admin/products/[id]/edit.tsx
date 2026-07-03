@@ -3,11 +3,12 @@ import ProductForm from '@/components/admin/product-form';
 import type { ProductFormPayload } from '@/components/admin/product-form';
 import ProductImageUploader from '@/components/admin/product-image-uploader';
 import { useFlashToast } from '@/hooks/use-flash-toast';
-import type { Brand, Product } from '@/types/models';
+import type { Brand, Category, Product } from '@/types/models';
 
 interface PageProps {
     product: Product;
     brands: Brand[];
+    categories: Category[];
     flash?: {
         success?: string;
         error?: string;
@@ -16,7 +17,7 @@ interface PageProps {
 }
 
 export default function AdminProductsEdit() {
-    const { product, brands, flash } = usePage<PageProps>().props;
+    const { product, brands, categories, flash } = usePage<PageProps>().props;
 
     useFlashToast(flash);
 
@@ -31,6 +32,7 @@ export default function AdminProductsEdit() {
         <div className="space-y-8 p-6">
             <ProductForm
                 brands={brands}
+                categories={categories}
                 product={product}
                 onSubmit={handleSubmit}
             />

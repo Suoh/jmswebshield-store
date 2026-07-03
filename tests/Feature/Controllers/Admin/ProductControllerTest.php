@@ -3,6 +3,7 @@
 namespace Tests\Feature\Controllers\Admin;
 
 use App\Models\Brand;
+use App\Models\Category;
 use App\Models\Product;
 use App\Models\User;
 
@@ -81,12 +82,17 @@ describe('Admin ProductController', function () {
     });
 
     describe('create', function () {
-        it('renders create form', function () {
+        it('renders create form with brands and categories', function () {
+            Brand::factory()->create(['name' => 'Brand A']);
+            Category::factory()->create(['name' => 'Category A']);
+
             $response = $this->actingAs($this->admin)->get('/admin/products/create');
 
             $response->assertOk()
                 ->assertInertia(fn ($page) => $page
                     ->component('admin/products/create')
+                    ->has('brands')
+                    ->has('categories')
                 );
         });
     });
@@ -201,6 +207,35 @@ describe('Admin ProductController', function () {
             $response->assertInvalid(['brand_id']);
         });
 
+        it('creates product with category_ids', function () {
+            $categoryA = Category::factory()->create();
+            $categoryB = Category::factory()->create();
+
+            $response = $this->actingAs($this->admin)->post('/admin/products', [
+                'name' => 'Product With Categories',
+                'price' => 99.99,
+                'sku' => 'CAT-PROD-001',
+                'is_active' => true,
+                'category_ids' => [$categoryA->id, $categoryB->id],
+            ]);
+
+            $response->assertRedirect('/admin/products');
+
+            $product = Product::where('sku', 'CAT-PROD-001')->first();
+            expect($product->categories->pluck('id')->toArray())->toEqual([$categoryA->id, $categoryB->id]);
+        });
+
+        it('fails when category_ids contain nonexistent id', function () {
+            $response = $this->actingAs($this->admin)->post('/admin/products', [
+                'name' => 'Invalid Category Product',
+                'price' => 99.99,
+                'sku' => 'INV-CAT-001',
+                'category_ids' => [99999],
+            ]);
+
+            $response->assertInvalid(['category_ids.0']);
+        });
+
         it('sanitizes XSS in full_description on store', function () {
             $response = $this->actingAs($this->admin)->post('/admin/products', [
                 'name' => 'XSS Test',
@@ -226,11 +261,13 @@ describe('Admin ProductController', function () {
     describe('edit', function () {
         it('renders edit form with product data', function () {
             $brand = Brand::factory()->create();
+            $category = Category::factory()->create();
             $product = Product::factory()->create([
                 'name' => 'Edit Me',
                 'sku' => 'EDIT-SKU',
                 'brand_id' => $brand->id,
             ]);
+            $product->categories()->attach($category);
 
             $response = $this->actingAs($this->admin)->get("/admin/products/{$product->id}/edit");
 
@@ -240,6 +277,8 @@ describe('Admin ProductController', function () {
                     ->where('product.id', $product->id)
                     ->where('product.name', 'Edit Me')
                     ->where('product.sku', 'EDIT-SKU')
+                    ->has('categories')
+                    ->has('product.categories')
                 );
         });
 
@@ -320,6 +359,26 @@ describe('Admin ProductController', function () {
             ]);
 
             $response->assertInvalid(['discount']);
+        });
+
+        it('syncs categories on update (replaces existing)', function () {
+            $categoryA = Category::factory()->create();
+            $categoryB = Category::factory()->create();
+            $categoryC = Category::factory()->create();
+            $product = Product::factory()->create();
+            $product->categories()->attach([$categoryA->id, $categoryB->id]);
+
+            $response = $this->actingAs($this->admin)->put("/admin/products/{$product->id}", [
+                'name' => 'Updated Categories',
+                'price' => 99.99,
+                'sku' => $product->sku,
+                'category_ids' => [$categoryB->id, $categoryC->id],
+            ]);
+
+            $response->assertRedirect('/admin/products');
+
+            expect($product->fresh()->categories->pluck('id')->toArray())
+                ->toEqual([$categoryB->id, $categoryC->id]);
         });
 
         it('sanitizes XSS in full_description on update', function () {

@@ -19,6 +19,8 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 
+import type { Category } from '@/types/models';
+
 interface Product {
     id?: number;
     name: string;
@@ -32,6 +34,7 @@ interface Product {
     model: string | null;
     image_url: string | null;
     is_active: boolean;
+    categories?: Category[];
 }
 
 interface Brand {
@@ -49,6 +52,7 @@ export interface ProductFormPayload {
     discount: number;
     sku: string;
     brand_id: number | null;
+    category_ids: number[];
     model: string;
     image_url: string;
     is_active: boolean;
@@ -57,12 +61,14 @@ export interface ProductFormPayload {
 interface ProductFormProps {
     product?: Product;
     brands: Brand[];
+    categories: Category[];
     onSubmit: (data: ProductFormPayload) => void;
 }
 
 export default function ProductForm({
     product,
     brands,
+    categories,
     onSubmit,
 }: ProductFormProps) {
     const { data, setData, errors, processing } = useForm({
@@ -74,6 +80,7 @@ export default function ProductForm({
         discount: product?.discount ?? 0,
         sku: product?.sku ?? '',
         brand_id: product?.brand_id?.toString() ?? '',
+        category_ids: product?.categories?.map((c) => c.id) ?? [],
         model: product?.model ?? '',
         image_url: product?.image_url ?? '',
         is_active: product?.is_active ?? true,
@@ -92,6 +99,7 @@ export default function ProductForm({
                     : data.brand_id
                       ? parseInt(data.brand_id, 10)
                       : null,
+            category_ids: data.category_ids,
             is_active: data.is_active,
         };
         onSubmit(payload);
@@ -303,6 +311,56 @@ export default function ProductForm({
                             {errors.brand_id && (
                                 <p className="text-sm text-destructive">
                                     {errors.brand_id}
+                                </p>
+                            )}
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label className="mb-2 block text-sm font-medium">
+                                Categorías
+                            </Label>
+                            <div className="max-h-48 space-y-2 overflow-y-auto rounded-md border p-2">
+                                {categories.map((category) => (
+                                    <label
+                                        key={category.id}
+                                        className="group flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 transition-colors hover:bg-muted"
+                                    >
+                                        <Checkbox
+                                            checked={data.category_ids.includes(
+                                                category.id,
+                                            )}
+                                            onCheckedChange={(checked) => {
+                                                if (checked) {
+                                                    setData('category_ids', [
+                                                        ...data.category_ids,
+                                                        category.id,
+                                                    ]);
+                                                } else {
+                                                    setData(
+                                                        'category_ids',
+                                                        data.category_ids.filter(
+                                                            (id) =>
+                                                                id !==
+                                                                category.id,
+                                                        ),
+                                                    );
+                                                }
+                                            }}
+                                        />
+                                        <span className="text-sm transition-colors group-hover:text-primary">
+                                            {category.name}
+                                        </span>
+                                    </label>
+                                ))}
+                                {categories.length === 0 && (
+                                    <p className="py-2 text-center text-sm text-muted-foreground">
+                                        No hay categorías disponibles
+                                    </p>
+                                )}
+                            </div>
+                            {errors.category_ids && (
+                                <p className="text-sm text-destructive">
+                                    {errors.category_ids}
                                 </p>
                             )}
                         </div>

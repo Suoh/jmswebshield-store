@@ -2,6 +2,7 @@
 
 use App\Http\Requests\Admin\ProductRequest;
 use App\Models\Brand;
+use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Validation\Rule;
 
@@ -139,5 +140,44 @@ describe('ProductRequest', function () {
 
         expect($validator->fails())->toBeTrue()
             ->and($validator->errors()->has('sku'))->toBeTrue();
+    });
+
+    it('passes when category_ids is empty', function () {
+        $rules = (new ProductRequest)->rules();
+
+        $validator = validator([
+            'name' => 'Laptop',
+            'price' => 100,
+            'category_ids' => [],
+        ], $rules);
+
+        expect($validator->fails())->toBeFalse();
+    });
+
+    it('passes when category_ids contain valid category ids', function () {
+        $category = Category::factory()->create();
+
+        $rules = (new ProductRequest)->rules();
+
+        $validator = validator([
+            'name' => 'Laptop',
+            'price' => 100,
+            'category_ids' => [$category->id],
+        ], $rules);
+
+        expect($validator->fails())->toBeFalse();
+    });
+
+    it('fails when category_ids contain nonexistent id', function () {
+        $rules = (new ProductRequest)->rules();
+
+        $validator = validator([
+            'name' => 'Laptop',
+            'price' => 100,
+            'category_ids' => [99999],
+        ], $rules);
+
+        expect($validator->fails())->toBeTrue()
+            ->and($validator->errors()->has('category_ids.0'))->toBeTrue();
     });
 });
