@@ -62,10 +62,19 @@ class Product extends Model
         return $this->belongsToMany(Category::class);
     }
 
+    public function editorImages(): HasMany
+    {
+        return $this->hasMany(EditorImage::class);
+    }
+
     protected static function booted(): void
     {
         static::forceDeleting(function (self $product): void {
             foreach ($product->images as $image) {
+                Storage::disk('public')->delete($image->path);
+            }
+
+            foreach ($product->editorImages as $image) {
                 Storage::disk('public')->delete($image->path);
             }
         });

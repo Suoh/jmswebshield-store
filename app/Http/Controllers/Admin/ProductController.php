@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Actions\ReconcileEditorImages;
 use App\Enums\SortOrder;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ProductRequest;
 use App\Models\Brand;
 use App\Models\Category;
+use App\Models\EditorImage;
 use App\Models\Product;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -14,6 +16,10 @@ use Inertia\Response;
 
 class ProductController extends Controller
 {
+    public function __construct(
+        private ReconcileEditorImages $reconcileEditorImages,
+    ) {}
+
     public function index(): Response
     {
         $query = Product::with('brand')
@@ -59,6 +65,14 @@ class ProductController extends Controller
             $product->categories()->sync($request->input('category_ids', []));
         }
 
+        if ($request->has('editor_image_ids')) {
+            EditorImage::whereIn('id', $request->input('editor_image_ids', []))
+                ->whereNull('product_id')
+                ->update(['product_id' => $product->id]);
+        }
+
+        ($this->reconcileEditorImages)($product, $product->full_description ?? '');
+
         return redirect()->route('admin.products.index')->with('success', 'Producto creado exitosamente.');
     }
 
@@ -84,6 +98,14 @@ class ProductController extends Controller
         if ($request->has('category_ids')) {
             $product->categories()->sync($request->input('category_ids', []));
         }
+
+        if ($request->has('editor_image_ids')) {
+            EditorImage::whereIn('id', $request->input('editor_image_ids', []))
+                ->whereNull('product_id')
+                ->update(['product_id' => $product->id]);
+        }
+
+        ($this->reconcileEditorImages)($product, $product->full_description ?? '');
 
         return redirect()->route('admin.products.index')->with('success', 'Producto actualizado exitosamente.');
     }

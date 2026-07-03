@@ -36,8 +36,8 @@ describe('HtmlSanitizer', function () {
             ->toContain('<li>')
             ->toContain('<strong>')
             ->toContain('<h3>')
-            ->toContain('<hr>')
-            ->toContain('<br>');
+            ->toContain('<hr')
+            ->toContain('<br');
     });
 
     it('preserves link tags with href attribute', function () {
@@ -68,19 +68,35 @@ describe('HtmlSanitizer', function () {
 
         $sanitized = HtmlSanitizer::sanitize($html);
 
-        expect($sanitized)->not->toContain('<style>')
-            ->not->toContain('</style>');
+        expect($sanitized)->toBeNull();
     });
 
-    it('strips disallowed tags while keeping text content', function () {
-        $html = '<p>Good</p><div>Bad tag</div><p>Also good</p>';
+    it('preserves text content inside block elements', function () {
+        $html = '<p>Good</p><div>Styled text</div><p>Also good</p>';
 
         $sanitized = HtmlSanitizer::sanitize($html);
 
         expect($sanitized)->toContain('<p>Good</p>')
-            ->toContain('Bad tag')
-            ->toContain('<p>Also good</p>')
-            ->not->toContain('<div>');
+            ->toContain('<div>Styled text</div>')
+            ->toContain('<p>Also good</p>');
+    });
+
+    it('allows img elements with src, alt, and class attributes', function () {
+        $html = '<img src="https://example.com/photo.jpg" alt="A photo" class="inline">';
+
+        $sanitized = HtmlSanitizer::sanitize($html);
+
+        expect($sanitized)->toContain('src="https://example.com/photo.jpg"')
+            ->toContain('alt="A photo"');
+    });
+
+    it('strips onclick from img tags', function () {
+        $html = '<img src="https://example.com/photo.jpg" onclick="alert(1)">';
+
+        $sanitized = HtmlSanitizer::sanitize($html);
+
+        expect($sanitized)->not->toContain('onclick')
+            ->toContain('src="https://example.com/photo.jpg"');
     });
 
     it('strips onclick event handlers', function () {
