@@ -38,6 +38,35 @@ describe('SyscomMapper', function () {
         });
     });
 
+    describe('toLocalCategory', function () {
+        it('maps syscom category response to local category array', function () {
+            $syscomCategory = [
+                'id' => 'cat-001',
+                'nombre' => 'Cámaras',
+            ];
+
+            $result = SyscomMapper::toLocalCategory($syscomCategory);
+
+            expect($result)->toBeArray()
+                ->toHaveKey('name', 'Cámaras')
+                ->toHaveKey('slug', 'camaras')
+                ->toHaveKey('metadata')
+                ->and($result['metadata'])->toBeArray()
+                ->toHaveKey('syscom_id', 'cat-001');
+        });
+
+        it('generates slug from syscom category name', function () {
+            $syscomCategory = [
+                'id' => 'cat-redes',
+                'nombre' => 'Redes y Conectividad',
+            ];
+
+            $result = SyscomMapper::toLocalCategory($syscomCategory);
+
+            expect($result['slug'])->toBe('redes-y-conectividad');
+        });
+    });
+
     describe('toLocalProduct', function () {
         it('maps syscom product response to local array with admin price', function () {
             $syscomProduct = [
@@ -48,7 +77,7 @@ describe('SyscomMapper', function () {
                 'stock' => 50,
                 'modelo' => 'RBK852',
                 'marca_id' => 'tp-link',
-                'categoria_id' => '1',
+                'categorias' => ['cat-001', 'cat-002'],
                 'precios' => [
                     'precio_lista' => 1500.00,
                     'precio_descuento' => 1350.00,
@@ -69,6 +98,7 @@ describe('SyscomMapper', function () {
                 ->toHaveKey('metadata')
                 ->and($result['metadata'])->toBeArray()
                 ->toHaveKey('syscom_id', '12345')
+                ->toHaveKey('syscom_categoria_ids', ['cat-001', 'cat-002'])
                 ->toHaveKey('syscom_precios')
                 ->and($result['metadata']['syscom_precios'])->toBeArray()
                 ->toHaveKey('precio_lista', 1500.00)
@@ -84,7 +114,7 @@ describe('SyscomMapper', function () {
                 'stock' => 10,
                 'modelo' => 'MODEL-X',
                 'marca_id' => null,
-                'categoria_id' => null,
+                'categorias' => [],
                 'precios' => [
                     'precio_lista' => 9999.99,
                     'precio_descuento' => 8999.99,
@@ -107,7 +137,7 @@ describe('SyscomMapper', function () {
                 'stock' => 5,
                 'modelo' => null,
                 'marca_id' => null,
-                'categoria_id' => null,
+                'categorias' => [],
                 'precios' => [
                     'precio_lista' => 100.00,
                     'precio_descuento' => 90.00,
@@ -130,7 +160,7 @@ describe('SyscomMapper', function () {
                 'stock' => 5,
                 'modelo' => null,
                 'marca_id' => null,
-                'categoria_id' => null,
+                'categorias' => [],
                 'precios' => [
                     'precio_lista' => 100.00,
                     'precio_descuento' => 90.00,
@@ -152,7 +182,7 @@ describe('SyscomMapper', function () {
                 'stock' => 1,
                 'modelo' => null,
                 'marca_id' => null,
-                'categoria_id' => null,
+                'categorias' => [],
                 'precios' => [
                     'precio_lista' => 100.00,
                     'precio_descuento' => 100.00,
@@ -163,6 +193,28 @@ describe('SyscomMapper', function () {
             $result = SyscomMapper::toLocalProduct($syscomProduct, 100.00);
 
             expect($result['metadata'])->toHaveKey('syscom_id', 'abc-123-xyz');
+        });
+
+        it('stores syscom_categoria_ids as empty array when no categories', function () {
+            $syscomProduct = [
+                'id' => '1',
+                'nombre' => 'Test Product',
+                'descripcion_corta' => null,
+                'descripcion_larga' => null,
+                'stock' => 1,
+                'modelo' => null,
+                'marca_id' => null,
+                'categorias' => [],
+                'precios' => [
+                    'precio_lista' => 100.00,
+                    'precio_descuento' => 100.00,
+                ],
+                'imagen' => null,
+            ];
+
+            $result = SyscomMapper::toLocalProduct($syscomProduct, 100.00);
+
+            expect($result['metadata'])->toHaveKey('syscom_categoria_ids', []);
         });
     });
 });

@@ -118,7 +118,7 @@ class SyscomService
             'marca_id' => strtolower($raw['marca'] ?? null),
             'precios' => $raw['precios'] ?? null,
             'imagen' => $raw['img_portada'] ?? null,
-            'categoria_id' => null,
+            'categorias' => $raw['categorias'] ?? [],
         ];
     }
 

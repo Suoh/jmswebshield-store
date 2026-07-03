@@ -3,6 +3,7 @@
 namespace App\Services\Syscom;
 
 use App\Models\Brand;
+use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 
@@ -24,11 +25,21 @@ class ProductImporter
             $brandLookup[$brand['id']] = $brand['nombre'];
         }
 
+        $categoriesData = $this->syscomService->getCategories();
+        $categoryLookup = [];
+        foreach ($categoriesData as $category) {
+            $categoryLookup[$category['id']] = $category['nombre'];
+        }
+
         $existingSyscomIds = Product::importedSyscomIds()->flip()->toArray();
 
         $localBrands = Brand::whereHasSyscomId()
             ->get()
             ->keyBy(fn ($b) => $b->metadata['syscom_id'] ?? '');
+
+        $localCategories = Category::whereHasSyscomId()
+            ->get()
+            ->keyBy(fn ($c) => $c->metadata['syscom_id'] ?? '');
 
         DB::transaction(function () use (
             $products,
@@ -38,6 +49,8 @@ class ProductImporter
             $existingSyscomIds,
             $brandLookup,
             &$localBrands,
+            $categoryLookup,
+            &$localCategories,
         ) {
             foreach ($products as $item) {
                 $productoId = $item['producto_id'];
@@ -77,7 +90,32 @@ class ProductImporter
                 }
 
                 $localData['brand_id'] = $brandId;
-                Product::create($localData);
+                $product = Product::create($localData);
+
+                $syscomCategoriaIds = $localData['metadata']['syscom_categoria_ids'] ?? [];
+                $categoryIds = [];
+
+                foreach ($syscomCategoriaIds as $catSyscomId) {
+                    $category = $localCategories->get($catSyscomId);
+                    if (! $category && isset($categoryLookup[$catSyscomId])) {
+                        $categoryName = $categoryLookup[$catSyscomId];
+                        $category = Category::firstOrCreate(
+                            ['slug' => $catSyscomId],
+                            [
+                                'name' => $categoryName,
+                                'metadata' => ['syscom_id' => $catSyscomId],
+                            ],
+                        );
+                        $localCategories->put($catSyscomId, $category);
+                    }
+                    if ($category) {
+                        $categoryIds[] = $category->id;
+                    }
+                }
+
+                if ($categoryIds !== []) {
+                    $product->categories()->attach($categoryIds);
+                }
 
                 $existingSyscomIds[$productoId] = true;
                 $imported++;
