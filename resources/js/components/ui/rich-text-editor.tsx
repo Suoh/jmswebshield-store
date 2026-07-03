@@ -210,7 +210,57 @@ export function RichTextEditor({
                         editor={editor}
                         role="textbox"
                         aria-multiline="true"
-                        className="prose prose-sm max-w-none [&_.ProseMirror]:min-h-[120px] [&_.ProseMirror]:px-3 [&_.ProseMirror]:py-2 [&_.ProseMirror]:outline-none [&_.ProseMirror]:text-sm [&_.ProseMirror_p.is-editor-empty:first-child::before]:text-muted-foreground [&_.ProseMirror_p.is-editor-empty:first-child::before]:float-left [&_.ProseMirror_p.is-editor-empty:first-child::before]:h-0 [&_.ProseMirror_p.is-editor-empty:first-child::before]:content-[attr(data-placeholder)]"
+                        className="prose prose-sm max-w-none
+                            [&_.ProseMirror]:min-h-[120px]
+                            [&_.ProseMirror]:px-3
+                            [&_.ProseMirror]:py-2
+                            [&_.ProseMirror]:outline-none
+                            [&_.ProseMirror]:text-sm
+                            [&_.ProseMirror_p.is-editor-empty:first-child::before]:text-muted-foreground
+                            [&_.ProseMirror_p.is-editor-empty:first-child::before]:float-left
+                            [&_.ProseMirror_p.is-editor-empty:first-child::before]:h-0
+                            [&_.ProseMirror_p.is-editor-empty:first-child::before]:content-[attr(data-placeholder)]
+                            [&_.ProseMirror_ul]:list-disc
+                            [&_.ProseMirror_ul]:pl-6
+                            [&_.ProseMirror_ol]:list-decimal
+                            [&_.ProseMirror_ol]:pl-6
+                            [&_.ProseMirror_li]:my-0.5
+                            [&_.ProseMirror_h3]:text-lg
+                            [&_.ProseMirror_h3]:font-semibold
+                            [&_.ProseMirror_h3]:mt-4
+                            [&_.ProseMirror_h3]:mb-2
+                            [&_.ProseMirror_h4]:text-base
+                            [&_.ProseMirror_h4]:font-semibold
+                            [&_.ProseMirror_h4]:mt-3
+                            [&_.ProseMirror_h4]:mb-1
+                            [&_.ProseMirror_blockquote]:border-l-4
+                            [&_.ProseMirror_blockquote]:border-muted-foreground/30
+                            [&_.ProseMirror_blockquote]:pl-4
+                            [&_.ProseMirror_blockquote]:italic
+                            [&_.ProseMirror_blockquote]:text-muted-foreground
+                            [&_.ProseMirror_blockquote]:my-3
+                            [&_.ProseMirror_code]:rounded
+                            [&_.ProseMirror_code]:bg-muted
+                            [&_.ProseMirror_code]:px-1
+                            [&_.ProseMirror_code]:py-0.5
+                            [&_.ProseMirror_code]:text-xs
+                            [&_.ProseMirror_code]:font-mono
+                            [&_.ProseMirror_pre]:rounded-lg
+                            [&_.ProseMirror_pre]:bg-muted
+                            [&_.ProseMirror_pre]:p-3
+                            [&_.ProseMirror_pre]:my-3
+                            [&_.ProseMirror_pre]:font-mono
+                            [&_.ProseMirror_pre]:text-xs
+                            [&_.ProseMirror_pre]:overflow-x-auto
+                            [&_.ProseMirror_pre_code]:bg-transparent
+                            [&_.ProseMirror_pre_code]:p-0
+                            [&_.ProseMirror_pre_code]:text-inherit
+                            [&_.ProseMirror_hr]:my-4
+                            [&_.ProseMirror_hr]:border-t
+                            [&_.ProseMirror_hr]:border-input
+                            [&_.ProseMirror_a]:text-primary
+                            [&_.ProseMirror_a]:underline
+                            [&_.ProseMirror_p]:my-1"
                     />
                 </>
             )}
