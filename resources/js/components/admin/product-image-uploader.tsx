@@ -194,16 +194,13 @@ export default function ProductImageUploader({
             const [removed] = reordered.splice(event.source.index, 1);
             reordered.splice(event.destination.index, 0, removed);
 
-            const newPositions = reordered.map((img, index) => ({
-                id: img.id,
-                position: index,
-            }));
+            const ids = reordered.map((img) => img.id);
             setLocalImages(reordered);
             onImagesChange?.(reordered);
 
             router.put(
                 `/admin/products/${productId}/images/reorder`,
-                { ids: newPositions },
+                { ids },
                 {
                     only: [],
                 },
@@ -313,7 +310,7 @@ export default function ProductImageUploader({
                                                 className={`relative overflow-hidden rounded-lg border bg-muted ${snapshot.isDragging ? 'shadow-lg ring-2 ring-primary' : ''}`}
                                             >
                                                 <img
-                                                    src={`/storage/${image.path}`}
+                                                    src={image.url}
                                                     alt={`Imagen ${index + 1}`}
                                                     className="aspect-square w-full object-cover"
                                                 />

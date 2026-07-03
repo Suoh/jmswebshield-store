@@ -13,6 +13,7 @@ export interface ProductImage {
     path: string;
     position: number;
     is_cover: boolean;
+    url: string;
     created_at: string;
     updated_at: string;
 }
