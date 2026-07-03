@@ -1,9 +1,11 @@
 <?php
 
 use App\Http\Controllers\Admin\BrandController as AdminBrandController;
+use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\ProductImageController;
 use App\Http\Controllers\Admin\Syscom\BrandController as SyscomBrandController;
+use App\Http\Controllers\Admin\Syscom\CategoryController as SyscomCategoryController;
 use App\Http\Controllers\Admin\Syscom\ProductController as SyscomProductController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
@@ -20,6 +22,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('brands', AdminBrandController::class);
 
+    Route::resource('categories', AdminCategoryController::class);
+
     Route::resource('products', AdminProductController::class)->except(['create', 'show']);
     Route::get('products/create', [AdminProductController::class, 'create'])->name('products.create');
     Route::get('products/{product}/edit', [AdminProductController::class, 'edit'])->name('products.edit');
@@ -35,6 +39,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     Route::get('syscom/brands', [SyscomBrandController::class, 'index'])->name('syscom.brands.index');
     Route::post('syscom/brands/import', [SyscomBrandController::class, 'import'])->name('syscom.brands.import');
+
+    Route::get('syscom/categories', [SyscomCategoryController::class, 'index'])->name('syscom.categories.index');
+    Route::post('syscom/categories/import', [SyscomCategoryController::class, 'import'])->name('syscom.categories.import');
 
     Route::get('syscom/products', [SyscomProductController::class, 'index'])->name('syscom.products.index');
     Route::post('syscom/products/import', [SyscomProductController::class, 'import'])->name('syscom.products.import');
