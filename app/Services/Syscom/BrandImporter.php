@@ -14,7 +14,7 @@ class BrandImporter
         $existingSyscomIds = Brand::importedSyscomIds()->flip()->toArray();
 
         foreach ($brands as $brand) {
-            $syscomId = $brand['syscom_id'];
+            $syscomId = (string) ($brand['syscom_id'] ?? '');
             $name = $brand['name'];
 
             if (isset($existingSyscomIds[$syscomId])) {

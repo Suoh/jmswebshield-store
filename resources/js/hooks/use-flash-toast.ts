@@ -8,6 +8,7 @@ interface FlashProps {
 
 export function useFlashToast(flash?: FlashProps): void {
     const prevSuccess = useRef<string | undefined>(undefined);
+    const prevError = useRef<string | undefined>(undefined);
 
     useEffect(() => {
         if (flash?.success && flash.success !== prevSuccess.current) {
@@ -15,7 +16,8 @@ export function useFlashToast(flash?: FlashProps): void {
             toast.success(flash.success);
         }
 
-        if (flash?.error) {
+        if (flash?.error && flash.error !== prevError.current) {
+            prevError.current = flash.error;
             toast.error(flash.error);
         }
     }, [flash]);

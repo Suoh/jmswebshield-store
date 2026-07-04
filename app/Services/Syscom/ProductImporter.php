@@ -53,7 +53,7 @@ class ProductImporter
             &$localCategories,
         ) {
             foreach ($products as $item) {
-                $productoId = $item['producto_id'];
+                $productoId = (string) ($item['producto_id'] ?? '');
                 $adminPrice = (float) $item['price'];
 
                 if (isset($existingSyscomIds[$productoId])) {
