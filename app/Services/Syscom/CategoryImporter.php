@@ -14,7 +14,7 @@ class CategoryImporter
         $existingSyscomIds = Category::importedSyscomIds()->flip()->toArray();
 
         foreach ($categories as $category) {
-            $syscomId = $category['syscom_id'];
+            $syscomId = (string) ($category['syscom_id'] ?? '');
             $name = $category['name'];
 
             if (isset($existingSyscomIds[$syscomId])) {

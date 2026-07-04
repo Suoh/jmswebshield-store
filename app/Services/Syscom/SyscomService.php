@@ -108,6 +108,16 @@ class SyscomService
 
     private function normalizeProductDetail(array $raw): array
     {
+        $categorias = $raw['categorias'] ?? [];
+
+        if (array_is_list($categorias)) {
+            $categorias = array_map(fn ($cat) => match (true) {
+                is_array($cat) => (string) ($cat['categoria_id'] ?? $cat['id'] ?? ''),
+                default => (string) $cat,
+            }, $categorias);
+            $categorias = array_values(array_filter($categorias, fn ($id) => $id !== ''));
+        }
+
         return [
             'id' => (string) ($raw['producto_id'] ?? ''),
             'nombre' => $raw['titulo'] ?? '',
@@ -115,10 +125,10 @@ class SyscomService
             'descripcion_larga' => $raw['descripcion'] ?? null,
             'stock' => (int) ($raw['total_existencia'] ?? 0),
             'modelo' => $raw['modelo'] ?? null,
-            'marca_id' => strtolower($raw['marca'] ?? null),
+            'marca_id' => strtolower((string) ($raw['marca'] ?? '')),
             'precios' => $raw['precios'] ?? null,
             'imagen' => $raw['img_portada'] ?? null,
-            'categorias' => $raw['categorias'] ?? [],
+            'categorias' => $categorias,
         ];
     }
 
