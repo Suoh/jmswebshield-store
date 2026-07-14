@@ -1,13 +1,13 @@
 import { router } from '@inertiajs/react';
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 
 export function useUrlSetFilter(
     key: string,
     basePath?: string,
 ): [Set<string>, (newValues: Set<string>) => void] {
-    const value = useMemo<Set<string>>(() => {
+    const value = (() => {
         if (typeof window === 'undefined') {
-            return new Set();
+            return new Set<string>();
         }
 
         const params = new URLSearchParams(window.location.search);
@@ -25,7 +25,7 @@ export function useUrlSetFilter(
         }
 
         return ids;
-    }, [key]);
+    })();
 
     const navigate = useCallback(
         (newValues: Set<string>) => {

@@ -41,84 +41,93 @@ class ProductImporter
             ->get()
             ->keyBy(fn ($c) => $c->metadata['syscom_id'] ?? '');
 
+        // Phase 1: fetch all product details outside DB transaction
+        // This prevents holding a transaction open during slow HTTP calls
+        $productDetails = [];
+        foreach ($products as $item) {
+            $productoId = (string) ($item['producto_id'] ?? '');
+            $adminPrice = (float) $item['price'];
+
+            if (isset($existingSyscomIds[$productoId]) || isset($productDetails[$productoId])) {
+                $skipped++;
+
+                continue;
+            }
+
+            try {
+                $productDetails[$productoId] = $this->syscomService->getProductDetail($productoId, $adminPrice);
+            } catch (\Exception $e) {
+                $failed++;
+            }
+        }
+
+        // Phase 2: DB writes inside a single transaction
+        if ($productDetails === []) {
+            return ['imported' => $imported, 'skipped' => $skipped, 'failed' => $failed];
+        }
+
         DB::transaction(function () use (
-            $products,
+            $productDetails,
             &$imported,
-            &$skipped,
             &$failed,
-            $existingSyscomIds,
             $brandLookup,
             &$localBrands,
             $categoryLookup,
             &$localCategories,
         ) {
-            foreach ($products as $item) {
-                $productoId = (string) ($item['producto_id'] ?? '');
-                $adminPrice = (float) $item['price'];
-
-                if (isset($existingSyscomIds[$productoId])) {
-                    $skipped++;
-
-                    continue;
-                }
-
+            foreach ($productDetails as $productoId => $localData) {
                 try {
-                    $localData = $this->syscomService->getProductDetail($productoId, $adminPrice);
+                    $marcaId = $localData['metadata']['syscom_marca_id'] ?? null;
+                    $brandId = null;
+
+                    if ($marcaId) {
+                        $brand = $localBrands->get($marcaId);
+                        if (! $brand && isset($brandLookup[$marcaId])) {
+                            $brandName = $brandLookup[$marcaId];
+                            $brand = Brand::firstOrCreate(
+                                ['slug' => $marcaId],
+                                [
+                                    'name' => $brandName,
+                                    'metadata' => ['syscom_id' => $marcaId],
+                                ],
+                            );
+                            $localBrands->put($marcaId, $brand);
+                        }
+                        $brandId = $brand?->id;
+                    }
+
+                    $localData['brand_id'] = $brandId;
+                    $product = Product::create($localData);
+
+                    $syscomCategoriaIds = $localData['metadata']['syscom_categoria_ids'] ?? [];
+                    $categoryIds = [];
+
+                    foreach ($syscomCategoriaIds as $catSyscomId) {
+                        $category = $localCategories->get($catSyscomId);
+                        if (! $category && isset($categoryLookup[$catSyscomId])) {
+                            $categoryName = $categoryLookup[$catSyscomId];
+                            $category = Category::firstOrCreate(
+                                ['slug' => $catSyscomId],
+                                [
+                                    'name' => $categoryName,
+                                    'metadata' => ['syscom_id' => $catSyscomId],
+                                ],
+                            );
+                            $localCategories->put($catSyscomId, $category);
+                        }
+                        if ($category) {
+                            $categoryIds[] = $category->id;
+                        }
+                    }
+
+                    if ($categoryIds !== []) {
+                        $product->categories()->attach($categoryIds);
+                    }
+
+                    $imported++;
                 } catch (\Exception $e) {
                     $failed++;
-
-                    continue;
                 }
-
-                $marcaId = $localData['metadata']['syscom_marca_id'] ?? null;
-                $brandId = null;
-
-                if ($marcaId) {
-                    $brand = $localBrands->get($marcaId);
-                    if (! $brand && isset($brandLookup[$marcaId])) {
-                        $brandName = $brandLookup[$marcaId];
-                        $brand = Brand::firstOrCreate(
-                            ['slug' => $marcaId],
-                            [
-                                'name' => $brandName,
-                                'metadata' => ['syscom_id' => $marcaId],
-                            ],
-                        );
-                        $localBrands->put($marcaId, $brand);
-                    }
-                    $brandId = $brand?->id;
-                }
-
-                $localData['brand_id'] = $brandId;
-                $product = Product::create($localData);
-
-                $syscomCategoriaIds = $localData['metadata']['syscom_categoria_ids'] ?? [];
-                $categoryIds = [];
-
-                foreach ($syscomCategoriaIds as $catSyscomId) {
-                    $category = $localCategories->get($catSyscomId);
-                    if (! $category && isset($categoryLookup[$catSyscomId])) {
-                        $categoryName = $categoryLookup[$catSyscomId];
-                        $category = Category::firstOrCreate(
-                            ['slug' => $catSyscomId],
-                            [
-                                'name' => $categoryName,
-                                'metadata' => ['syscom_id' => $catSyscomId],
-                            ],
-                        );
-                        $localCategories->put($catSyscomId, $category);
-                    }
-                    if ($category) {
-                        $categoryIds[] = $category->id;
-                    }
-                }
-
-                if ($categoryIds !== []) {
-                    $product->categories()->attach($categoryIds);
-                }
-
-                $existingSyscomIds[$productoId] = true;
-                $imported++;
             }
         });
 

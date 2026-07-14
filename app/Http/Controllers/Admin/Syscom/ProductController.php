@@ -56,17 +56,26 @@ class ProductController extends Controller
 
         $brands = $brandsData['data'] ?? [];
 
-        try {
-            $syscomProducts = $this->syscomService->getProducts($filters, $page);
-        } catch (SyscomApiException $e) {
-            session()->flash('error', 'No se pudieron cargar los productos de SYSCOM. Intentalo de nuevo más tarde.');
-
+        if (empty($filters['categoria'])) {
             $syscomProducts = [
                 'data' => [],
                 'current_page' => 1,
                 'last_page' => 1,
                 'links' => [],
             ];
+        } else {
+            try {
+                $syscomProducts = $this->syscomService->getProducts($filters, $page);
+            } catch (SyscomApiException $e) {
+                session()->flash('error', 'No se pudieron cargar los productos de SYSCOM. Intentalo de nuevo más tarde.');
+
+                $syscomProducts = [
+                    'data' => [],
+                    'current_page' => 1,
+                    'last_page' => 1,
+                    'links' => [],
+                ];
+            }
         }
 
         $importedSyscomIds = Product::importedSyscomIds()->all();

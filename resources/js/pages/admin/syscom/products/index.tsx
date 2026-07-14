@@ -158,7 +158,6 @@ export default function AdminSyscomProductsIndex() {
                     setIsImporting(false);
                     reset();
                     setPrices(new Map());
-                    router.reload({ only: ['syscom_products'] });
                 },
                 onError: () => {
                     setIsImporting(false);
