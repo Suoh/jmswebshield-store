@@ -78,6 +78,7 @@ export default function AdminSyscomProductsIndex() {
         'all',
         '/admin/syscom/products',
     );
+    const [sort, setSort] = useUrlFilter('sort', '', '/admin/syscom/products');
 
     const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(
         undefined,
@@ -108,6 +109,10 @@ export default function AdminSyscomProductsIndex() {
         setStock(value);
     };
 
+    const handleSortChange = (value: string) => {
+        setSort(value);
+    };
+
     const handlePageChange = (newPage: number) => {
         const params = new URLSearchParams(window.location.search);
         params.set('page', String(newPage));
@@ -120,6 +125,7 @@ export default function AdminSyscomProductsIndex() {
         setMarcaId('all');
         setSearchUrl('');
         setStock('all');
+        setSort('');
     };
 
     const handlePriceChange = (id: string, value: string) => {
@@ -187,7 +193,8 @@ export default function AdminSyscomProductsIndex() {
         categoriaId !== 'all' ||
         marcaId !== 'all' ||
         searchUrl !== '' ||
-        stock !== 'all';
+        stock !== 'all' ||
+        sort !== '';
 
     return (
         <div className="space-y-4 p-6">
@@ -264,6 +271,17 @@ export default function AdminSyscomProductsIndex() {
                         <SelectItem value="all">Cualquier stock</SelectItem>
                         <SelectItem value="true">En stock</SelectItem>
                         <SelectItem value="false">Sin stock</SelectItem>
+                    </SelectContent>
+                </Select>
+
+                <Select value={sort} onValueChange={handleSortChange}>
+                    <SelectTrigger className="w-48">
+                        <SelectValue placeholder="Ordenar por" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="">Más relevantes</SelectItem>
+                        <SelectItem value="nombre:asc">Nombre A-Z</SelectItem>
+                        <SelectItem value="nombre:desc">Nombre Z-A</SelectItem>
                     </SelectContent>
                 </Select>
 
