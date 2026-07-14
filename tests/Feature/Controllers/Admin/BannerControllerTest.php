@@ -2,6 +2,7 @@
 
 use App\Models\Banner;
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
 
 beforeEach(fn () => actingAsAdmin());
 
