@@ -16,12 +16,15 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { getOrCreateSessionId } from '@/lib/editor-image-upload';
 import type { ProductImage } from '@/types/models';
 
 interface ProductImageUploaderProps {
     productId?: number;
     images: ProductImage[];
+    sessionId?: string;
     onImagesChange?: (images: ProductImage[]) => void;
+    onSessionImageIdsChange?: (ids: number[]) => void;
 }
 
 const MAX_IMAGES = 6;
@@ -31,13 +34,135 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 export default function ProductImageUploader({
     productId,
     images,
+    sessionId,
     onImagesChange,
+    onSessionImageIdsChange,
 }: ProductImageUploaderProps) {
     const [uploading, setUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
     const [uploadError, setUploadError] = useState<string | null>(null);
     const [localImages, setLocalImages] = useState<ProductImage[]>(images);
     const [deleteImageId, setDeleteImageId] = useState<number | null>(null);
+    const [sessionImageIds, setSessionImageIds] = useState<number[]>([]);
+    const resolvedSessionId = sessionId ?? getOrCreateSessionId(productId);
+
+    const uploadBatch = (validFiles: File[]) => {
+        setUploading(true);
+        setUploadProgress(0);
+
+        const formData = new FormData();
+        validFiles.forEach((file) => formData.append('images[]', file));
+        formData.append('product_id', productId!.toString());
+
+        const xhr = new XMLHttpRequest();
+        xhr.upload.addEventListener('progress', (e) => {
+            if (e.lengthComputable) {
+                setUploadProgress(Math.round((e.loaded / e.total) * 100));
+            }
+        });
+
+        xhr.addEventListener('load', () => {
+            setUploading(false);
+            setUploadProgress(0);
+
+            if (xhr.status >= 200 && xhr.status < 300) {
+                try {
+                    const response = JSON.parse(xhr.responseText);
+
+                    if (response.images) {
+                        const newImages = [...localImages, ...response.images];
+                        setLocalImages(newImages);
+                        onImagesChange?.(newImages);
+                    }
+                } catch {
+                    setUploadError(
+                        'Error al procesar la respuesta del servidor',
+                    );
+                }
+            } else {
+                try {
+                    const errorResponse = JSON.parse(xhr.responseText);
+                    const errorMsg =
+                        errorResponse.errors?.image?.[0] ||
+                        errorResponse.message ||
+                        'Error al subir imagen';
+                    setUploadError(errorMsg);
+                } catch {
+                    setUploadError('Error al subir imagen');
+                }
+            }
+        });
+
+        xhr.addEventListener('error', () => {
+            setUploading(false);
+            setUploadProgress(0);
+            setUploadError('Error de conexión al subir imagen');
+        });
+
+        xhr.open('POST', `/admin/products/${productId}/images/batch`);
+        xhr.send(formData);
+    };
+
+    const uploadSession = async (validFiles: File[]) => {
+        setUploading(true);
+        setUploadProgress(0);
+        const newIds: number[] = [];
+
+        for (let i = 0; i < validFiles.length; i++) {
+            const file = validFiles[i];
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('session_id', resolvedSessionId);
+
+            try {
+                const response = await fetch('/admin/product-images/session', {
+                    method: 'POST',
+                    body: formData,
+                    headers: { Accept: 'application/json' },
+                });
+
+                if (!response.ok) {
+                    const body = await response.json().catch(() => ({}));
+                    setUploadError(body.message ?? 'Error al subir imagen');
+
+                    return;
+                }
+
+                const data = await response.json();
+                newIds.push(data.id);
+                setUploadProgress(
+                    Math.round(((i + 1) / validFiles.length) * 100),
+                );
+
+                setLocalImages((prev) => [
+                    ...prev,
+                    {
+                        id: data.id,
+                        product_id: 0,
+                        path: '',
+                        position: prev.length + 1,
+                        is_cover: prev.length === 0,
+                        url: data.url,
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString(),
+                    },
+                ]);
+            } catch {
+                setUploadError('Error de conexión al subir imagen');
+
+                return;
+            }
+        }
+
+        setUploading(false);
+        setUploadProgress(0);
+        setSessionImageIds((prev) => {
+            const allIds = [...prev, ...newIds];
+            onSessionImageIdsChange?.(allIds);
+
+            return allIds;
+        });
+    };
 
     const handleFileSelect = useCallback(
         (files: FileList | null) => {
@@ -51,7 +176,7 @@ export default function ProductImageUploader({
             for (const file of fileArray) {
                 if (!ALLOWED_TYPES.includes(file.type)) {
                     setUploadError(
-                        `"${file.name}" no es un tipo de archivo válido ( JPG, PNG, WEBP)`,
+                        `"${file.name}" no es un tipo de archivo válido (JPG, PNG, WEBP)`,
                     );
 
                     return;
@@ -83,72 +208,42 @@ export default function ProductImageUploader({
             }
 
             setUploadError(null);
-            setUploading(true);
-            setUploadProgress(0);
-
-            const formData = new FormData();
-            validFiles.forEach((file) => formData.append('images[]', file));
 
             if (productId) {
-                formData.append('product_id', productId.toString());
+                uploadBatch(validFiles);
+            } else {
+                void uploadSession(validFiles);
             }
-
-            const xhr = new XMLHttpRequest();
-            xhr.upload.addEventListener('progress', (e) => {
-                if (e.lengthComputable) {
-                    setUploadProgress(Math.round((e.loaded / e.total) * 100));
-                }
-            });
-
-            xhr.addEventListener('load', () => {
-                setUploading(false);
-                setUploadProgress(0);
-
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    try {
-                        const response = JSON.parse(xhr.responseText);
-
-                        if (response.images) {
-                            const newImages = [
-                                ...localImages,
-                                ...response.images,
-                            ];
-                            setLocalImages(newImages);
-                            onImagesChange?.(newImages);
-                        }
-                    } catch {
-                        setUploadError(
-                            'Error al procesar la respuesta del servidor',
-                        );
-                    }
-                } else {
-                    try {
-                        const errorResponse = JSON.parse(xhr.responseText);
-                        const errorMsg =
-                            errorResponse.errors?.image?.[0] ||
-                            errorResponse.message ||
-                            'Error al subir imagen';
-                        setUploadError(errorMsg);
-                    } catch {
-                        setUploadError('Error al subir imagen');
-                    }
-                }
-            });
-
-            xhr.addEventListener('error', () => {
-                setUploading(false);
-                setUploadProgress(0);
-                setUploadError('Error de conexión al subir imagen');
-            });
-
-            xhr.open('POST', `/admin/products/${productId}/images/batch`);
-            xhr.send(formData);
         },
-        [localImages, onImagesChange, productId],
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [localImages, onImagesChange, productId, resolvedSessionId],
     );
 
     const handleDelete = useCallback(() => {
         if (deleteImageId === null) {
+            return;
+        }
+
+        const isSessionImage = sessionImageIds.includes(deleteImageId);
+
+        if (isSessionImage && !productId) {
+            fetch(`/admin/product-images/session/${deleteImageId}`, {
+                method: 'DELETE',
+                headers: { Accept: 'application/json' },
+            }).catch(() => {});
+
+            const updated = localImages.filter(
+                (img) => img.id !== deleteImageId,
+            );
+            const updatedIds = sessionImageIds.filter(
+                (id) => id !== deleteImageId,
+            );
+            setLocalImages(updated);
+            setSessionImageIds(updatedIds);
+            onSessionImageIdsChange?.(updatedIds);
+            onImagesChange?.(updated);
+            setDeleteImageId(null);
+
             return;
         }
 
@@ -158,14 +253,41 @@ export default function ProductImageUploader({
                     (img) => img.id !== deleteImageId,
                 );
                 setLocalImages(updated);
+
+                if (isSessionImage) {
+                    const updatedIds = sessionImageIds.filter(
+                        (id) => id !== deleteImageId,
+                    );
+                    setSessionImageIds(updatedIds);
+                    onSessionImageIdsChange?.(updatedIds);
+                }
+
                 onImagesChange?.(updated);
                 setDeleteImageId(null);
             },
         });
-    }, [localImages, onImagesChange, productId, deleteImageId]);
+    }, [
+        localImages,
+        onImagesChange,
+        onSessionImageIdsChange,
+        productId,
+        deleteImageId,
+        sessionImageIds,
+    ]);
 
     const handleSetCover = useCallback(
         (imageId: number) => {
+            if (!productId) {
+                const updated = localImages.map((img) => ({
+                    ...img,
+                    is_cover: img.id === imageId,
+                }));
+                setLocalImages(updated);
+                onImagesChange?.(updated);
+
+                return;
+            }
+
             router.put(
                 `/admin/products/${productId}/images/${imageId}/cover`,
                 {},
@@ -198,13 +320,15 @@ export default function ProductImageUploader({
             setLocalImages(reordered);
             onImagesChange?.(reordered);
 
-            router.put(
-                `/admin/products/${productId}/images/reorder`,
-                { ids },
-                {
-                    only: [],
-                },
-            );
+            if (productId) {
+                router.put(
+                    `/admin/products/${productId}/images/reorder`,
+                    { ids },
+                    {
+                        only: [],
+                    },
+                );
+            }
         },
         [localImages, onImagesChange, productId],
     );

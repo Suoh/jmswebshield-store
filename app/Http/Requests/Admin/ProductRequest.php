@@ -43,6 +43,8 @@ class ProductRequest extends FormRequest
             'is_active' => ['boolean'],
             'editor_image_ids' => ['nullable', 'array'],
             'editor_image_ids.*' => ['integer', 'exists:editor_images,id'],
+            'product_image_ids' => ['nullable', 'array'],
+            'product_image_ids.*' => ['integer', 'exists:product_images,id'],
         ];
     }
 }

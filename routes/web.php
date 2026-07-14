@@ -38,6 +38,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::put('products/{product}/images/{image}/cover', [ProductImageController::class, 'setCover'])->name('products.images.setCover');
     Route::delete('products/{product}/images/{image}', [ProductImageController::class, 'destroy'])->name('products.images.destroy');
 
+    Route::post('product-images/session', [ProductImageController::class, 'sessionStore'])->name('product-images.session');
+    Route::delete('product-images/session/{productImage}', [ProductImageController::class, 'destroySession'])->name('product-images.session.destroy');
+    Route::post('products/{product}/product-images/link', [ProductImageController::class, 'link'])->name('products.product-images.link');
+
     Route::post('editor-images', [EditorImageController::class, 'store'])->name('editor-images.store');
     Route::delete('editor-images/{editorImage}', [EditorImageController::class, 'destroy'])->name('editor-images.destroy');
     Route::post('products/{product}/editor-images/link', [EditorImageController::class, 'link'])->name('products.editor-images.link');

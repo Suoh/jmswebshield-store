@@ -5,6 +5,7 @@ namespace Tests\Feature\Controllers\Admin;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\ProductImage;
 use App\Models\User;
 
 beforeEach(fn () => actingAsAdmin());
@@ -234,6 +235,43 @@ describe('Admin ProductController', function () {
             ]);
 
             $response->assertInvalid(['category_ids.0']);
+        });
+
+        it('links product_image_ids after creating product', function () {
+            $image = ProductImage::factory()->create([
+                'product_id' => null,
+                'session_id' => fake()->uuid(),
+            ]);
+
+            $response = $this->actingAs($this->admin)->post('/admin/products', [
+                'name' => 'Product With Images',
+                'price' => 99.99,
+                'sku' => 'IMG-PROD-001',
+                'is_active' => true,
+                'product_image_ids' => [$image->id],
+            ]);
+
+            $response->assertRedirect('/admin/products');
+            $product = Product::where('sku', 'IMG-PROD-001')->first();
+            $this->assertEquals($product->id, $image->fresh()->product_id);
+        });
+
+        it('links multiple product_image_ids after creating product', function () {
+            $img1 = ProductImage::factory()->create(['product_id' => null, 'session_id' => fake()->uuid()]);
+            $img2 = ProductImage::factory()->create(['product_id' => null, 'session_id' => fake()->uuid()]);
+
+            $response = $this->actingAs($this->admin)->post('/admin/products', [
+                'name' => 'Product With Multiple Images',
+                'price' => 149.99,
+                'sku' => 'IMG-PROD-002',
+                'is_active' => true,
+                'product_image_ids' => [$img1->id, $img2->id],
+            ]);
+
+            $response->assertRedirect('/admin/products');
+            $product = Product::where('sku', 'IMG-PROD-002')->first();
+            $this->assertEquals($product->id, $img1->fresh()->product_id);
+            $this->assertEquals($product->id, $img2->fresh()->product_id);
         });
 
         it('sanitizes XSS in full_description on store', function () {
