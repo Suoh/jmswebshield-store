@@ -72,7 +72,7 @@ export default function FilterSidebar({
     const handleClearAll = () => {
         setPriceMinDraft('');
         setPriceMaxDraft('');
-        router.get('/products');
+        router.get('/products', {}, { preserveScroll: true });
     };
 
     const hasActiveFilters =

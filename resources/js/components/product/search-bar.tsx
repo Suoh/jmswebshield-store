@@ -26,7 +26,11 @@ export default function SearchBar() {
 
         params.delete('page');
         const query = params.toString();
-        router.get(`/products${query ? `?${query}` : ''}`);
+        router.get(
+            `/products${query ? `?${query}` : ''}`,
+            {},
+            { preserveScroll: true },
+        );
     }, []);
 
     useEffect(() => {

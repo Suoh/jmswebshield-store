@@ -29,7 +29,11 @@ export function useUrlFilter(
             }
 
             const query = params.toString();
-            router.get(`${path}${query ? `?${query}` : ''}`);
+            router.get(
+                `${path}${query ? `?${query}` : ''}`,
+                {},
+                { preserveScroll: true },
+            );
         },
         [key, defaultValue, basePath],
     );

@@ -36,7 +36,11 @@ export default function SortSelect() {
         params.set('order', newOrder);
         params.delete('page');
         const query = params.toString();
-        router.get(`/products${query ? `?${query}` : ''}`);
+        router.get(
+            `/products${query ? `?${query}` : ''}`,
+            {},
+            { preserveScroll: true },
+        );
     };
 
     return (
