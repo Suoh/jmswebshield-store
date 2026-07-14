@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\BannerController as AdminBannerController;
 use App\Http\Controllers\Admin\BrandController as AdminBrandController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\EditorImageController;
@@ -21,6 +22,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('banners', AdminBannerController::class);
+
     Route::resource('brands', AdminBrandController::class);
 
     Route::resource('categories', AdminCategoryController::class);

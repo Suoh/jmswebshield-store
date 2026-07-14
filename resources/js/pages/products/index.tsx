@@ -1,4 +1,5 @@
 import { Head } from '@inertiajs/react';
+import BannerCarousel from '@/components/banner-carousel';
 import FilterSidebar from '@/components/product/filter-sidebar';
 import ProductCard from '@/components/product/product-card';
 import ProductListRow from '@/components/product/product-list-row';
@@ -7,21 +8,38 @@ import SortSelect from '@/components/product/sort-select';
 import ViewToggle from '@/components/product/view-toggle';
 import { Pagination } from '@/components/ui/pagination';
 import { useUrlFilter } from '@/hooks/use-url-filter';
-import type { Brand, Category, PaginatedData, Product } from '@/types/models';
+import type {
+    Banner,
+    Brand,
+    Category,
+    PaginatedData,
+    Product,
+} from '@/types/models';
 
 interface Props {
     products: PaginatedData<Product>;
     brands: Brand[];
     categories: Category[];
+    banners: Banner[];
 }
 
-export default function ProductIndex({ products, brands, categories }: Props) {
+export default function ProductIndex({
+    products,
+    brands,
+    categories,
+    banners,
+}: Props) {
     const [view] = useUrlFilter('view', 'grid');
 
     return (
         <>
             <Head title="Catálogo de productos" />
             <div className="container mx-auto px-4 py-6">
+                {banners.length > 0 && (
+                    <div className="mb-8">
+                        <BannerCarousel banners={banners} />
+                    </div>
+                )}
                 <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
                     <aside className="w-full shrink-0 rounded-lg bg-sidebar p-4 lg:w-56">
                         <FilterSidebar

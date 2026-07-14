@@ -5,6 +5,7 @@ import {
     CheckCircle2,
     DownloadCloud,
     Grid3X3,
+    Image,
     PackageSearch,
     Store,
     Tag,
@@ -21,6 +22,14 @@ import {
 import { dashboard } from '@/routes';
 
 const adminSections = [
+    {
+        title: 'Banners',
+        href: '/admin/banners',
+        description:
+            'Gestioná banners promocionales para el catálogo público: imágenes y enlaces.',
+        cta: 'Gestionar banners',
+        icon: Image,
+    },
     {
         title: 'Productos',
         href: '/admin/products',

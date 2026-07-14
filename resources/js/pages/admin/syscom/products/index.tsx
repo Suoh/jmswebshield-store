@@ -78,7 +78,11 @@ export default function AdminSyscomProductsIndex() {
         'all',
         '/admin/syscom/products',
     );
-    const [sort, setSort] = useUrlFilter('sort', '', '/admin/syscom/products');
+    const [sort, setSort] = useUrlFilter(
+        'sort',
+        'relevance',
+        '/admin/syscom/products',
+    );
 
     const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(
         undefined,
@@ -125,7 +129,7 @@ export default function AdminSyscomProductsIndex() {
         setMarcaId('all');
         setSearchUrl('');
         setStock('all');
-        setSort('');
+        setSort('relevance');
     };
 
     const handlePriceChange = (id: string, value: string) => {
@@ -194,7 +198,7 @@ export default function AdminSyscomProductsIndex() {
         marcaId !== 'all' ||
         searchUrl !== '' ||
         stock !== 'all' ||
-        sort !== '';
+        sort !== 'relevance';
 
     return (
         <div className="space-y-4 p-6">
@@ -279,7 +283,9 @@ export default function AdminSyscomProductsIndex() {
                         <SelectValue placeholder="Ordenar por" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="">Más relevantes</SelectItem>
+                        <SelectItem value="relevance">
+                            Más relevantes
+                        </SelectItem>
                         <SelectItem value="nombre:asc">Nombre A-Z</SelectItem>
                         <SelectItem value="nombre:desc">Nombre Z-A</SelectItem>
                     </SelectContent>

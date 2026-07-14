@@ -1,5 +1,13 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Box, Download, Grid3X3, Package, Store, Tag } from 'lucide-react';
+import {
+    Box,
+    Download,
+    Grid3X3,
+    Image,
+    Package,
+    Store,
+    Tag,
+} from 'lucide-react';
 import BrandLogo from '@/components/brand-logo';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -17,6 +25,11 @@ import {
 import type { NavItem } from '@/types';
 
 const adminNavItems: NavItem[] = [
+    {
+        title: 'Banners',
+        href: '/admin/banners',
+        icon: Image,
+    },
     {
         title: 'Marcas',
         href: '/admin/brands',
