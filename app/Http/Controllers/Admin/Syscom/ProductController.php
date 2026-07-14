@@ -27,6 +27,7 @@ class ProductController extends Controller
             'marca' => $request->query('marca_id'),
             'busqueda' => $request->query('search'),
             'stock' => $request->query('stock'),
+            'orden' => $request->query('sort'),
         ]);
 
         if (isset($filters['stock'])) {

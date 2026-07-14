@@ -140,6 +140,50 @@ describe('Syscom Product Import Controller', function () {
             $response->assertOk();
         });
 
+        it('passes sort param as orden to SYSCOM API', function () {
+            $mockService = Mockery::mock(SyscomService::class);
+            $mockService->shouldReceive('getCategories')->andReturn([]);
+            $mockService->shouldReceive('getBrands')->andReturn(['data' => [], 'current_page' => 1, 'last_page' => 1, 'total' => 0]);
+            $mockService->shouldReceive('getProducts')
+                ->with(['categoria' => '1', 'orden' => 'nombre:asc'], 1)
+                ->once()
+                ->andReturn([
+                    'data' => [],
+                    'current_page' => 1,
+                    'last_page' => 1,
+                    'total' => 0,
+                    'per_page' => 20,
+                ]);
+
+            $this->app->instance(SyscomService::class, $mockService);
+
+            $response = $this->actingAs($this->admin)->get('/admin/syscom/products?categoria_id=1&sort=nombre:asc');
+
+            $response->assertOk();
+        });
+
+        it('ignores sort param when not provided', function () {
+            $mockService = Mockery::mock(SyscomService::class);
+            $mockService->shouldReceive('getCategories')->andReturn([]);
+            $mockService->shouldReceive('getBrands')->andReturn(['data' => [], 'current_page' => 1, 'last_page' => 1, 'total' => 0]);
+            $mockService->shouldReceive('getProducts')
+                ->with(['categoria' => '1'], 1)
+                ->once()
+                ->andReturn([
+                    'data' => [],
+                    'current_page' => 1,
+                    'last_page' => 1,
+                    'total' => 0,
+                    'per_page' => 20,
+                ]);
+
+            $this->app->instance(SyscomService::class, $mockService);
+
+            $response = $this->actingAs($this->admin)->get('/admin/syscom/products?categoria_id=1');
+
+            $response->assertOk();
+        });
+
         it('denies access to non-admin users', function () {
             $user = User::factory()->create(['email' => 'user@test.com']);
 
