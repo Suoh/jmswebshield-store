@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\SortOrder;
 use App\Enums\StockFilter;
+use App\Models\Banner;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
@@ -62,11 +63,15 @@ class ProductController extends Controller
 
         $brands = Brand::orderBy('name')->get(['id', 'name', 'slug']);
         $categories = Category::orderBy('name')->get(['id', 'name', 'slug']);
+        $banners = Banner::where('is_active', true)
+            ->orderBy('position')
+            ->get();
 
         return Inertia::render('products/index', [
             'products' => $products,
             'brands' => $brands,
             'categories' => $categories,
+            'banners' => $banners,
         ]);
     }
 

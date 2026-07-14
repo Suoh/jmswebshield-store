@@ -1,3 +1,15 @@
+export interface Banner {
+    id: number;
+    name: string;
+    image_path: string;
+    image_url: string;
+    link_url: string | null;
+    position: number;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+}
+
 export interface Brand {
     id: number;
     name: string;
