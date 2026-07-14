@@ -176,8 +176,8 @@ export default function ProductForm({
                                 onImageUploaded={(imageId) =>
                                     setEditorImageIds((prev) => {
                                         if (prev.includes(imageId)) {
-return prev;
-}
+                                            return prev;
+                                        }
 
                                         return [...prev, imageId];
                                     })
@@ -379,7 +379,6 @@ return prev;
                                 </p>
                             )}
                         </div>
-
                     </CardContent>
                 </Card>
 

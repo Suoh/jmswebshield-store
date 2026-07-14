@@ -1,21 +1,16 @@
 import { router } from '@inertiajs/react';
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 
 export function useUrlFilter(
     key: string,
     defaultValue: string,
     basePath?: string,
 ) {
-    const value = useMemo<string>(() => {
-        if (typeof window === 'undefined') {
-            return defaultValue;
-        }
-
-        const params = new URLSearchParams(window.location.search);
-        const val = params.get(key);
-
-        return val ?? defaultValue;
-    }, [key, defaultValue]);
+    const value =
+        typeof window === 'undefined'
+            ? defaultValue
+            : (new URLSearchParams(window.location.search).get(key) ??
+              defaultValue);
 
     const navigate = useCallback(
         (newValue: string) => {

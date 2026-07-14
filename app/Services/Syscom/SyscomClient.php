@@ -59,7 +59,7 @@ class SyscomClient
         return $response->json('access_token');
     }
 
-    private function request(string $method, string $endpoint, array $query = []): array
+    private function request(string $method, string $endpoint, array $query = [], int $timeout = 30): array
     {
         $token = $this->getAccessToken();
         $url = $this->baseUrl.$endpoint;
@@ -68,7 +68,7 @@ class SyscomClient
         $lastException = null;
         while ($retries < self::MAX_RETRIES) {
             try {
-                $response = $this->makeRequest($method, $url, $query, $token);
+                $response = $this->makeRequest($method, $url, $query, $token, $timeout);
 
                 return $response->json();
             } catch (SyscomApiException $e) {
@@ -86,10 +86,10 @@ class SyscomClient
         throw SyscomApiException::fromRequest($url, $lastException);
     }
 
-    private function makeRequest(string $method, string $url, array $query, string $token): Response
+    private function makeRequest(string $method, string $url, array $query, string $token, int $timeout = 30): Response
     {
         $response = Http::withToken($token)
-            ->timeout(30)
+            ->timeout($timeout)
             ->{strtolower($method)}($url, $query);
 
         $response->throw();
@@ -151,6 +151,6 @@ class SyscomClient
 
     public function getProductDetail(string $id): array
     {
-        return $this->request('GET', "/api/v1/productos/{$id}");
+        return $this->request('GET', "/api/v1/productos/{$id}", timeout: 60);
     }
 }

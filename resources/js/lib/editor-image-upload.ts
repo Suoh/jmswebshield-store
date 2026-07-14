@@ -47,8 +47,8 @@ export function getOrCreateSessionId(productId?: number): string {
     const existing = sessionStorage.getItem(key);
 
     if (existing) {
-return existing;
-}
+        return existing;
+    }
 
     const newId = generateSessionId();
     sessionStorage.setItem(key, newId);

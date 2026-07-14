@@ -70,7 +70,7 @@ describe('Syscom Product Import Controller', function () {
                 );
         });
 
-        it('shows all products without category filter when no filters are provided', function () {
+        it('returns empty products when no category filter is provided', function () {
             $mockService = Mockery::mock(SyscomService::class);
             $mockService->shouldReceive('getCategories')
                 ->once()
@@ -87,15 +87,7 @@ describe('Syscom Product Import Controller', function () {
                     'last_page' => 1,
                     'total' => 0,
                 ]);
-            $mockService->shouldReceive('getProducts')
-                ->with([], 1)
-                ->once()
-                ->andReturn([
-                    'data' => [],
-                    'current_page' => 1,
-                    'last_page' => 1,
-                    'total' => 0,
-                ]);
+            $mockService->shouldNotReceive('getProducts');
 
             $this->app->instance(SyscomService::class, $mockService);
 
@@ -131,7 +123,7 @@ describe('Syscom Product Import Controller', function () {
             $mockService->shouldReceive('getCategories')->andReturn([]);
             $mockService->shouldReceive('getBrands')->andReturn(['data' => [], 'current_page' => 1, 'last_page' => 1, 'total' => 0]);
             $mockService->shouldReceive('getProducts')
-                ->with(['stock' => '0'], 1)
+                ->with(['categoria' => '1', 'stock' => '0'], 1)
                 ->once()
                 ->andReturn([
                     'data' => [],
@@ -143,7 +135,7 @@ describe('Syscom Product Import Controller', function () {
 
             $this->app->instance(SyscomService::class, $mockService);
 
-            $response = $this->actingAs($this->admin)->get('/admin/syscom/products?stock=false');
+            $response = $this->actingAs($this->admin)->get('/admin/syscom/products?categoria_id=1&stock=false');
 
             $response->assertOk();
         });
