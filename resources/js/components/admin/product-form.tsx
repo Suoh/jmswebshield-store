@@ -1,5 +1,6 @@
 import { useForm } from '@inertiajs/react';
 import { useState } from 'react';
+import ProductImageUploader from '@/components/admin/product-image-uploader';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -21,7 +22,7 @@ import {
 } from '@/components/ui/select';
 import { getOrCreateSessionId } from '@/lib/editor-image-upload';
 
-import type { Category } from '@/types/models';
+import type { Category, ProductImage } from '@/types/models';
 
 interface Product {
     id?: number;
@@ -37,6 +38,7 @@ interface Product {
     image_url: string | null;
     is_active: boolean;
     categories?: Category[];
+    images?: ProductImage[];
 }
 
 interface Brand {
@@ -58,6 +60,7 @@ export interface ProductFormPayload {
     model: string;
     is_active: boolean;
     editor_image_ids: number[];
+    product_image_ids: number[];
 }
 
 interface ProductFormProps {
@@ -74,6 +77,7 @@ export default function ProductForm({
     onSubmit,
 }: ProductFormProps) {
     const [editorImageIds, setEditorImageIds] = useState<number[]>([]);
+    const [productImageIds, setProductImageIds] = useState<number[]>([]);
     const [sessionId] = useState(() => getOrCreateSessionId(product?.id));
     const { data, setData, errors, processing } = useForm({
         name: product?.name ?? '',
@@ -105,6 +109,7 @@ export default function ProductForm({
             category_ids: data.category_ids,
             is_active: data.is_active,
             editor_image_ids: editorImageIds,
+            product_image_ids: productImageIds,
         };
         onSubmit(payload);
     };
@@ -413,6 +418,23 @@ export default function ProductForm({
                     </CardContent>
                 </Card>
             </div>
+
+            <Card className="mt-6">
+                <CardHeader>
+                    <CardTitle>Imágenes del producto</CardTitle>
+                    <CardDescription>
+                        Sube imágenes del producto. La primera será la portada.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <ProductImageUploader
+                        productId={product?.id}
+                        images={product?.images ?? []}
+                        sessionId={sessionId}
+                        onSessionImageIdsChange={setProductImageIds}
+                    />
+                </CardContent>
+            </Card>
 
             <div className="flex items-center gap-2 pt-6">
                 <Button type="submit" disabled={processing}>

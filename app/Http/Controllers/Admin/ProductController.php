@@ -10,6 +10,7 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\EditorImage;
 use App\Models\Product;
+use App\Models\ProductImage;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -67,6 +68,12 @@ class ProductController extends Controller
 
         if ($request->has('editor_image_ids')) {
             EditorImage::whereIn('id', $request->input('editor_image_ids', []))
+                ->whereNull('product_id')
+                ->update(['product_id' => $product->id]);
+        }
+
+        if ($request->has('product_image_ids')) {
+            ProductImage::whereIn('id', $request->input('product_image_ids', []))
                 ->whereNull('product_id')
                 ->update(['product_id' => $product->id]);
         }

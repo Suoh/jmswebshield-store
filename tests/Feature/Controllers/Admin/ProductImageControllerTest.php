@@ -239,6 +239,110 @@ describe('Admin ProductImageController', function () {
         });
     });
 
+    describe('sessionStore', function () {
+        it('uploads image without product_id', function () {
+            $file = UploadedFile::fake()->create('session.jpg', 100, 'image/jpeg');
+            $sessionId = fake()->uuid();
+
+            $response = $this->actingAs($this->admin)->post('/admin/product-images/session', [
+                'image' => $file,
+                'session_id' => $sessionId,
+            ]);
+
+            $response->assertStatus(201);
+            $data = $response->json();
+
+            expect($data)->toHaveKeys(['id', 'url']);
+
+            $this->assertDatabaseHas('product_images', [
+                'id' => $data['id'],
+                'product_id' => null,
+                'session_id' => $sessionId,
+            ]);
+
+            $image = ProductImage::find($data['id']);
+            Storage::disk('public')->assertExists($image->path);
+        });
+
+        it('rejects files larger than 2MB', function () {
+            $file = UploadedFile::fake()->create('large.jpg', 3 * 1024, 'image/jpeg');
+            $sessionId = fake()->uuid();
+
+            $response = $this->actingAs($this->admin)->post('/admin/product-images/session', [
+                'image' => $file,
+                'session_id' => $sessionId,
+            ]);
+
+            $response->assertInvalid(['image']);
+        });
+
+        it('rejects non-image files', function () {
+            $file = UploadedFile::fake()->create('doc.pdf', 100, 'application/pdf');
+            $sessionId = fake()->uuid();
+
+            $response = $this->actingAs($this->admin)->post('/admin/product-images/session', [
+                'image' => $file,
+                'session_id' => $sessionId,
+            ]);
+
+            $response->assertInvalid(['image']);
+        });
+
+        it('requires session_id', function () {
+            $file = UploadedFile::fake()->create('test.jpg', 100, 'image/jpeg');
+
+            $response = $this->actingAs($this->admin)->post('/admin/product-images/session', [
+                'image' => $file,
+            ]);
+
+            $response->assertInvalid(['session_id']);
+        });
+    });
+
+    describe('link', function () {
+        it('links session images to product', function () {
+            $product = Product::factory()->create();
+            $sessionId = fake()->uuid();
+            $image = ProductImage::factory()->create([
+                'product_id' => null,
+                'session_id' => $sessionId,
+            ]);
+
+            $response = $this->actingAs($this->admin)->post(
+                "/admin/products/{$product->id}/product-images/link",
+                ['product_image_ids' => [$image->id]]
+            );
+
+            $response->assertOk();
+            $this->assertEquals($product->id, $image->fresh()->product_id);
+        });
+
+        it('only links images with null product_id', function () {
+            $product = Product::factory()->create();
+            $otherProduct = Product::factory()->create();
+            $image = ProductImage::factory()->create(['product_id' => $otherProduct->id]);
+
+            $response = $this->actingAs($this->admin)->post(
+                "/admin/products/{$product->id}/product-images/link",
+                ['product_image_ids' => [$image->id]]
+            );
+
+            $response->assertOk();
+            $this->assertEquals($otherProduct->id, $image->fresh()->product_id);
+        });
+
+        it('rejects nonexistent image ids', function () {
+            $product = Product::factory()->create();
+
+            $response = $this->actingAs($this->admin)->post(
+                "/admin/products/{$product->id}/product-images/link",
+                ['product_image_ids' => [99999]]
+            );
+
+            $response->assertInvalid(['product_image_ids.0']);
+        });
+    });
+
     describe('cover image fallback', function () {
         it('product coverImage returns image_url when no images exist', function () {
             $product = Product::factory()->create(['image_url' => 'https://example.com/img.jpg']);

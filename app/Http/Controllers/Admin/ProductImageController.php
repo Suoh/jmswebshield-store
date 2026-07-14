@@ -12,6 +12,7 @@ use App\Models\ProductImage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\File;
 
 class ProductImageController extends Controller
@@ -21,6 +22,62 @@ class ProductImageController extends Controller
         private DeleteProductImage $deleteProductImage,
         private ReorderProductImages $reorderProductImages,
     ) {}
+
+    public function sessionStore(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'image' => [
+                'required',
+                File::types(['jpg', 'jpeg', 'png', 'webp'])->max(2 * 1024),
+            ],
+            'session_id' => ['required', 'string', 'size:36'],
+        ]);
+
+        $sessionId = $validated['session_id'];
+        $file = $validated['image'];
+        $filename = Str::uuid().'.'.$file->extension();
+        $path = $file->storeAs("product-images/pending/{$sessionId}", $filename, 'public');
+
+        $image = ProductImage::create([
+            'product_id' => null,
+            'session_id' => $sessionId,
+            'path' => $path,
+            'original_name' => $file->getClientOriginalName(),
+            'size_bytes' => $file->getSize(),
+            'position' => 0,
+            'is_cover' => false,
+        ]);
+
+        return response()->json([
+            'id' => $image->id,
+            'url' => $image->url,
+        ], 201);
+    }
+
+    public function destroySession(ProductImage $productImage): JsonResponse
+    {
+        if ($productImage->product_id !== null) {
+            return response()->json(['message' => 'Image is linked to a product'], 422);
+        }
+
+        $productImage->delete();
+
+        return response()->json(null, 204);
+    }
+
+    public function link(Request $request, Product $product): JsonResponse
+    {
+        $validated = $request->validate([
+            'product_image_ids' => ['required', 'array'],
+            'product_image_ids.*' => ['integer', 'exists:product_images,id'],
+        ]);
+
+        $count = ProductImage::whereIn('id', $validated['product_image_ids'])
+            ->whereNull('product_id')
+            ->update(['product_id' => $product->id]);
+
+        return response()->json(['linked' => $count]);
+    }
 
     public function store(Request $request, int $productId): RedirectResponse
     {
