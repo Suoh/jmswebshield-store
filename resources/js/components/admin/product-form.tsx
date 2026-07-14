@@ -20,6 +20,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 import { getOrCreateSessionId } from '@/lib/editor-image-upload';
 
 import type { Category, ProductImage } from '@/types/models';
@@ -226,13 +227,31 @@ export default function ProductForm({
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Precios y stock</CardTitle>
+                        <CardTitle>Imágenes del producto</CardTitle>
                         <CardDescription>
-                            Configura el precio, descuento y disponibilidad.
+                            Sube imágenes del producto. La primera será la
+                            portada.
                         </CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                    <CardContent>
+                        <ProductImageUploader
+                            productId={product?.id}
+                            images={product?.images ?? []}
+                            sessionId={sessionId}
+                            onSessionImageIdsChange={setProductImageIds}
+                        />
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Configuración del producto</CardTitle>
+                        <CardDescription>
+                            Configura el precio, clasificación y disponibilidad.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <div className="grid grid-cols-3 gap-4">
                             <div className="space-y-2">
                                 <Label htmlFor="price">Precio *</Label>
                                 <Input
@@ -267,42 +286,34 @@ export default function ProductForm({
                                     placeholder="0"
                                 />
                             </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="discount">
+                                    Descuento ({data.discount}%)
+                                </Label>
+                                <Input
+                                    id="discount"
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    value={data.discount}
+                                    onChange={(e) =>
+                                        setData(
+                                            'discount',
+                                            parseInt(e.target.value, 10) || 0,
+                                        )
+                                    }
+                                />
+                                {errors.discount && (
+                                    <p className="text-sm text-destructive">
+                                        {errors.discount}
+                                    </p>
+                                )}
+                            </div>
                         </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="discount">
-                                Descuento ({data.discount}%)
-                            </Label>
-                            <Input
-                                id="discount"
-                                type="range"
-                                min="0"
-                                max="100"
-                                value={data.discount}
-                                onChange={(e) =>
-                                    setData(
-                                        'discount',
-                                        parseInt(e.target.value, 10) || 0,
-                                    )
-                                }
-                            />
-                            {errors.discount && (
-                                <p className="text-sm text-destructive">
-                                    {errors.discount}
-                                </p>
-                            )}
-                        </div>
-                    </CardContent>
-                </Card>
+                        <Separator />
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Clasificación</CardTitle>
-                        <CardDescription>
-                            Asocia el producto con una marca y categoría.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
                         <div className="space-y-2">
                             <Label htmlFor="brand_id">Marca</Label>
                             <Select
@@ -384,17 +395,9 @@ export default function ProductForm({
                                 </p>
                             )}
                         </div>
-                    </CardContent>
-                </Card>
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Estado</CardTitle>
-                        <CardDescription>
-                            Controla la visibilidad del producto.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
+                        <Separator />
+
                         <div className="flex items-center gap-3">
                             <Checkbox
                                 id="is_active"
@@ -411,30 +414,13 @@ export default function ProductForm({
                             </Label>
                         </div>
                         {errors.is_active && (
-                            <p className="mt-2 text-sm text-destructive">
+                            <p className="text-sm text-destructive">
                                 {errors.is_active}
                             </p>
                         )}
                     </CardContent>
                 </Card>
             </div>
-
-            <Card className="mt-6">
-                <CardHeader>
-                    <CardTitle>Imágenes del producto</CardTitle>
-                    <CardDescription>
-                        Sube imágenes del producto. La primera será la portada.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <ProductImageUploader
-                        productId={product?.id}
-                        images={product?.images ?? []}
-                        sessionId={sessionId}
-                        onSessionImageIdsChange={setProductImageIds}
-                    />
-                </CardContent>
-            </Card>
 
             <div className="flex items-center gap-2 pt-6">
                 <Button type="submit" disabled={processing}>
