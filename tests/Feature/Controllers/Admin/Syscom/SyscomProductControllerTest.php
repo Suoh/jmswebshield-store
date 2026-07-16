@@ -21,19 +21,13 @@ describe('Syscom Product Import Controller', function () {
                     ['id' => '2', 'nombre' => 'Switches'],
                 ]);
             $mockService->shouldReceive('getBrands')
-                ->with(1)
                 ->once()
                 ->andReturn([
-                    'data' => [
-                        ['id' => 'tp-link', 'nombre' => 'TP-Link'],
-                        ['id' => 'netgear', 'nombre' => 'Netgear'],
-                    ],
-                    'current_page' => 1,
-                    'last_page' => 1,
-                    'total' => 2,
+                    ['id' => 'tp-link', 'nombre' => 'TP-Link'],
+                    ['id' => 'netgear', 'nombre' => 'Netgear'],
                 ]);
             $mockService->shouldReceive('getProducts')
-                ->with(['categoria' => '1'], 1)
+                ->with(['categoria' => '1', 'limit' => 20], 1)
                 ->once()
                 ->andReturn([
                     'data' => [
@@ -79,14 +73,8 @@ describe('Syscom Product Import Controller', function () {
                     ['id' => '2', 'nombre' => 'Switches'],
                 ]);
             $mockService->shouldReceive('getBrands')
-                ->with(1)
                 ->once()
-                ->andReturn([
-                    'data' => [],
-                    'current_page' => 1,
-                    'last_page' => 1,
-                    'total' => 0,
-                ]);
+                ->andReturn([]);
             $mockService->shouldNotReceive('getProducts');
 
             $this->app->instance(SyscomService::class, $mockService);
@@ -99,9 +87,9 @@ describe('Syscom Product Import Controller', function () {
         it('passes filters to getProducts with SYSCOM param names', function () {
             $mockService = Mockery::mock(SyscomService::class);
             $mockService->shouldReceive('getCategories')->andReturn([]);
-            $mockService->shouldReceive('getBrands')->andReturn(['data' => [], 'current_page' => 1, 'last_page' => 1, 'total' => 0]);
+            $mockService->shouldReceive('getBrands')->andReturn([]);
             $mockService->shouldReceive('getProducts')
-                ->with(['categoria' => '5', 'marca' => 'tp-link', 'busqueda' => 'router', 'stock' => '1'], 2)
+                ->with(['categoria' => '5', 'marca' => 'tp-link', 'busqueda' => 'router', 'stock' => '1', 'limit' => 20], 2)
                 ->once()
                 ->andReturn([
                     'data' => [],
@@ -121,9 +109,9 @@ describe('Syscom Product Import Controller', function () {
         it('maps stock false to 0 for SYSCOM API', function () {
             $mockService = Mockery::mock(SyscomService::class);
             $mockService->shouldReceive('getCategories')->andReturn([]);
-            $mockService->shouldReceive('getBrands')->andReturn(['data' => [], 'current_page' => 1, 'last_page' => 1, 'total' => 0]);
+            $mockService->shouldReceive('getBrands')->andReturn([]);
             $mockService->shouldReceive('getProducts')
-                ->with(['categoria' => '1', 'stock' => '0'], 1)
+                ->with(['categoria' => '1', 'stock' => '0', 'limit' => 20], 1)
                 ->once()
                 ->andReturn([
                     'data' => [],
@@ -143,9 +131,9 @@ describe('Syscom Product Import Controller', function () {
         it('passes sort param as orden to SYSCOM API', function () {
             $mockService = Mockery::mock(SyscomService::class);
             $mockService->shouldReceive('getCategories')->andReturn([]);
-            $mockService->shouldReceive('getBrands')->andReturn(['data' => [], 'current_page' => 1, 'last_page' => 1, 'total' => 0]);
+            $mockService->shouldReceive('getBrands')->andReturn([]);
             $mockService->shouldReceive('getProducts')
-                ->with(['categoria' => '1', 'orden' => 'nombre:asc'], 1)
+                ->with(['categoria' => '1', 'orden' => 'nombre:asc', 'limit' => 20], 1)
                 ->once()
                 ->andReturn([
                     'data' => [],
@@ -165,9 +153,9 @@ describe('Syscom Product Import Controller', function () {
         it('ignores sort param when not provided', function () {
             $mockService = Mockery::mock(SyscomService::class);
             $mockService->shouldReceive('getCategories')->andReturn([]);
-            $mockService->shouldReceive('getBrands')->andReturn(['data' => [], 'current_page' => 1, 'last_page' => 1, 'total' => 0]);
+            $mockService->shouldReceive('getBrands')->andReturn([]);
             $mockService->shouldReceive('getProducts')
-                ->with(['categoria' => '1'], 1)
+                ->with(['categoria' => '1', 'limit' => 20], 1)
                 ->once()
                 ->andReturn([
                     'data' => [],
@@ -204,15 +192,9 @@ describe('Syscom Product Import Controller', function () {
             $mockService = Mockery::mock(SyscomService::class);
             $mockService->shouldReceive('getCategories')->andReturn([]);
             $mockService->shouldReceive('getBrands')
-                ->with(1)
                 ->once()
                 ->andReturn([
-                    'data' => [
-                        ['id' => 'netgear', 'nombre' => 'Netgear'],
-                    ],
-                    'current_page' => 1,
-                    'last_page' => 1,
-                    'total' => 1,
+                    ['id' => 'netgear', 'nombre' => 'Netgear'],
                 ]);
             $mockService->shouldReceive('getProductDetail')
                 ->with('prod-001', 120.00)
@@ -262,16 +244,10 @@ describe('Syscom Product Import Controller', function () {
             $mockService = Mockery::mock(SyscomService::class);
             $mockService->shouldReceive('getCategories')->andReturn([]);
             $mockService->shouldReceive('getBrands')
-                ->with(1)
                 ->once()
                 ->andReturn([
-                    'data' => [
-                        ['id' => 'tp-link', 'nombre' => 'TP-Link'],
-                        ['id' => 'netgear', 'nombre' => 'Netgear'],
-                    ],
-                    'current_page' => 1,
-                    'last_page' => 1,
-                    'total' => 2,
+                    ['id' => 'tp-link', 'nombre' => 'TP-Link'],
+                    ['id' => 'netgear', 'nombre' => 'Netgear'],
                 ]);
             $mockService->shouldReceive('getProductDetail')
                 ->with('prod-001', 80.00)
@@ -342,7 +318,7 @@ describe('Syscom Product Import Controller', function () {
             $mockService = Mockery::mock(SyscomService::class);
             $mockService->shouldReceive('getCategories')->andReturn([]);
             $mockService->shouldReceive('getBrands')
-                ->andReturn(['data' => [], 'current_page' => 1, 'last_page' => 1, 'total' => 0]);
+                ->andReturn([]);
 
             $this->app->instance(SyscomService::class, $mockService);
 
@@ -362,7 +338,7 @@ describe('Syscom Product Import Controller', function () {
             $mockService = Mockery::mock(SyscomService::class);
             $mockService->shouldReceive('getCategories')->andReturn([]);
             $mockService->shouldReceive('getBrands')
-                ->andReturn(['data' => [], 'current_page' => 1, 'last_page' => 1, 'total' => 0]);
+                ->andReturn([]);
             $mockService->shouldReceive('getProductDetail')
                 ->with('prod-001', 80.00)
                 ->once()
@@ -406,7 +382,7 @@ describe('Syscom Product Import Controller', function () {
         it('fails when price is missing', function () {
             $mockService = Mockery::mock(SyscomService::class);
             $mockService->shouldReceive('getCategories')->andReturn([]);
-            $mockService->shouldReceive('getBrands')->andReturn(['data' => [], 'current_page' => 1, 'last_page' => 1, 'total' => 0]);
+            $mockService->shouldReceive('getBrands')->andReturn([]);
             $this->app->instance(SyscomService::class, $mockService);
 
             $response = $this->actingAs($this->admin)->postJson('/admin/syscom/products/import', [
@@ -422,7 +398,7 @@ describe('Syscom Product Import Controller', function () {
         it('fails when price is negative', function () {
             $mockService = Mockery::mock(SyscomService::class);
             $mockService->shouldReceive('getCategories')->andReturn([]);
-            $mockService->shouldReceive('getBrands')->andReturn(['data' => [], 'current_page' => 1, 'last_page' => 1, 'total' => 0]);
+            $mockService->shouldReceive('getBrands')->andReturn([]);
             $this->app->instance(SyscomService::class, $mockService);
 
             $response = $this->actingAs($this->admin)->postJson('/admin/syscom/products/import', [
@@ -438,7 +414,7 @@ describe('Syscom Product Import Controller', function () {
         it('fails when more than 50 products provided', function () {
             $mockService = Mockery::mock(SyscomService::class);
             $mockService->shouldReceive('getCategories')->andReturn([]);
-            $mockService->shouldReceive('getBrands')->andReturn(['data' => [], 'current_page' => 1, 'last_page' => 1, 'total' => 0]);
+            $mockService->shouldReceive('getBrands')->andReturn([]);
             $this->app->instance(SyscomService::class, $mockService);
 
             $products = array_map(

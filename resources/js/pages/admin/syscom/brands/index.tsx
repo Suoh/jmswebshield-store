@@ -6,15 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DataTable } from '@/components/ui/data-table';
 import { Input } from '@/components/ui/input';
-import { Pagination } from '@/components/ui/pagination';
 import { Spinner } from '@/components/ui/spinner';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { useFlashToast } from '@/hooks/use-flash-toast';
 import { useToggleAll } from '@/hooks/use-toggle-all';
-import type { PaginatedData, SyscomBrand } from '@/types';
+import type { SyscomBrand } from '@/types';
 
 interface PageProps {
-    syscom_brands: PaginatedData<SyscomBrand>;
+    syscom_brands: SyscomBrand[];
     imported_syscom_ids: string[];
     [key: string]: unknown;
 }
@@ -44,7 +43,7 @@ export default function AdminSyscomBrandsIndex() {
         };
     }, []);
 
-    const filtered = syscom_brands.data.filter((brand) =>
+    const filtered = syscom_brands.filter((brand) =>
         brand.nombre.toLowerCase().includes(search.toLowerCase()),
     );
 
@@ -142,14 +141,6 @@ export default function AdminSyscomBrandsIndex() {
                 loading={isLoading}
                 loadingRows={10}
                 emptyTitle={emptyTitle}
-                footer={
-                    syscom_brands.last_page > 1 ? (
-                        <Pagination
-                            links={syscom_brands.links}
-                            className="mt-0"
-                        />
-                    ) : null
-                }
             >
                 {filtered.map((brand) => {
                     const isImported = imported_syscom_ids.includes(brand.id);

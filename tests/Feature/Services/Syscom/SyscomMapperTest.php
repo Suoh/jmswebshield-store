@@ -79,6 +79,8 @@ describe('SyscomMapper', function () {
                 'marca_id' => 'tp-link',
                 'categorias' => ['cat-001', 'cat-002'],
                 'precios' => [
+                    'precio_1' => 1600.00,
+                    'precio_especial' => 1550.00,
                     'precio_lista' => 1500.00,
                     'precio_descuento' => 1350.00,
                 ],
@@ -101,6 +103,8 @@ describe('SyscomMapper', function () {
                 ->toHaveKey('syscom_categoria_ids', ['cat-001', 'cat-002'])
                 ->toHaveKey('syscom_precios')
                 ->and($result['metadata']['syscom_precios'])->toBeArray()
+                ->toHaveKey('precio_1', 1600.00)
+                ->toHaveKey('precio_especial', 1550.00)
                 ->toHaveKey('precio_lista', 1500.00)
                 ->toHaveKey('precio_descuento', 1350.00);
         });
@@ -116,6 +120,8 @@ describe('SyscomMapper', function () {
                 'marca_id' => null,
                 'categorias' => [],
                 'precios' => [
+                    'precio_1' => 9999.99,
+                    'precio_especial' => 9499.99,
                     'precio_lista' => 9999.99,
                     'precio_descuento' => 8999.99,
                 ],
@@ -139,8 +145,10 @@ describe('SyscomMapper', function () {
                 'marca_id' => null,
                 'categorias' => [],
                 'precios' => [
+                    'precio_1' => 110.00,
+                    'precio_especial' => 105.00,
                     'precio_lista' => 100.00,
-                    'precio_descuento' => 90.00,
+                    'precio_descuento' => 100.00,
                 ],
                 'imagen' => null,
             ];
@@ -162,8 +170,10 @@ describe('SyscomMapper', function () {
                 'marca_id' => null,
                 'categorias' => [],
                 'precios' => [
+                    'precio_1' => 110.00,
+                    'precio_especial' => 105.00,
                     'precio_lista' => 100.00,
-                    'precio_descuento' => 90.00,
+                    'precio_descuento' => 100.00,
                 ],
                 'imagen' => null,
             ];

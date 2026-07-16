@@ -31,7 +31,7 @@ describe('ProductImporter category attachment', function () {
         ]);
 
         $mockClient = Mockery::mock(SyscomClient::class);
-        $mockClient->shouldReceive('getBrands')->andReturn(['data' => []]);
+        $mockClient->shouldReceive('getBrands')->andReturn([]);
         $mockClient->shouldReceive('getCategories')->andReturn([
             ['id' => 'cat-001', 'nombre' => 'Redes'],
             ['id' => 'cat-002', 'nombre' => 'Audio'],
@@ -42,12 +42,13 @@ describe('ProductImporter category attachment', function () {
             ->andReturn([
                 'producto_id' => 'prod-001',
                 'titulo' => 'Switch Gigabit',
+                'sat_description' => 'Switch 8 puertos',
                 'descripcion' => 'Switch 8 puertos',
                 'total_existencia' => 10,
                 'modelo' => 'SG108',
                 'marca' => null,
                 'categorias' => ['cat-001', 'cat-002'],
-                'precios' => ['precio_lista' => 1500.00, 'precio_descuento' => null],
+                'precios' => ['precio_1' => 1600.00, 'precio_especial' => 1550.00, 'precio_lista' => 1500.00, 'precio_descuento' => null],
                 'img_portada' => null,
             ]);
 
@@ -72,7 +73,7 @@ describe('ProductImporter category attachment', function () {
         ]);
 
         $mockClient = Mockery::mock(SyscomClient::class);
-        $mockClient->shouldReceive('getBrands')->andReturn(['data' => []]);
+        $mockClient->shouldReceive('getBrands')->andReturn([]);
         $mockClient->shouldReceive('getCategories')->andReturn([
             ['id' => 'cat-001', 'nombre' => 'Redes'],
         ]);
@@ -82,12 +83,13 @@ describe('ProductImporter category attachment', function () {
             ->andReturn([
                 'producto_id' => 'prod-001',
                 'titulo' => 'Producto sin categoría local',
+                'sat_description' => null,
                 'descripcion' => null,
                 'total_existencia' => 5,
                 'modelo' => null,
                 'marca' => null,
                 'categorias' => ['cat-001', 'cat-unknown'],
-                'precios' => ['precio_lista' => 1500.00, 'precio_descuento' => null],
+                'precios' => ['precio_1' => 1600.00, 'precio_especial' => 1550.00, 'precio_lista' => 1500.00, 'precio_descuento' => null],
                 'img_portada' => null,
             ]);
 
@@ -105,7 +107,7 @@ describe('ProductImporter category attachment', function () {
 
     it('auto-creates category from SYSCOM catalog when not imported yet', function () {
         $mockClient = Mockery::mock(SyscomClient::class);
-        $mockClient->shouldReceive('getBrands')->andReturn(['data' => []]);
+        $mockClient->shouldReceive('getBrands')->andReturn([]);
         $mockClient->shouldReceive('getCategories')->andReturn([
             ['id' => 'cat-new', 'nombre' => 'Almacenamiento'],
         ]);
@@ -115,12 +117,13 @@ describe('ProductImporter category attachment', function () {
             ->andReturn([
                 'producto_id' => 'prod-001',
                 'titulo' => 'Disco NAS',
+                'sat_description' => null,
                 'descripcion' => null,
                 'total_existencia' => 3,
                 'modelo' => null,
                 'marca' => null,
                 'categorias' => ['cat-new'],
-                'precios' => ['precio_lista' => 1500.00, 'precio_descuento' => null],
+                'precios' => ['precio_1' => 1600.00, 'precio_especial' => 1550.00, 'precio_lista' => 1500.00, 'precio_descuento' => null],
                 'img_portada' => null,
             ]);
 
