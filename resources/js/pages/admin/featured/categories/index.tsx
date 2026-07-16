@@ -51,7 +51,6 @@ interface PageProps {
 
 export default function AdminFeaturedCategoriesIndex() {
     const { items, categories, flash } = usePage<PageProps>().props;
-    const [orderedItems, setOrderedItems] = useState(items);
     const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
     const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
 
@@ -62,10 +61,9 @@ export default function AdminFeaturedCategoriesIndex() {
             return;
         }
 
-        const reordered = Array.from(orderedItems);
+        const reordered = Array.from(items);
         const [removed] = reordered.splice(result.source.index, 1);
         reordered.splice(result.destination.index, 0, removed);
-        setOrderedItems(reordered);
 
         router.put(
             '/admin/featured/categories/reorder',
@@ -89,13 +87,8 @@ export default function AdminFeaturedCategoriesIndex() {
             { category_id: id } as never,
             {
                 preserveScroll: true,
-                onSuccess: () => {
-                    setSelectedCategoryId('');
-                    toast.success('Categoría agregada a destacadas.');
-                },
-                onError: () => {
-                    toast.error('Error al agregar la categoría.');
-                },
+                onSuccess: () => setSelectedCategoryId(''),
+                onError: () => toast.error('Error al agregar la categoría.'),
             },
         );
     };
@@ -104,8 +97,6 @@ export default function AdminFeaturedCategoriesIndex() {
         if (deleteTarget) {
             router.delete(`/admin/featured/categories/${deleteTarget}`, {
                 preserveScroll: true,
-                onSuccess: () =>
-                    toast.success('Categoría removida de destacadas.'),
                 onError: () => toast.error('Error al remover la categoría.'),
             });
             setDeleteTarget(null);
@@ -159,7 +150,7 @@ export default function AdminFeaturedCategoriesIndex() {
                 </CardContent>
             </Card>
 
-            {orderedItems.length === 0 ? (
+            {items.length === 0 ? (
                 <div className="flex flex-col items-center gap-2 py-12 text-muted-foreground">
                     <ImageIcon className="size-12" />
                     <p className="text-lg font-medium">
@@ -189,7 +180,7 @@ export default function AdminFeaturedCategoriesIndex() {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {orderedItems.map((item, index) => {
+                                        {items.map((item, index) => {
                                             const cat =
                                                 item.featurable as Category;
 
@@ -281,6 +272,7 @@ export default function AdminFeaturedCategoriesIndex() {
                                                                                 {
                                                                                     cat.name
                                                                                 }
+
                                                                                 "
                                                                                 del
                                                                                 carrusel

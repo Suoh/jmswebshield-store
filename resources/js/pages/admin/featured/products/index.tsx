@@ -46,9 +46,9 @@ interface PageProps {
 
 export default function AdminFeaturedProductsIndex() {
     const { items, products, flash } = usePage<PageProps>().props;
-    const [orderedItems, setOrderedItems] = useState(items);
     const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
+
     const [dialogOpen, setDialogOpen] = useState(false);
 
     useFlashToast(flash);
@@ -58,10 +58,9 @@ export default function AdminFeaturedProductsIndex() {
             return;
         }
 
-        const reordered = Array.from(orderedItems);
+        const reordered = Array.from(items);
         const [removed] = reordered.splice(result.source.index, 1);
         reordered.splice(result.destination.index, 0, removed);
-        setOrderedItems(reordered);
 
         router.put(
             '/admin/featured/products/reorder',
@@ -95,7 +94,6 @@ export default function AdminFeaturedProductsIndex() {
             {
                 preserveScroll: true,
                 onSuccess: () => {
-                    toast.success('Producto agregado a destacados.');
                     setDialogOpen(false);
                     setSearchTerm('');
                 },
@@ -110,12 +108,6 @@ export default function AdminFeaturedProductsIndex() {
         if (deleteTarget) {
             router.delete(`/admin/featured/products/${deleteTarget}`, {
                 preserveScroll: true,
-                onSuccess: () => {
-                    toast.success('Producto removido de destacados.');
-                    setOrderedItems((prev) =>
-                        prev.filter((i) => i.id !== deleteTarget),
-                    );
-                },
                 onError: () => toast.error('Error al remover el producto.'),
             });
             setDeleteTarget(null);
@@ -221,7 +213,7 @@ export default function AdminFeaturedProductsIndex() {
                 </Dialog>
             </div>
 
-            {orderedItems.length === 0 ? (
+            {items.length === 0 ? (
                 <div className="flex flex-col items-center gap-2 py-12 text-muted-foreground">
                     <ImageIcon className="size-12" />
                     <p className="text-lg font-medium">
@@ -252,7 +244,7 @@ export default function AdminFeaturedProductsIndex() {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {orderedItems.map((item, index) => {
+                                        {items.map((item, index) => {
                                             const product =
                                                 item.featurable as Product;
 
@@ -381,6 +373,7 @@ export default function AdminFeaturedProductsIndex() {
                                                                                 {
                                                                                     product.name
                                                                                 }
+
                                                                                 "
                                                                                 del
                                                                                 carrusel
