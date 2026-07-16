@@ -20,8 +20,16 @@ class FeaturedProductController extends Controller
             ->orderBy('position')
             ->get();
 
+        $featuredIds = $items->pluck('featurable_id');
+
+        $products = Product::whereNotIn('id', $featuredIds)
+            ->with(['brand', 'images' => fn ($q) => $q->where('is_cover', true)])
+            ->orderBy('name')
+            ->get(['id', 'name', 'model', 'price', 'discount', 'brand_id']);
+
         return Inertia::render('admin/featured/products/index', [
             'items' => $items,
+            'products' => $products,
         ]);
     }
 

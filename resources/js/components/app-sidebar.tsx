@@ -5,6 +5,7 @@ import {
     Grid3X3,
     Image,
     Package,
+    Sparkles,
     Store,
     Tag,
 } from 'lucide-react';
@@ -29,6 +30,16 @@ const adminNavItems: NavItem[] = [
         title: 'Banners',
         href: '/admin/banners',
         icon: Image,
+    },
+    {
+        title: 'Categorías destacadas',
+        href: '/admin/featured/categories',
+        icon: Sparkles,
+    },
+    {
+        title: 'Productos destacados',
+        href: '/admin/featured/products',
+        icon: Sparkles,
     },
     {
         title: 'Marcas',

@@ -1,5 +1,7 @@
 import { Head } from '@inertiajs/react';
 import BannerCarousel from '@/components/banner-carousel';
+import FeaturedCategoriesCarousel from '@/components/featured-categories-carousel';
+import FeaturedProductsCarousel from '@/components/featured-products-carousel';
 import FilterSidebar from '@/components/product/filter-sidebar';
 import ProductCard from '@/components/product/product-card';
 import ProductListRow from '@/components/product/product-list-row';
@@ -12,6 +14,7 @@ import type {
     Banner,
     Brand,
     Category,
+    FeaturedItem,
     PaginatedData,
     Product,
 } from '@/types/models';
@@ -21,6 +24,8 @@ interface Props {
     brands: Brand[];
     categories: Category[];
     banners: Banner[];
+    featuredCategories: FeaturedItem[];
+    featuredProducts: FeaturedItem[];
 }
 
 export default function ProductIndex({
@@ -28,6 +33,8 @@ export default function ProductIndex({
     brands,
     categories,
     banners,
+    featuredCategories,
+    featuredProducts,
 }: Props) {
     const [view] = useUrlFilter('view', 'grid');
 
@@ -40,6 +47,21 @@ export default function ProductIndex({
                         <BannerCarousel banners={banners} />
                     </div>
                 )}
+
+                {featuredCategories.length > 0 && (
+                    <div className="mb-10">
+                        <FeaturedCategoriesCarousel
+                            items={featuredCategories}
+                        />
+                    </div>
+                )}
+
+                {featuredProducts.length > 0 && (
+                    <div className="mb-10">
+                        <FeaturedProductsCarousel items={featuredProducts} />
+                    </div>
+                )}
+
                 <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
                     <aside className="w-full shrink-0 rounded-lg bg-sidebar p-4 lg:w-56">
                         <FilterSidebar
