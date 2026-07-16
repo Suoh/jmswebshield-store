@@ -5,6 +5,7 @@ interface Category {
     id: number;
     name: string;
     slug: string;
+    image_url?: string | null;
     products_count: number;
 }
 
@@ -16,8 +17,8 @@ interface PageProps {
 export default function AdminCategoriesEdit() {
     const { category } = usePage<PageProps>().props;
 
-    const handleSubmit = (data: { name: string }) => {
-        router.put(`/admin/categories/${category.id}`, data);
+    const handleSubmit = (data: { name: string; image?: File | null }) => {
+        router.put(`/admin/categories/${category.id}`, data as never);
     };
 
     return (

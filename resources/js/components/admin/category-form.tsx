@@ -1,4 +1,5 @@
 import { useForm } from '@inertiajs/react';
+import { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -11,21 +12,47 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 interface CategoryFormProps {
-    category?: { id: number; name: string; slug: string };
-    onSubmit: (data: { name: string }) => void;
+    category?: {
+        id: number;
+        name: string;
+        slug: string;
+        image_url?: string | null;
+    };
+    onSubmit: (data: { name: string; image?: File | null }) => void;
 }
 
 export default function CategoryForm({
     category,
     onSubmit,
 }: CategoryFormProps) {
-    const { data, setData, errors, processing } = useForm({
+    const { data, setData, errors, processing } = useForm<{
+        name: string;
+        image: File | null;
+    }>({
         name: category?.name ?? '',
+        image: null,
     });
+
+    const [preview, setPreview] = useState<string | null>(
+        category?.image_url ?? null,
+    );
+    const fileRef = useRef<File | null>(null);
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+
+        if (file) {
+            fileRef.current = file;
+            setPreview(URL.createObjectURL(file));
+        }
+    };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onSubmit(data);
+        onSubmit({
+            name: data.name,
+            image: fileRef.current ?? undefined,
+        });
     };
 
     return (
@@ -37,8 +64,8 @@ export default function CategoryForm({
                     </CardTitle>
                     <CardDescription>
                         {category
-                            ? 'Actualiza el nombre de la categoría.'
-                            : 'Ingresa el nombre de la nueva categoría.'}
+                            ? 'Actualizá el nombre y la imagen de la categoría.'
+                            : 'Ingresá el nombre y la imagen de la nueva categoría.'}
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -57,6 +84,35 @@ export default function CategoryForm({
                             </p>
                         )}
                     </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="image">
+                            Imagen{' '}
+                            {category ? '(dejar vacío para mantener)' : ''}
+                        </Label>
+                        <Input
+                            id="image"
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            onChange={handleFileChange}
+                            aria-invalid={!!errors.image}
+                        />
+                        {errors.image && (
+                            <p className="text-sm text-destructive">
+                                {errors.image}
+                            </p>
+                        )}
+                        {preview && (
+                            <div className="mt-2 overflow-hidden rounded-lg border">
+                                <img
+                                    src={preview}
+                                    alt="Vista previa"
+                                    className="max-h-36 w-full object-cover"
+                                />
+                            </div>
+                        )}
+                    </div>
+
                     <div className="flex items-center gap-2 pt-2">
                         <Button type="submit" disabled={processing}>
                             {category ? 'Guardar cambios' : 'Crear categoría'}

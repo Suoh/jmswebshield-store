@@ -7,6 +7,7 @@ use App\Enums\StockFilter;
 use App\Models\Banner;
 use App\Models\Brand;
 use App\Models\Category;
+use App\Models\FeaturedItem;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -67,11 +68,23 @@ class ProductController extends Controller
             ->orderBy('position')
             ->get();
 
+        $featuredCategories = FeaturedItem::where('featurable_type', Category::class)
+            ->with('featurable')
+            ->orderBy('position')
+            ->get();
+
+        $featuredProducts = FeaturedItem::where('featurable_type', Product::class)
+            ->with('featurable.images', 'featurable.brand')
+            ->orderBy('position')
+            ->get();
+
         return Inertia::render('products/index', [
             'products' => $products,
             'brands' => $brands,
             'categories' => $categories,
             'banners' => $banners,
+            'featuredCategories' => $featuredCategories,
+            'featuredProducts' => $featuredProducts,
         ]);
     }
 

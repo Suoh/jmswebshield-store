@@ -9,11 +9,6 @@ use Illuminate\Validation\Rule;
 class CategoryRequest extends FormRequest
 {
     /**
-     * Get the validation rules that apply to the request.
-     *
-     * Single FormRequest handles both store and update. On update, the
-     * route parameter 'category' is bound; the unique rule ignores it.
-     *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
@@ -27,6 +22,13 @@ class CategoryRequest extends FormRequest
                 'string',
                 'max:255',
                 Rule::unique('categories', 'name')->ignore($categoryId),
+            ],
+            'image' => [
+                Rule::when($categoryId === null && ! $this->hasFile('image'), 'sometimes'),
+                'nullable',
+                'image',
+                'mimes:jpg,jpeg,png,webp',
+                'max:2048',
             ],
         ];
     }

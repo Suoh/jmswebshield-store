@@ -7,6 +7,7 @@ import {
     Grid3X3,
     Image,
     PackageSearch,
+    Sparkles,
     Store,
     Tag,
 } from 'lucide-react';
@@ -29,6 +30,22 @@ const adminSections = [
             'Gestioná banners promocionales para el catálogo público: imágenes y enlaces.',
         cta: 'Gestionar banners',
         icon: Image,
+    },
+    {
+        title: 'Categorías destacadas',
+        href: '/admin/featured/categories',
+        description:
+            'Seleccioná categorías para mostrar en el carrusel de destacados del catálogo.',
+        cta: 'Gestionar destacadas',
+        icon: Sparkles,
+    },
+    {
+        title: 'Productos destacados',
+        href: '/admin/featured/products',
+        description:
+            'Elegí productos para destacar visualmente en la página principal del catálogo.',
+        cta: 'Gestionar destacados',
+        icon: Sparkles,
     },
     {
         title: 'Productos',
