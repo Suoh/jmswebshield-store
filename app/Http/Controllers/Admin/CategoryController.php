@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\CategoryRequest;
 use App\Models\Category;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -30,10 +31,16 @@ class CategoryController extends Controller
 
     public function store(CategoryRequest $request): RedirectResponse
     {
-        Category::create([
+        $data = [
             'name' => $request->validated('name'),
             'slug' => Str::slug($request->validated('name')),
-        ]);
+        ];
+
+        if ($request->hasFile('image')) {
+            $data['image_path'] = $request->file('image')->store('categories', 'public');
+        }
+
+        Category::create($data);
 
         return redirect()->route('admin.categories.index')->with('success', 'Categoría creada exitosamente.');
     }
@@ -51,10 +58,20 @@ class CategoryController extends Controller
     {
         $category = Category::findOrFail($id);
 
-        $category->update([
+        $data = [
             'name' => $request->validated('name'),
             'slug' => Str::slug($request->validated('name')),
-        ]);
+        ];
+
+        if ($request->hasFile('image')) {
+            if ($category->image_path) {
+                Storage::disk('public')->delete($category->image_path);
+            }
+
+            $data['image_path'] = $request->file('image')->store('categories', 'public');
+        }
+
+        $category->update($data);
 
         return redirect()->route('admin.categories.index')->with('success', 'Categoría actualizada exitosamente.');
     }
@@ -65,6 +82,10 @@ class CategoryController extends Controller
 
         if ($category->products()->exists()) {
             return abort(409, 'No se puede eliminar una categoría que tiene productos asociados.');
+        }
+
+        if ($category->image_path) {
+            Storage::disk('public')->delete($category->image_path);
         }
 
         $category->delete();

@@ -4,6 +4,8 @@ use App\Http\Controllers\Admin\BannerController as AdminBannerController;
 use App\Http\Controllers\Admin\BrandController as AdminBrandController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\EditorImageController;
+use App\Http\Controllers\Admin\FeaturedCategoryController;
+use App\Http\Controllers\Admin\FeaturedProductController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\ProductImageController;
 use App\Http\Controllers\Admin\Syscom\BrandController as SyscomBrandController;
@@ -57,6 +59,16 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     Route::get('syscom/products', [SyscomProductController::class, 'index'])->name('syscom.products.index');
     Route::post('syscom/products/import', [SyscomProductController::class, 'import'])->name('syscom.products.import');
+
+    Route::get('featured/categories', [FeaturedCategoryController::class, 'index'])->name('featured.categories.index');
+    Route::post('featured/categories', [FeaturedCategoryController::class, 'store'])->name('featured.categories.store');
+    Route::put('featured/categories/reorder', [FeaturedCategoryController::class, 'reorder'])->name('featured.categories.reorder');
+    Route::delete('featured/categories/{featuredItem}', [FeaturedCategoryController::class, 'destroy'])->name('featured.categories.destroy');
+
+    Route::get('featured/products', [FeaturedProductController::class, 'index'])->name('featured.products.index');
+    Route::post('featured/products', [FeaturedProductController::class, 'store'])->name('featured.products.store');
+    Route::put('featured/products/reorder', [FeaturedProductController::class, 'reorder'])->name('featured.products.reorder');
+    Route::delete('featured/products/{featuredItem}', [FeaturedProductController::class, 'destroy'])->name('featured.products.destroy');
 });
 
 require __DIR__.'/settings.php';

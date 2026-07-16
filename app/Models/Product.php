@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasFeaturedPosition;
 use App\Models\Concerns\HasMetadata;
 use App\Services\HtmlSanitizer;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -32,7 +33,7 @@ use Illuminate\Support\Facades\Storage;
 ])]
 class Product extends Model
 {
-    use HasFactory, HasMetadata, SoftDeletes;
+    use HasFactory, HasFeaturedPosition, HasMetadata, SoftDeletes;
 
     protected $appends = ['cover_image', 'availability', 'discounted_price'];
 
