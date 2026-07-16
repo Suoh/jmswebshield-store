@@ -19,9 +19,9 @@ class ProductImporter
         $skipped = 0;
         $failed = 0;
 
-        $brandsData = $this->syscomService->getBrands(1);
+        $brandsData = $this->syscomService->getBrands();
         $brandLookup = [];
-        foreach ($brandsData['data'] ?? [] as $brand) {
+        foreach ($brandsData as $brand) {
             $brandLookup[$brand['id']] = $brand['nombre'];
         }
 

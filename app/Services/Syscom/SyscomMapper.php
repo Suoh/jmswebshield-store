@@ -31,6 +31,10 @@ class SyscomMapper
 
     public const PRODUCT_IMAGE = 'imagen';
 
+    public const PRICE_1 = 'precio_1';
+
+    public const PRICE_ESPECIAL = 'precio_especial';
+
     public const PRICE_LISTA = 'precio_lista';
 
     public const PRICE_DESCUENTO = 'precio_descuento';
@@ -83,6 +87,8 @@ class SyscomMapper
                 'syscom_marca_id' => $syscomProduct[self::PRODUCT_BRAND_ID] ?? null,
                 'syscom_categoria_ids' => $categorias,
                 'syscom_precios' => [
+                    'precio_1' => $prices[self::PRICE_1] ?? null,
+                    'precio_especial' => $prices[self::PRICE_ESPECIAL] ?? null,
                     'precio_lista' => $prices[self::PRICE_LISTA] ?? null,
                     'precio_descuento' => $prices[self::PRICE_DESCUENTO] ?? null,
                 ],

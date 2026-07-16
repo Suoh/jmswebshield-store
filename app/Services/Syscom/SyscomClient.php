@@ -45,7 +45,7 @@ class SyscomClient
         try {
             $response = Http::timeout(30)
                 ->asForm()
-                ->post($this->baseUrl.'/oauth/token', [
+                ->post($this->baseUrl.'/api/v1/oauth/token', [
                     'grant_type' => 'client_credentials',
                     'client_id' => $this->clientId,
                     'client_secret' => $this->clientSecret,
@@ -137,14 +137,14 @@ class SyscomClient
         return $this->request('GET', '/api/v1/categorias');
     }
 
-    public function getBrands(int $page = 1): array
+    public function getBrands(): array
     {
-        return $this->request('GET', '/api/v1/marcas', ['pagina' => $page]);
+        return $this->request('GET', '/api/v1/marcas');
     }
 
-    public function getProducts(array $filters = [], int $page = 1): array
+    public function getProducts(array $filters = [], int $page = 1, int $limit = 20): array
     {
-        $params = array_merge($filters, ['pagina' => $page]);
+        $params = array_merge($filters, ['pagina' => $page, 'limit' => $limit]);
 
         return $this->request('GET', '/api/v1/productos', $params);
     }

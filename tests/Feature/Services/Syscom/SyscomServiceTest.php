@@ -35,10 +35,9 @@ describe('SyscomService', function () {
     });
 
     describe('getBrands', function () {
-        it('normalizes flat array from SYSCOM API to PaginatedData', function () {
+        it('returns flat array from SYSCOM API', function () {
             $mockClient = Mockery::mock(SyscomClient::class);
             $mockClient->shouldReceive('getBrands')
-                ->with(1)
                 ->once()
                 ->andReturn([
                     ['id' => 'tp-link', 'nombre' => 'TP-Link'],
@@ -46,28 +45,12 @@ describe('SyscomService', function () {
                 ]);
 
             $service = new SyscomService($mockClient);
-            $result = $service->getBrands(1);
+            $result = $service->getBrands();
 
-            expect($result)->toHaveKey('data')
-                ->toHaveKey('current_page', 1)
-                ->toHaveKey('last_page', 1)
-                ->toHaveKey('total', 2)
-                ->and($result['data'])->toHaveCount(2);
-        });
-
-        it('passes page parameter to client', function () {
-            $mockClient = Mockery::mock(SyscomClient::class);
-            $mockClient->shouldReceive('getBrands')
-                ->with(3)
-                ->once()
-                ->andReturn([
-                    ['id' => 'brand-a', 'nombre' => 'Brand A'],
-                ]);
-
-            $service = new SyscomService($mockClient);
-            $result = $service->getBrands(3);
-
-            expect($result['data'][0]['id'])->toBe('brand-a');
+            expect($result)->toBeArray()
+                ->toHaveCount(2)
+                ->and($result[0])->toHaveKey('id', 'tp-link')
+                ->and($result[0])->toHaveKey('nombre', 'TP-Link');
         });
     });
 
@@ -75,7 +58,7 @@ describe('SyscomService', function () {
         it('normalizes Búsqueda schema from SYSCOM API to PaginatedData', function () {
             $mockClient = Mockery::mock(SyscomClient::class);
             $mockClient->shouldReceive('getProducts')
-                ->with([], 1)
+                ->with([], 1, 20)
                 ->once()
                 ->andReturn([
                     'cantidad' => 500,
@@ -99,7 +82,7 @@ describe('SyscomService', function () {
         it('passes filters and page to client', function () {
             $mockClient = Mockery::mock(SyscomClient::class);
             $mockClient->shouldReceive('getProducts')
-                ->with(['categoria_id' => '5', 'stock' => 'true'], 2)
+                ->with(['categoria_id' => '5', 'stock' => 'true'], 2, 20)
                 ->once()
                 ->andReturn([
                     'cantidad' => 0,
@@ -133,36 +116,19 @@ describe('SyscomService', function () {
                 ->and($first[0]['id'])->toBe('cat-1');
         });
 
-        it('caches getBrands page 1 for subsequent calls', function () {
+        it('caches getBrands for subsequent calls', function () {
             $mockClient = Mockery::mock(SyscomClient::class);
             $mockClient->shouldReceive('getBrands')
-                ->with(1)
                 ->once()
                 ->andReturn([['id' => 'brand-cached', 'nombre' => 'Brand Cached']]);
 
             $service = new SyscomService($mockClient);
 
-            $first = $service->getBrands(1);
-            $second = $service->getBrands(1);
+            $first = $service->getBrands();
+            $second = $service->getBrands();
 
             expect($first)->toBe($second)
-                ->and($first['data'][0]['id'])->toBe('brand-cached');
-        });
-
-        it('does not cache getBrands for pages other than 1', function () {
-            $mockClient = Mockery::mock(SyscomClient::class);
-            $mockClient->shouldReceive('getBrands')
-                ->with(2)
-                ->twice()
-                ->andReturn([['id' => 'brand-2', 'nombre' => 'Page 2 Brand']]);
-
-            $service = new SyscomService($mockClient);
-
-            $first = $service->getBrands(2);
-            $second = $service->getBrands(2);
-
-            expect($first['data'][0]['id'])->toBe('brand-2')
-                ->and($second['data'][0]['id'])->toBe('brand-2');
+                ->and($first[0]['id'])->toBe('brand-cached');
         });
     });
 
@@ -175,12 +141,15 @@ describe('SyscomService', function () {
                 ->andReturn([
                     'producto_id' => '12345',
                     'titulo' => 'Router Premium',
+                    'sat_description' => 'Router de alta velocidad',
                     'descripcion' => 'Sistema mesh de alta velocidad',
                     'total_existencia' => 15,
                     'modelo' => 'RBK953',
                     'marca' => 'tp-link',
-                    'categorias' => ['cat-001', 'cat-002'],
+                    'categorias' => [['id' => 'cat-001', 'nombre' => 'Categoría A', 'nivel' => 1], ['id' => 'cat-002', 'nombre' => 'Categoría B', 'nivel' => 1]],
                     'precios' => [
+                        'precio_1' => 21000.00,
+                        'precio_especial' => 20500.00,
                         'precio_lista' => 20000.00,
                         'precio_descuento' => 18000.00,
                     ],
@@ -198,6 +167,8 @@ describe('SyscomService', function () {
                 ->and($result['metadata'])->toHaveKey('syscom_id', '12345')
                 ->and($result['metadata'])->toHaveKey('syscom_categoria_ids', ['cat-001', 'cat-002'])
                 ->and($result['metadata'])->toHaveKey('syscom_precios')
+                ->and($result['metadata']['syscom_precios'])->toHaveKey('precio_1', 21000.00)
+                ->and($result['metadata']['syscom_precios'])->toHaveKey('precio_especial', 20500.00)
                 ->and($result['metadata']['syscom_precios'])->toHaveKey('precio_lista', 20000.00)
                 ->and($result['metadata']['syscom_precios'])->toHaveKey('precio_descuento', 18000.00);
         });
@@ -210,12 +181,15 @@ describe('SyscomService', function () {
                 ->andReturn([
                     'producto_id' => '99999',
                     'titulo' => 'Expensive Item',
+                    'sat_description' => null,
                     'descripcion' => null,
                     'total_existencia' => 1,
                     'modelo' => null,
                     'marca' => null,
                     'categorias' => [],
                     'precios' => [
+                        'precio_1' => 99999.99,
+                        'precio_especial' => 94999.99,
                         'precio_lista' => 99999.99,
                         'precio_descuento' => 89999.99,
                     ],

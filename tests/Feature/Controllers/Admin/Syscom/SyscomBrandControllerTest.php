@@ -11,20 +11,13 @@ beforeEach(fn () => actingAsAdmin());
 
 describe('Syscom Brand Import Controller', function () {
     describe('index', function () {
-        it('renders page with paginated SYSCOM brands', function () {
+        it('renders page with SYSCOM brands', function () {
             $mockService = Mockery::mock(SyscomService::class);
             $mockService->shouldReceive('getBrands')
-                ->with(1)
                 ->once()
                 ->andReturn([
-                    'data' => [
-                        ['id' => 'tp-link', 'nombre' => 'TP-Link'],
-                        ['id' => 'netgear', 'nombre' => 'Netgear'],
-                    ],
-                    'current_page' => 1,
-                    'last_page' => 2,
-                    'total' => 30,
-                    'per_page' => 15,
+                    ['id' => 'tp-link', 'nombre' => 'TP-Link'],
+                    ['id' => 'netgear', 'nombre' => 'Netgear'],
                 ]);
 
             $this->app->instance(SyscomService::class, $mockService);
@@ -34,9 +27,7 @@ describe('Syscom Brand Import Controller', function () {
             $response->assertOk()
                 ->assertInertia(fn ($page) => $page
                     ->component('admin/syscom/brands/index')
-                    ->has('syscom_brands.data', 2)
-                    ->where('syscom_brands.current_page', 1)
-                    ->where('syscom_brands.total', 30)
+                    ->has('syscom_brands', 2)
                 );
         });
 
@@ -49,17 +40,10 @@ describe('Syscom Brand Import Controller', function () {
 
             $mockService = Mockery::mock(SyscomService::class);
             $mockService->shouldReceive('getBrands')
-                ->with(1)
                 ->once()
                 ->andReturn([
-                    'data' => [
-                        ['id' => 'tp-link', 'nombre' => 'TP-Link'],
-                        ['id' => 'ubiquiti', 'nombre' => 'Ubiquiti'],
-                    ],
-                    'current_page' => 1,
-                    'last_page' => 1,
-                    'total' => 2,
-                    'per_page' => 15,
+                    ['id' => 'tp-link', 'nombre' => 'TP-Link'],
+                    ['id' => 'ubiquiti', 'nombre' => 'Ubiquiti'],
                 ]);
 
             $this->app->instance(SyscomService::class, $mockService);
@@ -92,13 +76,7 @@ describe('Syscom Brand Import Controller', function () {
         it('imports single brand successfully', function () {
             $mockService = Mockery::mock(SyscomService::class);
             $mockService->shouldReceive('getBrands')
-                ->andReturn([
-                    'data' => [],
-                    'current_page' => 1,
-                    'last_page' => 1,
-                    'total' => 0,
-                    'per_page' => 15,
-                ]);
+                ->andReturn([]);
 
             $this->app->instance(SyscomService::class, $mockService);
 

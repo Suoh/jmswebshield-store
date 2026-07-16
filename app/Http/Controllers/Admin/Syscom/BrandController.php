@@ -10,7 +10,6 @@ use App\Models\Brand;
 use App\Services\Syscom\BrandImporter;
 use App\Services\Syscom\SyscomService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -20,16 +19,14 @@ class BrandController extends Controller
         private SyscomService $syscomService,
     ) {}
 
-    public function index(Request $request): Response
+    public function index(): Response
     {
-        $page = (int) $request->query('page', 1);
-
         try {
-            $syscomBrands = $this->syscomService->getBrands($page);
+            $syscomBrands = $this->syscomService->getBrands();
         } catch (SyscomApiException $e) {
             session()->flash('error', 'No se pudieron cargar las marcas de SYSCOM. Intentalo de nuevo más tarde.');
 
-            $syscomBrands = ['data' => [], 'current_page' => 1, 'last_page' => 1, 'links' => []];
+            $syscomBrands = [];
         }
 
         $importedSyscomIds = Brand::importedSyscomIds()->all();

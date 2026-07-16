@@ -16,6 +16,8 @@ export interface SyscomProduct {
     modelo: string | null;
     marca_id: string | null;
     precios: {
+        precio_1?: number;
+        precio_especial?: number;
         precio_lista: number;
         precio_descuento: number | null;
     } | null;

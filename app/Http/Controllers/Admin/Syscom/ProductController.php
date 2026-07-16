@@ -28,6 +28,7 @@ class ProductController extends Controller
             'busqueda' => $request->query('search'),
             'stock' => $request->query('stock'),
             'orden' => $request->query('sort'),
+            'limit' => 20,
         ]);
 
         if (isset($filters['stock'])) {
@@ -38,7 +39,7 @@ class ProductController extends Controller
 
         try {
             $categories = $this->syscomService->getCategories();
-            $brandsData = $this->syscomService->getBrands(1);
+            $brands = $this->syscomService->getBrands();
         } catch (SyscomApiException $e) {
             session()->flash('error', 'No se pudo conectar con SYSCOM. Intentalo de nuevo más tarde.');
 
@@ -54,8 +55,6 @@ class ProductController extends Controller
                 'imported_syscom_ids' => Product::importedSyscomIds()->all(),
             ]);
         }
-
-        $brands = $brandsData['data'] ?? [];
 
         if (empty($filters['categoria'])) {
             $syscomProducts = [
