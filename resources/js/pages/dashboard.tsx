@@ -27,7 +27,7 @@ const adminSections = [
         title: 'Banners',
         href: '/admin/banners',
         description:
-            'Gestioná banners promocionales para el catálogo público: imágenes y enlaces.',
+            'Gestione banners promocionales para el catálogo público: imágenes y enlaces.',
         cta: 'Gestionar banners',
         icon: Image,
     },
@@ -35,7 +35,7 @@ const adminSections = [
         title: 'Categorías destacadas',
         href: '/admin/featured/categories',
         description:
-            'Seleccioná categorías para mostrar en el carrusel de destacados del catálogo.',
+            'Seleccione categorías para mostrar en el carrusel de destacados del catálogo.',
         cta: 'Gestionar destacadas',
         icon: Sparkles,
     },
@@ -43,7 +43,7 @@ const adminSections = [
         title: 'Productos destacados',
         href: '/admin/featured/products',
         description:
-            'Elegí productos para destacar visualmente en la página principal del catálogo.',
+            'Elija productos para destacar visualmente en la página principal del catálogo.',
         cta: 'Gestionar destacados',
         icon: Sparkles,
     },
@@ -59,7 +59,7 @@ const adminSections = [
         title: 'Marcas',
         href: '/admin/brands',
         description:
-            'Creá y editá marcas locales para mantener el catálogo ordenado antes de publicar productos.',
+            'Cree y edite marcas locales para mantener el catálogo ordenado antes de publicar productos.',
         cta: 'Gestionar marcas',
         icon: Tag,
     },
@@ -67,7 +67,7 @@ const adminSections = [
         title: 'Categorías',
         href: '/admin/categories',
         description:
-            'Organizá tus productos en categorías locales para facilitar la navegación del catálogo.',
+            'Organice sus productos en categorías locales para facilitar la navegación del catálogo.',
         cta: 'Gestionar categorías',
         icon: Grid3X3,
     },
@@ -75,7 +75,7 @@ const adminSections = [
         title: 'SYSCOM Marcas',
         href: '/admin/syscom/brands',
         description:
-            'Buscá marcas disponibles en SYSCOM e importalas para vincularlas con productos externos.',
+            'Busque marcas disponibles en SYSCOM e impórtelas para vincularlas con productos externos.',
         cta: 'Importar marcas',
         icon: DownloadCloud,
     },
@@ -83,7 +83,7 @@ const adminSections = [
         title: 'SYSCOM Categorías',
         href: '/admin/syscom/categories',
         description:
-            'Importá categorías desde SYSCOM para mantener el catálogo sincronizado con el proveedor.',
+            'Importe categorías desde SYSCOM para mantener el catálogo sincronizado con el proveedor.',
         cta: 'Importar categorías',
         icon: DownloadCloud,
     },
@@ -91,17 +91,17 @@ const adminSections = [
         title: 'SYSCOM Productos',
         href: '/admin/syscom/products',
         description:
-            'Explorá productos de SYSCOM, asigná precios de venta e importalos al catálogo local.',
+            'Explore productos de SYSCOM, asigne precios de venta e impórtelos al catálogo local.',
         cta: 'Importar productos',
         icon: Boxes,
     },
 ];
 
 const workflowSteps = [
-    'Creá o importá las marcas necesarias para que los productos queden correctamente vinculados.',
-    'Buscá productos en SYSCOM usando categoría, marca o texto libre.',
-    'Asigná precio de venta a cada producto seleccionado e importalo al catálogo local.',
-    'Revisá descripción, imágenes, stock, descuento y estado activo antes de publicarlo.',
+    'Cree o importe las marcas necesarias para que los productos queden correctamente vinculados.',
+    'Busque productos en SYSCOM usando categoría, marca o texto libre.',
+    'Asigne precio de venta a cada producto seleccionado e impórtelo al catálogo local.',
+    'Revise descripción, imágenes, stock, descuento y estado activo antes de publicarlo.',
 ];
 
 export default function Dashboard() {
@@ -117,10 +117,10 @@ export default function Dashboard() {
                         </span>
                         <div className="space-y-3">
                             <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
-                                Gestioná el catálogo desde un solo punto
+                                Gestione el catálogo desde un solo punto
                             </h1>
                             <p className="text-base leading-7 text-muted-foreground md:text-lg">
-                                Usá este panel como punto de partida para crear
+                                Use este panel como punto de partida para crear
                                 marcas, importar información desde SYSCOM y
                                 preparar productos listos para publicar.
                             </p>
