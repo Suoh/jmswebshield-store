@@ -53,35 +53,35 @@ describe('Pagination', () => {
 
     it('disables buttons whose url is null', () => {
         const links = [
-            { url: null, label: '&laquo; Previous', active: false },
+            { url: null, label: '&laquo; Anterior', active: false },
             { url: 'http://example.test?page=1', label: '1', active: true },
-            { url: null, label: 'Next &raquo;', active: false },
+            { url: null, label: 'Siguiente &raquo;', active: false },
         ];
 
         render(<Pagination links={links} />);
 
         expect(
-            screen.getByRole('button', { name: '« Previous' }),
+            screen.getByRole('button', { name: '« Anterior' }),
         ).toBeDisabled();
         expect(
-            screen.getByRole('button', { name: 'Next »' }),
+            screen.getByRole('button', { name: 'Siguiente »' }),
         ).toBeDisabled();
     });
 
     it('decodes &laquo; and &raquo; HTML entities from labels', () => {
         const links = [
-            { url: null, label: '&laquo; Previous', active: false },
+            { url: null, label: '&laquo; Anterior', active: false },
             { url: 'http://example.test?page=1', label: '1', active: true },
-            { url: null, label: 'Next &raquo;', active: false },
+            { url: null, label: 'Siguiente &raquo;', active: false },
         ];
 
         render(<Pagination links={links} />);
 
-        expect(screen.getByText('« Previous')).toBeInTheDocument();
-        expect(screen.getByText('Next »')).toBeInTheDocument();
+        expect(screen.getByText('« Anterior')).toBeInTheDocument();
+        expect(screen.getByText('Siguiente »')).toBeInTheDocument();
 
         expect(
-            screen.queryByText('&laquo; Previous', { exact: false }),
+            screen.queryByText('&laquo; Anterior', { exact: false }),
         ).not.toBeInTheDocument();
     });
 
@@ -103,13 +103,13 @@ describe('Pagination', () => {
 
     it('does not navigate when a disabled button is clicked', () => {
         const links = [
-            { url: null, label: 'Next &raquo;', active: false },
+            { url: null, label: 'Siguiente &raquo;', active: false },
             { url: 'http://example.test?page=1', label: '1', active: true },
         ];
 
         render(<Pagination links={links} />);
 
-        fireEvent.click(screen.getByRole('button', { name: 'Next »' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Siguiente »' }));
 
         expect(router.get).not.toHaveBeenCalled();
     });

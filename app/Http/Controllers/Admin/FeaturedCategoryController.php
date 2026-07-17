@@ -16,13 +16,14 @@ class FeaturedCategoryController extends Controller
     public function index(): Response
     {
         $items = FeaturedItem::where('featurable_type', Category::class)
-            ->with('featurable')
+            ->with(['featurable' => fn ($q) => $q->withCount('products')])
             ->orderBy('position')
             ->get();
 
         $categories = Category::whereDoesntHave('featuredPosition')
+            ->withCount('products')
             ->orderBy('name')
-            ->get(['id', 'name']);
+            ->get(['id', 'name', 'image_path']);
 
         return Inertia::render('admin/featured/categories/index', [
             'items' => $items,

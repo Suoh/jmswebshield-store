@@ -16,6 +16,15 @@ interface PaginationProps {
     lastPage?: number;
 }
 
+const LABEL_TRANSLATIONS: Record<string, string> = {
+    '&laquo; Previous': '&laquo; Anterior',
+    '« Previous': '« Anterior',
+    Previous: 'Anterior',
+    'Next &raquo;': 'Siguiente &raquo;',
+    'Next »': 'Siguiente »',
+    Next: 'Siguiente',
+};
+
 const ENTITY_MAP: Record<string, string> = {
     '&laquo;': '«',
     '&raquo;': '»',
@@ -27,6 +36,10 @@ function decodeLabel(label: string): string {
         /&(laquo|raquo|nbsp);/g,
         (match) => ENTITY_MAP[match] ?? match,
     );
+}
+
+function translateLabel(label: string): string {
+    return LABEL_TRANSLATIONS[label] ?? label;
 }
 
 function buildPageRange(current: number, last: number): number[] {
@@ -109,7 +122,7 @@ export function Pagination({
                     disabled={!link.url}
                     onClick={() => link.url && router.get(link.url)}
                 >
-                    {decodeLabel(link.label)}
+                    {decodeLabel(translateLabel(link.label))}
                 </Button>
             ))}
         </div>
