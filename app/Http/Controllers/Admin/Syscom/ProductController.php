@@ -22,21 +22,6 @@ class ProductController extends Controller
 
     public function index(Request $request): Response|RedirectResponse
     {
-        $filters = array_filter([
-            'categoria' => $request->query('categoria_id'),
-            'marca' => $request->query('marca_id'),
-            'busqueda' => $request->query('search'),
-            'stock' => $request->query('stock'),
-            'orden' => $request->query('sort'),
-            'limit' => 20,
-        ]);
-
-        if (isset($filters['stock'])) {
-            $filters['stock'] = $filters['stock'] === 'true' ? '1' : '0';
-        }
-
-        $page = (int) $request->query('page', 1);
-
         try {
             $categories = $this->syscomService->getCategories();
             $brands = $this->syscomService->getBrands();
@@ -56,7 +41,13 @@ class ProductController extends Controller
             ]);
         }
 
-        if (empty($filters['categoria'])) {
+        $categoriaIds = $request->query('categoria_ids', '');
+
+        if ($categoriaIds === '') {
+            if (! empty($categories)) {
+                return redirect()->to('/admin/syscom/products?categoria_ids='.$categories[0]['id']);
+            }
+
             $syscomProducts = [
                 'data' => [],
                 'current_page' => 1,
@@ -64,6 +55,20 @@ class ProductController extends Controller
                 'links' => [],
             ];
         } else {
+            $filters = array_filter([
+                'categoria' => $categoriaIds,
+                'marca' => $request->query('marca_id'),
+                'busqueda' => $request->query('search'),
+                'stock' => $request->query('stock'),
+                'limit' => 20,
+            ]);
+
+            if (isset($filters['stock'])) {
+                $filters['stock'] = $filters['stock'] === 'true' ? '1' : '0';
+            }
+
+            $page = (int) $request->query('page', 1);
+
             try {
                 $syscomProducts = $this->syscomService->getProducts($filters, $page);
             } catch (SyscomApiException $e) {

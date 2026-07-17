@@ -50,7 +50,7 @@ describe('Syscom Product Import Controller', function () {
 
             $this->app->instance(SyscomService::class, $mockService);
 
-            $response = $this->actingAs($this->admin)->get('/admin/syscom/products?categoria_id=1');
+            $response = $this->actingAs($this->admin)->get('/admin/syscom/products?categoria_ids=1');
 
             $response->assertOk()
                 ->assertInertia(fn ($page) => $page
@@ -64,7 +64,7 @@ describe('Syscom Product Import Controller', function () {
                 );
         });
 
-        it('returns empty products when no category filter is provided', function () {
+        it('redirects to first category when no category filter is provided', function () {
             $mockService = Mockery::mock(SyscomService::class);
             $mockService->shouldReceive('getCategories')
                 ->once()
@@ -80,6 +80,34 @@ describe('Syscom Product Import Controller', function () {
             $this->app->instance(SyscomService::class, $mockService);
 
             $response = $this->actingAs($this->admin)->get('/admin/syscom/products');
+
+            $response->assertRedirect('/admin/syscom/products?categoria_ids=1');
+        });
+
+        it('renders page with first category auto-selected when only one category exists', function () {
+            $mockService = Mockery::mock(SyscomService::class);
+            $mockService->shouldReceive('getCategories')
+                ->once()
+                ->andReturn([
+                    ['id' => '7', 'nombre' => 'Routers'],
+                ]);
+            $mockService->shouldReceive('getBrands')
+                ->once()
+                ->andReturn([]);
+            $mockService->shouldReceive('getProducts')
+                ->with(['categoria' => '7', 'limit' => 20], 1)
+                ->once()
+                ->andReturn([
+                    'data' => [],
+                    'current_page' => 1,
+                    'last_page' => 1,
+                    'total' => 0,
+                    'per_page' => 20,
+                ]);
+
+            $this->app->instance(SyscomService::class, $mockService);
+
+            $response = $this->actingAs($this->admin)->get('/admin/syscom/products?categoria_ids=7');
 
             $response->assertOk();
         });
@@ -101,7 +129,7 @@ describe('Syscom Product Import Controller', function () {
 
             $this->app->instance(SyscomService::class, $mockService);
 
-            $response = $this->actingAs($this->admin)->get('/admin/syscom/products?categoria_id=5&marca_id=tp-link&search=router&stock=true&page=2');
+            $response = $this->actingAs($this->admin)->get('/admin/syscom/products?categoria_ids=5&marca_id=tp-link&search=router&stock=true&page=2');
 
             $response->assertOk();
         });
@@ -123,51 +151,7 @@ describe('Syscom Product Import Controller', function () {
 
             $this->app->instance(SyscomService::class, $mockService);
 
-            $response = $this->actingAs($this->admin)->get('/admin/syscom/products?categoria_id=1&stock=false');
-
-            $response->assertOk();
-        });
-
-        it('passes sort param as orden to SYSCOM API', function () {
-            $mockService = Mockery::mock(SyscomService::class);
-            $mockService->shouldReceive('getCategories')->andReturn([]);
-            $mockService->shouldReceive('getBrands')->andReturn([]);
-            $mockService->shouldReceive('getProducts')
-                ->with(['categoria' => '1', 'orden' => 'nombre:asc', 'limit' => 20], 1)
-                ->once()
-                ->andReturn([
-                    'data' => [],
-                    'current_page' => 1,
-                    'last_page' => 1,
-                    'total' => 0,
-                    'per_page' => 20,
-                ]);
-
-            $this->app->instance(SyscomService::class, $mockService);
-
-            $response = $this->actingAs($this->admin)->get('/admin/syscom/products?categoria_id=1&sort=nombre:asc');
-
-            $response->assertOk();
-        });
-
-        it('ignores sort param when not provided', function () {
-            $mockService = Mockery::mock(SyscomService::class);
-            $mockService->shouldReceive('getCategories')->andReturn([]);
-            $mockService->shouldReceive('getBrands')->andReturn([]);
-            $mockService->shouldReceive('getProducts')
-                ->with(['categoria' => '1', 'limit' => 20], 1)
-                ->once()
-                ->andReturn([
-                    'data' => [],
-                    'current_page' => 1,
-                    'last_page' => 1,
-                    'total' => 0,
-                    'per_page' => 20,
-                ]);
-
-            $this->app->instance(SyscomService::class, $mockService);
-
-            $response = $this->actingAs($this->admin)->get('/admin/syscom/products?categoria_id=1');
+            $response = $this->actingAs($this->admin)->get('/admin/syscom/products?categoria_ids=1&stock=false');
 
             $response->assertOk();
         });

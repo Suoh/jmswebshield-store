@@ -1,6 +1,7 @@
 import { router, usePage } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { MultiCategorySelect } from '@/components/syscom/multi-category-select';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -58,11 +59,14 @@ export default function AdminSyscomProductsIndex() {
         };
     }, []);
 
-    const [categoriaId, setCategoriaId] = useUrlFilter(
-        'categoria_id',
-        'all',
+    const [categoriaIdsStr, setCategoriaIdsStr] = useUrlFilter(
+        'categoria_ids',
+        '',
         '/admin/syscom/products',
     );
+    const selectedCategories = categoriaIdsStr
+        ? categoriaIdsStr.split(',')
+        : [];
     const [marcaId, setMarcaId] = useUrlFilter(
         'marca_id',
         'all',
@@ -78,12 +82,6 @@ export default function AdminSyscomProductsIndex() {
         'all',
         '/admin/syscom/products',
     );
-    const [sort, setSort] = useUrlFilter(
-        'sort',
-        'relevance',
-        '/admin/syscom/products',
-    );
-
     const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(
         undefined,
     );
@@ -101,8 +99,8 @@ export default function AdminSyscomProductsIndex() {
         }, 300);
     };
 
-    const handleCategoriaChange = (value: string) => {
-        setCategoriaId(value);
+    const handleCategoriasChange = (ids: string[]) => {
+        setCategoriaIdsStr(ids.join(','));
     };
 
     const handleMarcaChange = (value: string) => {
@@ -113,10 +111,6 @@ export default function AdminSyscomProductsIndex() {
         setStock(value);
     };
 
-    const handleSortChange = (value: string) => {
-        setSort(value);
-    };
-
     const handlePageChange = (newPage: number) => {
         const params = new URLSearchParams(window.location.search);
         params.set('page', String(newPage));
@@ -125,11 +119,10 @@ export default function AdminSyscomProductsIndex() {
     };
 
     const handleClearFilters = () => {
-        setCategoriaId('all');
+        setCategoriaIdsStr('');
         setMarcaId('all');
         setSearchUrl('');
         setStock('all');
-        setSort('relevance');
     };
 
     const handlePriceChange = (id: string, value: string) => {
@@ -194,11 +187,10 @@ export default function AdminSyscomProductsIndex() {
     ).length;
 
     const hasActiveFilters =
-        categoriaId !== 'all' ||
+        categoriaIdsStr !== '' ||
         marcaId !== 'all' ||
         searchUrl !== '' ||
-        stock !== 'all' ||
-        sort !== 'relevance';
+        stock !== 'all';
 
     return (
         <div className="space-y-4 p-6">
@@ -234,24 +226,11 @@ export default function AdminSyscomProductsIndex() {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-                <Select
-                    value={categoriaId}
-                    onValueChange={handleCategoriaChange}
-                >
-                    <SelectTrigger className="w-44">
-                        <SelectValue placeholder="Categoría" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">
-                            Todas las categorías
-                        </SelectItem>
-                        {categories.map((cat) => (
-                            <SelectItem key={cat.id} value={cat.id}>
-                                {cat.nombre}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+                <MultiCategorySelect
+                    categories={categories}
+                    selected={selectedCategories}
+                    onChange={handleCategoriasChange}
+                />
 
                 <Select value={marcaId} onValueChange={handleMarcaChange}>
                     <SelectTrigger className="w-44">
@@ -275,19 +254,6 @@ export default function AdminSyscomProductsIndex() {
                         <SelectItem value="all">Cualquier stock</SelectItem>
                         <SelectItem value="true">En stock</SelectItem>
                         <SelectItem value="false">Sin stock</SelectItem>
-                    </SelectContent>
-                </Select>
-
-                <Select value={sort} onValueChange={handleSortChange}>
-                    <SelectTrigger className="w-48">
-                        <SelectValue placeholder="Ordenar por" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="relevance">
-                            Más relevantes
-                        </SelectItem>
-                        <SelectItem value="nombre:asc">Nombre A-Z</SelectItem>
-                        <SelectItem value="nombre:desc">Nombre Z-A</SelectItem>
                     </SelectContent>
                 </Select>
 

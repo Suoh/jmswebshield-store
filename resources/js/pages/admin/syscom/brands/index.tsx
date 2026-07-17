@@ -1,16 +1,18 @@
 import { router, usePage } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DataTable } from '@/components/ui/data-table';
 import { Input } from '@/components/ui/input';
+import { Pagination } from '@/components/ui/pagination';
 import { Spinner } from '@/components/ui/spinner';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { useFlashToast } from '@/hooks/use-flash-toast';
-import { useToggleAll } from '@/hooks/use-toggle-all';
 import type { SyscomBrand } from '@/types';
+
+const BRANDS_PAGE_SIZE = 25;
 
 interface PageProps {
     syscom_brands: SyscomBrand[];
@@ -22,6 +24,8 @@ export default function AdminSyscomBrandsIndex() {
     const pageProps = usePage<PageProps>();
     const { syscom_brands, imported_syscom_ids } = pageProps.props;
     const [search, setSearch] = useState('');
+    const [selected, setSelected] = useState<Set<string>>(new Set());
+    const [brandsPage, setBrandsPage] = useState(1);
     const [isImporting, setIsImporting] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -47,10 +51,51 @@ export default function AdminSyscomBrandsIndex() {
         brand.nombre.toLowerCase().includes(search.toLowerCase()),
     );
 
-    const { selected, toggleAll, toggleOne, reset } = useToggleAll({
-        items: filtered,
-        getId: (b) => b.id,
-    });
+    const totalBrandPages = Math.max(
+        1,
+        Math.ceil(filtered.length / BRANDS_PAGE_SIZE),
+    );
+    const safePage = Math.min(brandsPage, totalBrandPages);
+    const paginatedBrands = filtered.slice(
+        (safePage - 1) * BRANDS_PAGE_SIZE,
+        safePage * BRANDS_PAGE_SIZE,
+    );
+
+    const currentPageIds = paginatedBrands.map((b) => b.id);
+    const allCurrentPageSelected =
+        currentPageIds.length > 0 &&
+        currentPageIds.every((id) => selected.has(id));
+
+    const toggleOne = useCallback((id: string) => {
+        setSelected((prev) => {
+            const next = new Set(prev);
+
+            if (next.has(id)) {
+                next.delete(id);
+            } else {
+                next.add(id);
+            }
+
+            return next;
+        });
+    }, []);
+
+    const toggleCurrentPage = useCallback(() => {
+        setSelected((prev) => {
+            const pageIds = paginatedBrands.map((b) => b.id);
+            const allSelected =
+                pageIds.length > 0 && pageIds.every((id) => prev.has(id));
+            const next = new Set(prev);
+
+            if (allSelected) {
+                pageIds.forEach((id) => next.delete(id));
+            } else {
+                pageIds.forEach((id) => next.add(id));
+            }
+
+            return next;
+        });
+    }, [paginatedBrands]);
 
     const handleImport = () => {
         if (selected.size === 0) {
@@ -68,7 +113,7 @@ export default function AdminSyscomBrandsIndex() {
             {
                 onSuccess: () => {
                     setIsImporting(false);
-                    reset();
+                    setSelected(new Set());
                     router.reload({ only: ['syscom_brands'] });
                 },
                 onError: () => {
@@ -127,11 +172,8 @@ export default function AdminSyscomBrandsIndex() {
                 columns={[
                     <Checkbox
                         key="select-all"
-                        checked={
-                            filtered.length > 0 &&
-                            selected.size === filtered.length
-                        }
-                        onCheckedChange={toggleAll}
+                        checked={allCurrentPageSelected}
+                        onCheckedChange={toggleCurrentPage}
                     />,
                     'SYSCOM ID',
                     'Nombre',
@@ -141,8 +183,17 @@ export default function AdminSyscomBrandsIndex() {
                 loading={isLoading}
                 loadingRows={10}
                 emptyTitle={emptyTitle}
+                footer={
+                    totalBrandPages > 1 ? (
+                        <Pagination
+                            currentPage={safePage}
+                            lastPage={totalBrandPages}
+                            onPageChange={setBrandsPage}
+                        />
+                    ) : null
+                }
             >
-                {filtered.map((brand) => {
+                {paginatedBrands.map((brand) => {
                     const isImported = imported_syscom_ids.includes(brand.id);
                     const isSelected = selected.has(brand.id);
 
