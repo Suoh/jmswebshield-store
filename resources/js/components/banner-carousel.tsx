@@ -2,6 +2,7 @@ import Autoplay from 'embla-carousel-autoplay';
 import useEmblaCarousel from 'embla-carousel-react';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import { useCallback } from 'react';
+import { Button } from '@/components/ui/button';
 import type { Banner } from '@/types/models';
 
 interface BannerCarouselProps {
@@ -21,17 +22,8 @@ export default function BannerCarousel({ banners }: BannerCarouselProps) {
             : [],
     );
 
-    const scrollPrev = useCallback(() => {
-        if (emblaApi) {
-            emblaApi.scrollPrev();
-        }
-    }, [emblaApi]);
-
-    const scrollNext = useCallback(() => {
-        if (emblaApi) {
-            emblaApi.scrollNext();
-        }
-    }, [emblaApi]);
+    const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
+    const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
 
     if (banners.length === 0) {
         return null;
@@ -69,20 +61,22 @@ export default function BannerCarousel({ banners }: BannerCarouselProps) {
 
             {banners.length > 1 && (
                 <>
-                    <button
+                    <Button
+                        variant="ghost"
+                        className="absolute top-1/2 left-3 h-auto w-auto -translate-y-1/2 rounded-full bg-black/40 p-2 text-white hover:bg-black/60 hover:text-white"
                         onClick={scrollPrev}
-                        className="absolute top-1/2 left-3 -translate-y-1/2 rounded-full bg-black/40 p-2 text-white transition-colors hover:bg-black/60"
                         aria-label="Anterior"
                     >
                         <ChevronLeftIcon className="size-5" />
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        className="absolute top-1/2 right-3 h-auto w-auto -translate-y-1/2 rounded-full bg-black/40 p-2 text-white hover:bg-black/60 hover:text-white"
                         onClick={scrollNext}
-                        className="absolute top-1/2 right-3 -translate-y-1/2 rounded-full bg-black/40 p-2 text-white transition-colors hover:bg-black/60"
                         aria-label="Siguiente"
                     >
                         <ChevronRightIcon className="size-5" />
-                    </button>
+                    </Button>
                 </>
             )}
         </div>

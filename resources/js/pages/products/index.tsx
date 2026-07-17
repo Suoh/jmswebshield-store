@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react';
 import BannerCarousel from '@/components/banner-carousel';
-import FeaturedCategoriesCarousel from '@/components/featured-categories-carousel';
+import FeaturedCategoriesGrid from '@/components/featured-categories-grid';
 import FeaturedProductsCarousel from '@/components/featured-products-carousel';
 import FilterSidebar from '@/components/product/filter-sidebar';
 import ProductCard from '@/components/product/product-card';
@@ -45,14 +45,6 @@ export default function ProductIndex({
                 {banners.length > 0 && (
                     <div className="mb-8">
                         <BannerCarousel banners={banners} />
-                    </div>
-                )}
-
-                {featuredCategories.length > 0 && (
-                    <div className="mb-10">
-                        <FeaturedCategoriesCarousel
-                            items={featuredCategories}
-                        />
                     </div>
                 )}
 
@@ -121,6 +113,12 @@ export default function ProductIndex({
                         )}
                     </div>
                 </div>
+
+                {featuredCategories.length > 0 && (
+                    <div className="mt-10">
+                        <FeaturedCategoriesGrid items={featuredCategories} />
+                    </div>
+                )}
             </div>
         </>
     );
