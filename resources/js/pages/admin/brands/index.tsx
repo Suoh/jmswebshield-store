@@ -89,7 +89,11 @@ export default function AdminBrandsIndex() {
                 emptyTitle={emptyTitle}
                 footer={
                     brands.last_page > 1 ? (
-                        <Pagination links={brands.links} />
+                        <Pagination
+                            links={brands.links}
+                            currentPage={brands.current_page}
+                            lastPage={brands.last_page}
+                        />
                     ) : null
                 }
             >

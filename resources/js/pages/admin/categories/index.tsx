@@ -89,7 +89,11 @@ export default function AdminCategoriesIndex() {
                 emptyTitle={emptyTitle}
                 footer={
                     categories.last_page > 1 ? (
-                        <Pagination links={categories.links} />
+                        <Pagination
+                            links={categories.links}
+                            currentPage={categories.current_page}
+                            lastPage={categories.last_page}
+                        />
                     ) : null
                 }
             >

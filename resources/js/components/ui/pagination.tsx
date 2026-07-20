@@ -16,6 +16,8 @@ interface PaginationProps {
     lastPage?: number;
 }
 
+const PAGE_WINDOW = 10;
+
 const LABEL_TRANSLATIONS: Record<string, string> = {
     '&laquo; Previous': '&laquo; Anterior',
     '« Previous': '« Anterior',
@@ -42,16 +44,75 @@ function translateLabel(label: string): string {
     return LABEL_TRANSLATIONS[label] ?? label;
 }
 
-function buildPageRange(current: number, last: number): number[] {
-    const pages: number[] = [];
-    const start = Math.max(1, current - 1);
-    const end = Math.min(last, current + 1);
+function getPaginationPages(current: number, last: number): (number | 'ellipsis')[] {
+    if (last <= PAGE_WINDOW + 2) {
+        return Array.from({ length: last }, (_, i) => i + 1);
+    }
+
+    const pages: (number | 'ellipsis')[] = [];
+    const half = Math.floor(PAGE_WINDOW / 2);
+
+    let start = Math.max(1, current - half);
+    let end = start + PAGE_WINDOW - 1;
+
+    if (end > last) {
+        end = last;
+        start = Math.max(1, end - PAGE_WINDOW + 1);
+    }
+
+    if (start > 1) {
+        pages.push(1);
+        if (start > 2) {
+            pages.push('ellipsis');
+        }
+    }
 
     for (let i = start; i <= end; i++) {
         pages.push(i);
     }
 
+    if (end < last) {
+        if (end < last - 1) {
+            pages.push('ellipsis');
+        }
+        pages.push(last);
+    }
+
     return pages;
+}
+
+type PageItem = number | 'ellipsis';
+
+function renderPageButton(
+    page: PageItem,
+    index: number,
+    currentPage: number,
+    onClick: (page: number) => void,
+) {
+    if (page === 'ellipsis') {
+        return (
+            <Button
+                key={`ellipsis-${index}`}
+                variant="outline"
+                size="sm"
+                disabled
+                className="cursor-default"
+            >
+                ...
+            </Button>
+        );
+    }
+
+    return (
+        <Button
+            key={page}
+            variant={page === currentPage ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => onClick(page)}
+        >
+            {page}
+        </Button>
+    );
 }
 
 export function Pagination({
@@ -62,7 +123,7 @@ export function Pagination({
     lastPage,
 }: PaginationProps) {
     if (onPageChange && currentPage !== undefined && lastPage !== undefined) {
-        const pages = buildPageRange(currentPage, lastPage);
+        const pages = getPaginationPages(currentPage, lastPage);
 
         return (
             <div
@@ -80,16 +141,9 @@ export function Pagination({
                     Anterior
                 </Button>
 
-                {pages.map((page) => (
-                    <Button
-                        key={page}
-                        variant={page === currentPage ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => onPageChange(page)}
-                    >
-                        {page}
-                    </Button>
-                ))}
+                {pages.map((page, index) =>
+                    renderPageButton(page, index, currentPage, onPageChange),
+                )}
 
                 <Button
                     variant="outline"
@@ -105,6 +159,60 @@ export function Pagination({
 
     if (!links) {
         return null;
+    }
+
+    if (currentPage !== undefined && lastPage !== undefined) {
+        const pages = getPaginationPages(currentPage, lastPage);
+        const prevLink = links.find((l) => {
+            const t = translateLabel(l.label);
+            return t === '&laquo; Anterior' || t === '« Anterior' || t === 'Anterior';
+        });
+        const nextLink = links.find((l) => {
+            const t = translateLabel(l.label);
+            return t === 'Siguiente &raquo;' || t === 'Siguiente »' || t === 'Siguiente';
+        });
+
+        return (
+            <div
+                className={cn(
+                    'mt-4 flex items-center justify-center gap-2',
+                    className,
+                )}
+            >
+                <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={!prevLink?.url}
+                    onClick={() => prevLink?.url && router.get(prevLink.url)}
+                >
+                    {prevLink
+                        ? decodeLabel(translateLabel(prevLink.label))
+                        : 'Anterior'}
+                </Button>
+
+                {pages.map((page, index) =>
+                    renderPageButton(page, index, currentPage, (p) => {
+                        const link = links.find(
+                            (l) => l.label === String(p) && l.url,
+                        );
+                        if (link?.url) {
+                            router.get(link.url);
+                        }
+                    }),
+                )}
+
+                <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={!nextLink?.url}
+                    onClick={() => nextLink?.url && router.get(nextLink.url)}
+                >
+                    {nextLink
+                        ? decodeLabel(translateLabel(nextLink.label))
+                        : 'Siguiente'}
+                </Button>
+            </div>
+        );
     }
 
     return (
