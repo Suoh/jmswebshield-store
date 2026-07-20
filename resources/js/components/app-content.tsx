@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { cn } from '@/lib/utils';
 import type { AppVariant } from '@/types';
 
 type Props = React.ComponentProps<'div'> & {
@@ -8,7 +9,13 @@ type Props = React.ComponentProps<'div'> & {
 export function AppContent({ variant = 'sidebar', children, ...props }: Props) {
     if (variant === 'sidebar') {
         return (
-            <div className="relative flex w-full flex-1 flex-col" {...props}>
+            <div
+                className={cn(
+                    'relative flex w-full flex-1 flex-col overflow-y-auto overflow-x-hidden',
+                    props.className,
+                )}
+                {...props}
+            >
                 {children}
             </div>
         );
@@ -16,7 +23,10 @@ export function AppContent({ variant = 'sidebar', children, ...props }: Props) {
 
     return (
         <main
-            className="mx-auto flex h-full w-full max-w-7xl flex-1 flex-col gap-4 rounded-xl"
+            className={cn(
+                'mx-auto flex h-full w-full max-w-7xl flex-1 flex-col gap-4 rounded-xl',
+                props.className,
+            )}
             {...props}
         >
             {children}

@@ -451,6 +451,7 @@ export default function ProductImageUploader({
                                                 <div className="absolute top-2 right-2 flex gap-1">
                                                     {!image.is_cover && (
                                                         <Button
+                                                            type="button"
                                                             variant="secondary"
                                                             size="sm"
                                                             className="h-6 px-2 text-xs"
