@@ -109,7 +109,6 @@ describe('Admin ProductController', function () {
                 'price' => 1299.99,
                 'stock' => 10,
                 'discount' => 15,
-                'sku' => 'SAM-TV-55',
                 'brand_id' => $brand->id,
                 'model' => 'UN55AU9000',
                 'image_url' => 'https://example.com/tv.jpg',
@@ -120,7 +119,6 @@ describe('Admin ProductController', function () {
 
             $this->assertDatabaseHas('products', [
                 'name' => 'Samsung TV 55"',
-                'sku' => 'SAM-TV-55',
                 'price' => 1299.99,
                 'stock' => 10,
                 'discount' => 15,
@@ -133,7 +131,6 @@ describe('Admin ProductController', function () {
             $response = $this->actingAs($this->admin)->post('/admin/products', [
                 'name' => 'Minimal Product',
                 'price' => 99.99,
-                'sku' => 'MIN-001',
                 'is_active' => true,
             ]);
 
@@ -142,14 +139,12 @@ describe('Admin ProductController', function () {
             $this->assertDatabaseHas('products', [
                 'name' => 'Minimal Product',
                 'price' => 99.99,
-                'sku' => 'MIN-001',
             ]);
         });
 
         it('fails when name is missing', function () {
             $response = $this->actingAs($this->admin)->post('/admin/products', [
                 'price' => 99.99,
-                'sku' => 'SKU-001',
             ]);
 
             $response->assertInvalid(['name']);
@@ -158,7 +153,6 @@ describe('Admin ProductController', function () {
         it('fails when price is missing', function () {
             $response = $this->actingAs($this->admin)->post('/admin/products', [
                 'name' => 'Test Product',
-                'sku' => 'SKU-001',
             ]);
 
             $response->assertInvalid(['price']);
@@ -168,29 +162,15 @@ describe('Admin ProductController', function () {
             $response = $this->actingAs($this->admin)->post('/admin/products', [
                 'name' => 'Test Product',
                 'price' => -10,
-                'sku' => 'SKU-001',
             ]);
 
             $response->assertInvalid(['price']);
-        });
-
-        it('fails when sku is not unique', function () {
-            Product::factory()->create(['sku' => 'EXISTING-SKU']);
-
-            $response = $this->actingAs($this->admin)->post('/admin/products', [
-                'name' => 'Test Product',
-                'price' => 99.99,
-                'sku' => 'EXISTING-SKU',
-            ]);
-
-            $response->assertInvalid(['sku']);
         });
 
         it('fails when discount is out of range', function () {
             $response = $this->actingAs($this->admin)->post('/admin/products', [
                 'name' => 'Test Product',
                 'price' => 99.99,
-                'sku' => 'SKU-001',
                 'discount' => 150,
             ]);
 
@@ -201,7 +181,6 @@ describe('Admin ProductController', function () {
             $response = $this->actingAs($this->admin)->post('/admin/products', [
                 'name' => 'Test Product',
                 'price' => 99.99,
-                'sku' => 'SKU-001',
                 'brand_id' => 99999,
             ]);
 
@@ -215,14 +194,13 @@ describe('Admin ProductController', function () {
             $response = $this->actingAs($this->admin)->post('/admin/products', [
                 'name' => 'Product With Categories',
                 'price' => 99.99,
-                'sku' => 'CAT-PROD-001',
                 'is_active' => true,
                 'category_ids' => [$categoryA->id, $categoryB->id],
             ]);
 
             $response->assertRedirect('/admin/products');
 
-            $product = Product::where('sku', 'CAT-PROD-001')->first();
+            $product = Product::where('name', 'Product With Categories')->first();
             expect($product->categories->pluck('id')->toArray())->toEqual([$categoryA->id, $categoryB->id]);
         });
 
@@ -230,7 +208,6 @@ describe('Admin ProductController', function () {
             $response = $this->actingAs($this->admin)->post('/admin/products', [
                 'name' => 'Invalid Category Product',
                 'price' => 99.99,
-                'sku' => 'INV-CAT-001',
                 'category_ids' => [99999],
             ]);
 
@@ -246,13 +223,12 @@ describe('Admin ProductController', function () {
             $response = $this->actingAs($this->admin)->post('/admin/products', [
                 'name' => 'Product With Images',
                 'price' => 99.99,
-                'sku' => 'IMG-PROD-001',
                 'is_active' => true,
                 'product_image_ids' => [$image->id],
             ]);
 
             $response->assertRedirect('/admin/products');
-            $product = Product::where('sku', 'IMG-PROD-001')->first();
+            $product = Product::where('name', 'Product With Images')->first();
             $this->assertEquals($product->id, $image->fresh()->product_id);
         });
 
@@ -263,13 +239,12 @@ describe('Admin ProductController', function () {
             $response = $this->actingAs($this->admin)->post('/admin/products', [
                 'name' => 'Product With Multiple Images',
                 'price' => 149.99,
-                'sku' => 'IMG-PROD-002',
                 'is_active' => true,
                 'product_image_ids' => [$img1->id, $img2->id],
             ]);
 
             $response->assertRedirect('/admin/products');
-            $product = Product::where('sku', 'IMG-PROD-002')->first();
+            $product = Product::where('name', 'Product With Multiple Images')->first();
             $this->assertEquals($product->id, $img1->fresh()->product_id);
             $this->assertEquals($product->id, $img2->fresh()->product_id);
         });
@@ -278,18 +253,13 @@ describe('Admin ProductController', function () {
             $response = $this->actingAs($this->admin)->post('/admin/products', [
                 'name' => 'XSS Test',
                 'price' => 99.99,
-                'sku' => 'XSS-001',
                 'full_description' => '<p>Safe</p><script>alert(1)</script>',
                 'is_active' => true,
             ]);
 
             $response->assertRedirect('/admin/products');
 
-            $this->assertDatabaseHas('products', [
-                'sku' => 'XSS-001',
-            ]);
-
-            $product = Product::where('sku', 'XSS-001')->first();
+            $product = Product::where('name', 'XSS Test')->first();
             expect($product->full_description)
                 ->toContain('<p>Safe</p>')
                 ->not->toContain('<script>');
@@ -302,7 +272,6 @@ describe('Admin ProductController', function () {
             $category = Category::factory()->create();
             $product = Product::factory()->create([
                 'name' => 'Edit Me',
-                'sku' => 'EDIT-SKU',
                 'brand_id' => $brand->id,
             ]);
             $product->categories()->attach($category);
@@ -314,7 +283,6 @@ describe('Admin ProductController', function () {
                     ->component('admin/products/[id]/edit')
                     ->where('product.id', $product->id)
                     ->where('product.name', 'Edit Me')
-                    ->where('product.sku', 'EDIT-SKU')
                     ->has('categories')
                     ->has('product.categories')
                 );
@@ -337,7 +305,6 @@ describe('Admin ProductController', function () {
             $response = $this->actingAs($this->admin)->put("/admin/products/{$product->id}", [
                 'name' => 'New Name',
                 'price' => 200.00,
-                'sku' => $product->sku,
             ]);
 
             $response->assertRedirect('/admin/products');
@@ -349,38 +316,12 @@ describe('Admin ProductController', function () {
             ]);
         });
 
-        it('fails when updating with duplicate sku', function () {
-            $product1 = Product::factory()->create(['sku' => 'SKU-ONE']);
-            $product2 = Product::factory()->create(['sku' => 'SKU-TWO']);
-
-            $response = $this->actingAs($this->admin)->put("/admin/products/{$product2->id}", [
-                'name' => 'Updated',
-                'price' => 99.99,
-                'sku' => 'SKU-ONE',
-            ]);
-
-            $response->assertInvalid(['sku']);
-        });
-
-        it('allows same sku when updating same product', function () {
-            $product = Product::factory()->create(['sku' => 'SAME-SKU']);
-
-            $response = $this->actingAs($this->admin)->put("/admin/products/{$product->id}", [
-                'name' => 'Updated Name',
-                'price' => 99.99,
-                'sku' => 'SAME-SKU',
-            ]);
-
-            $response->assertRedirect('/admin/products');
-        });
-
         it('fails when price is negative', function () {
             $product = Product::factory()->create();
 
             $response = $this->actingAs($this->admin)->put("/admin/products/{$product->id}", [
                 'name' => 'Updated',
                 'price' => -5,
-                'sku' => $product->sku,
             ]);
 
             $response->assertInvalid(['price']);
@@ -392,7 +333,6 @@ describe('Admin ProductController', function () {
             $response = $this->actingAs($this->admin)->put("/admin/products/{$product->id}", [
                 'name' => 'Updated',
                 'price' => 99.99,
-                'sku' => $product->sku,
                 'discount' => 101,
             ]);
 
@@ -409,7 +349,6 @@ describe('Admin ProductController', function () {
             $response = $this->actingAs($this->admin)->put("/admin/products/{$product->id}", [
                 'name' => 'Updated Categories',
                 'price' => 99.99,
-                'sku' => $product->sku,
                 'category_ids' => [$categoryB->id, $categoryC->id],
             ]);
 
@@ -427,7 +366,6 @@ describe('Admin ProductController', function () {
             $response = $this->actingAs($this->admin)->put("/admin/products/{$product->id}", [
                 'name' => 'Updated XSS',
                 'price' => 149.99,
-                'sku' => $product->sku,
                 'full_description' => '<b>Bold</b><iframe src="x"></iframe>',
             ]);
 

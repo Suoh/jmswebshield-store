@@ -108,6 +108,8 @@ export default function ProductIndex({
                         {products.last_page > 1 && (
                             <Pagination
                                 links={products.links}
+                                currentPage={products.current_page}
+                                lastPage={products.last_page}
                                 className="mt-8 flex-wrap"
                             />
                         )}

@@ -1,4 +1,4 @@
-import { useForm } from '@inertiajs/react';
+import { useForm, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import ProductImageUploader from '@/components/admin/product-image-uploader';
 import { Button } from '@/components/ui/button';
@@ -33,7 +33,6 @@ interface Product {
     price: string | number;
     stock: string | number;
     discount: string | number;
-    sku: string | null;
     brand_id: number | string | null;
     model: string | null;
     image_url: string | null;
@@ -55,7 +54,6 @@ export interface ProductFormPayload {
     price: number;
     stock: number;
     discount: number;
-    sku: string;
     brand_id: number | null;
     category_ids: number[];
     model: string;
@@ -80,19 +78,21 @@ export default function ProductForm({
     const [editorImageIds, setEditorImageIds] = useState<number[]>([]);
     const [productImageIds, setProductImageIds] = useState<number[]>([]);
     const [sessionId] = useState(() => getOrCreateSessionId(product?.id));
-    const { data, setData, errors, processing } = useForm({
+    const { data, setData, errors: formErrors, processing } = useForm({
         name: product?.name ?? '',
         short_description: product?.short_description ?? '',
         full_description: product?.full_description ?? '',
         price: product?.price ?? '',
         stock: product?.stock ?? 0,
         discount: product?.discount ?? 0,
-        sku: product?.sku ?? '',
         brand_id: product?.brand_id?.toString() ?? '',
         category_ids: product?.categories?.map((c) => c.id) ?? [],
         model: product?.model ?? '',
         is_active: product?.is_active ?? true,
     });
+
+    const { props } = usePage();
+    const errors = { ...formErrors, ...(props.errors as Record<string, string>) };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -206,21 +206,6 @@ export default function ProductForm({
                                 }
                                 placeholder="Ej: SM-S921B"
                             />
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="sku">SKU</Label>
-                            <Input
-                                id="sku"
-                                value={data.sku}
-                                onChange={(e) => setData('sku', e.target.value)}
-                                placeholder="Código único del producto"
-                            />
-                            {errors.sku && (
-                                <p className="text-sm text-destructive">
-                                    {errors.sku}
-                                </p>
-                            )}
                         </div>
                     </CardContent>
                 </Card>

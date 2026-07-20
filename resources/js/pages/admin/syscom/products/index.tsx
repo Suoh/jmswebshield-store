@@ -353,15 +353,16 @@ export default function AdminSyscomProductsIndex() {
                                     </div>
                                 )}
                             </TableCell>
-                            <TableCell className="w-[260px] max-w-[260px]">
-                                <div className="flex flex-col gap-0.5">
+                            <TableCell className="min-w-0 w-[200px] max-w-[200px]">
+                                <div className="flex min-w-0 flex-col gap-0.5">
                                     <span
                                         className={
-                                            'line-clamp-2 text-sm font-medium break-words ' +
+                                            'truncate text-sm font-medium ' +
                                             (imported
                                                 ? 'text-muted-foreground'
                                                 : '')
                                         }
+                                        title={product.nombre}
                                     >
                                         {product.nombre}
                                     </span>

@@ -3,8 +3,6 @@
 use App\Http\Requests\Admin\ProductRequest;
 use App\Models\Brand;
 use App\Models\Category;
-use App\Models\Product;
-use Illuminate\Validation\Rule;
 
 beforeEach(fn () => actingAsAdmin());
 
@@ -75,17 +73,6 @@ describe('ProductRequest', function () {
             ->and($validator->errors()->has('discount'))->toBeTrue();
     });
 
-    it('fails when sku is not unique on store', function () {
-        Product::factory()->create(['sku' => 'LAP-001']);
-
-        $rules = (new ProductRequest)->rules();
-
-        $validator = validator(['name' => 'Laptop', 'price' => 100, 'sku' => 'LAP-001'], $rules);
-
-        expect($validator->fails())->toBeTrue()
-            ->and($validator->errors()->has('sku'))->toBeTrue();
-    });
-
     it('fails when brand_id does not exist', function () {
         $rules = (new ProductRequest)->rules();
 
@@ -116,30 +103,6 @@ describe('ProductRequest', function () {
 
         expect($validator->fails())->toBeTrue()
             ->and($validator->errors()->has('image_url'))->toBeTrue();
-    });
-
-    it('passes when updating product with same sku (unique ignores self)', function () {
-        $product = Product::factory()->create(['sku' => 'LAP-001']);
-
-        $validator = validator(
-            ['name' => 'Laptop', 'price' => 100, 'sku' => 'LAP-001'],
-            ['sku' => ['nullable', 'string', Rule::unique('products', 'sku')->ignore($product->id)]]
-        );
-
-        expect($validator->fails())->toBeFalse();
-    });
-
-    it('fails when updating product with another existing sku', function () {
-        $product = Product::factory()->create(['sku' => 'LAP-001']);
-        Product::factory()->create(['sku' => 'LAP-002']);
-
-        $validator = validator(
-            ['name' => 'Laptop', 'price' => 100, 'sku' => 'LAP-002'],
-            ['sku' => ['nullable', 'string', Rule::unique('products', 'sku')->ignore($product->id)]]
-        );
-
-        expect($validator->fails())->toBeTrue()
-            ->and($validator->errors()->has('sku'))->toBeTrue();
     });
 
     it('passes when category_ids is empty', function () {

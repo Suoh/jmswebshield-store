@@ -91,7 +91,11 @@ export default function AdminBannersIndex() {
                 emptyTitle={emptyTitle}
                 footer={
                     banners.last_page > 1 ? (
-                        <Pagination links={banners.links} />
+                        <Pagination
+                            links={banners.links}
+                            currentPage={banners.current_page}
+                            lastPage={banners.last_page}
+                        />
                     ) : null
                 }
             >
