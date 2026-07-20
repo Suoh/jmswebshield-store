@@ -8,10 +8,8 @@ import {
     Image,
     PackageSearch,
     Sparkles,
-    Store,
     Tag,
 } from 'lucide-react';
-import BrandLogo from '@/components/brand-logo';
 import { Button } from '@/components/ui/button';
 import {
     Card,
