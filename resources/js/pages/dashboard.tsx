@@ -100,7 +100,7 @@ const adminSections = [
 const workflowSteps = [
     'Cree o importe las marcas necesarias para que los productos queden correctamente vinculados.',
     'Busque productos en SYSCOM usando categoría, marca o texto libre.',
-    'Asigne precio de venta a cada producto seleccionado e impórtelo al catálogo local.',
+    'Asigne precio de venta a cada producto seleccionado e importelo al catálogo local.',
     'Revise descripción, imágenes, stock, descuento y estado activo antes de publicarlo.',
 ];
 
@@ -108,32 +108,7 @@ export default function Dashboard() {
     return (
         <>
             <Head title="Panel de administración" />
-            <div className="flex h-full flex-1 flex-col gap-8 overflow-x-auto p-4 md:p-6">
-                <section className="overflow-hidden rounded-3xl border bg-card p-6 shadow-sm md:p-8">
-                    <div className="max-w-3xl space-y-4">
-                        <BrandLogo size="lg" withText={false} />
-                        <span className="inline-flex items-center rounded-full border bg-background/75 px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm">
-                            Panel admin JMS WebShield Store
-                        </span>
-                        <div className="space-y-3">
-                            <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
-                                Gestione el catálogo desde un solo punto
-                            </h1>
-                            <p className="text-base leading-7 text-muted-foreground md:text-lg">
-                                Use este panel como punto de partida para crear
-                                marcas, importar información desde SYSCOM y
-                                preparar productos listos para publicar.
-                            </p>
-                            <Button variant="outline" asChild>
-                                <Link href="/products">
-                                    <Store className="mr-2 size-4" />
-                                    Ir a la tienda
-                                </Link>
-                            </Button>
-                        </div>
-                    </div>
-                </section>
-
+            <div className="flex h-full flex-1 flex-col gap-8 p-4 md:p-6">
                 <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                     {adminSections.map((section) => (
                         <Card
@@ -170,7 +145,7 @@ export default function Dashboard() {
                         <CardHeader>
                             <CardTitle>Flujo de trabajo recomendado</CardTitle>
                             <CardDescription>
-                                Seguí estos pasos para pasar de datos externos a
+                                Sigue estos pasos para pasar de datos externos a
                                 productos publicados sin perder consistencia.
                             </CardDescription>
                         </CardHeader>
@@ -200,7 +175,7 @@ export default function Dashboard() {
                             </div>
                             <CardTitle>Atajo sugerido</CardTitle>
                             <CardDescription className="text-primary-foreground/75">
-                                Si ya tenés marcas cargadas, empezá directo en
+                                Si ya tienes marcas cargadas, empieza directo en
                                 productos SYSCOM para importar inventario nuevo.
                             </CardDescription>
                         </CardHeader>
