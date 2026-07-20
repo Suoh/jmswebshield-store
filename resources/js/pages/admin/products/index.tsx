@@ -257,36 +257,38 @@ export default function AdminProductsIndex() {
             <DataTable
                 columns={[
                     'Nombre',
-                    'SKU',
                     'Marca',
                     'Precio',
                     'Stock',
                     'Activo',
                     'Acciones',
                 ]}
-                colSpan={7}
+                colSpan={6}
                 emptyTitle="No hay productos registrados."
                 scrollHorizontal
                 footer={
                     products.last_page > 1 ? (
-                        <Pagination links={products.links} />
+                        <Pagination
+                            links={products.links}
+                            currentPage={products.current_page}
+                            lastPage={products.last_page}
+                        />
                     ) : null
                 }
             >
                 {products.data.map((product) => (
                     <TableRow key={product.id}>
-                        <TableCell className="font-medium">
-                            <div className="flex items-center gap-2">
+                        <TableCell className="min-w-0 font-medium">
+                            <div className="flex items-center gap-2 max-w-sm">
                                 {product.deleted_at && (
                                     <span className="rounded bg-destructive/10 px-1.5 py-0.5 text-xs text-destructive">
                                         Eliminado
                                     </span>
                                 )}
-                                {product.name}
+                                <span className="truncate" title={product.name}>
+                                    {product.name}
+                                </span>
                             </div>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                            {product.sku ?? '-'}
                         </TableCell>
                         <TableCell className="text-muted-foreground">
                             {product.brand?.name ?? '-'}

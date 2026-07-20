@@ -78,6 +78,10 @@ class ProductController extends Controller
                 ->update(['product_id' => $product->id]);
         }
 
+        if ($product->images()->where('is_cover', true)->doesntExist()) {
+            $product->images()->orderBy('id')->first()?->update(['is_cover' => true]);
+        }
+
         ($this->reconcileEditorImages)($product, $product->full_description ?? '');
 
         return redirect()->route('admin.products.index')->with('success', 'Producto creado exitosamente.');
