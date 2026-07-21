@@ -155,7 +155,7 @@ Agregar al crontab del servidor:
 * * * * * cd /ruta/al/proyecto && php artisan schedule:run >> /dev/null 2>&1
 ```
 
-La tarea `CleanupOrphanEditorImages` se ejecuta cada hora.
+La tarea `CleanupOrphanEditorImages` se ejecuta cada hora (Puedes elegir el tiempo que mejor se ajuste a tus necesidades).
 
 ### 7. Queue worker
 
