@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -44,7 +45,10 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+function actingAsAdmin(): void
 {
-    // ..
+    $test = test();
+    $user = User::factory()->create(['email' => 'admin@test.com']);
+    config(['app.admin_email' => 'admin@test.com']);
+    $test->admin = $user;
 }

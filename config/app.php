@@ -123,4 +123,17 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Admin Email
+    |--------------------------------------------------------------------------
+    |
+    | The email address used to identify the admin user. This value is
+    | checked by the EnsureEmailIsAdmin middleware against the logged
+    | in user's email address.
+    |
+    */
+
+    'admin_email' => env('ADMIN_EMAIL', null),
+
 ];

@@ -1,0 +1,127 @@
+import { Head } from '@inertiajs/react';
+import BannerCarousel from '@/components/banner-carousel';
+import FeaturedCategoriesGrid from '@/components/featured-categories-grid';
+import FeaturedProductsCarousel from '@/components/featured-products-carousel';
+import FilterSidebar from '@/components/product/filter-sidebar';
+import ProductCard from '@/components/product/product-card';
+import ProductListRow from '@/components/product/product-list-row';
+import SearchBar from '@/components/product/search-bar';
+import SortSelect from '@/components/product/sort-select';
+import ViewToggle from '@/components/product/view-toggle';
+import { Pagination } from '@/components/ui/pagination';
+import { useUrlFilter } from '@/hooks/use-url-filter';
+import type {
+    Banner,
+    Brand,
+    Category,
+    FeaturedItem,
+    PaginatedData,
+    Product,
+} from '@/types/models';
+
+interface Props {
+    products: PaginatedData<Product>;
+    brands: Brand[];
+    categories: Category[];
+    banners: Banner[];
+    featuredCategories: FeaturedItem[];
+    featuredProducts: FeaturedItem[];
+}
+
+export default function ProductIndex({
+    products,
+    brands,
+    categories,
+    banners,
+    featuredCategories,
+    featuredProducts,
+}: Props) {
+    const [view] = useUrlFilter('view', 'grid');
+
+    return (
+        <>
+            <Head title="Catálogo de productos" />
+            <div className="container mx-auto px-4 py-6">
+                {banners.length > 0 && (
+                    <div className="mb-8">
+                        <BannerCarousel banners={banners} />
+                    </div>
+                )}
+
+                {featuredProducts.length > 0 && (
+                    <div className="mb-10">
+                        <FeaturedProductsCarousel items={featuredProducts} />
+                    </div>
+                )}
+
+                <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+                    <aside className="w-full shrink-0 rounded-lg bg-sidebar p-4 lg:w-56">
+                        <FilterSidebar
+                            brands={brands}
+                            categories={categories}
+                        />
+                    </aside>
+
+                    <div className="min-w-0 flex-1">
+                        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="max-w-md min-w-0 flex-1">
+                                <SearchBar />
+                            </div>
+                            <div className="flex shrink-0 items-center gap-3">
+                                <SortSelect />
+                                <ViewToggle />
+                            </div>
+                        </div>
+
+                        {products.data.length === 0 ? (
+                            <div className="flex min-h-[300px] items-center justify-center">
+                                <div className="space-y-2 text-center">
+                                    <p className="text-lg font-medium">
+                                        No hay productos disponibles
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">
+                                        Probá cambiando los filtros o la
+                                        búsqueda
+                                    </p>
+                                </div>
+                            </div>
+                        ) : view === 'list' ? (
+                            <div className="space-y-3">
+                                {products.data.map((product) => (
+                                    <ProductListRow
+                                        key={product.id}
+                                        product={product}
+                                    />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+                                {products.data.map((product) => (
+                                    <ProductCard
+                                        key={product.id}
+                                        product={product}
+                                    />
+                                ))}
+                            </div>
+                        )}
+
+                        {products.last_page > 1 && (
+                            <Pagination
+                                links={products.links}
+                                currentPage={products.current_page}
+                                lastPage={products.last_page}
+                                className="mt-8 flex-wrap"
+                            />
+                        )}
+                    </div>
+                </div>
+
+                {featuredCategories.length > 0 && (
+                    <div className="mt-10">
+                        <FeaturedCategoriesGrid items={featuredCategories} />
+                    </div>
+                )}
+            </div>
+        </>
+    );
+}

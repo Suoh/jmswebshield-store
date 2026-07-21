@@ -1,0 +1,31 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: jmswebshield_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: jmswebshield_store
+      POSTGRES_USER: homestead
+      POSTGRES_PASSWORD: secret
+    ports:
+      - "54320:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  mysql:
+    image: mysql:8.0
+    container_name: jmswebshield_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: jmswebshield_store
+      MYSQL_USER: homestead
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: rootsecret
+    ports:
+      - "33060:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  postgres_data:
+  mysql_data:
