@@ -1,0 +1,1 @@
+function e(e){return e.replace(/<[^>]*>/g,``)}function t(e){return`$${Number(e).toLocaleString(`es-MX`,{minimumFractionDigits:2,maximumFractionDigits:2})}`}export{e as n,t};
