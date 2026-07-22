@@ -3,7 +3,7 @@
 > Plataforma de comercio electrónico para productos de seguridad web JMS WebShield
 
 [![Laravel](https://img.shields.io/badge/Laravel-13.x-FF2D20?logo=laravel)](https://laravel.com)
-[![PHP](https://img.shields.io/badge/PHP-8.3%2B-777BB4?logo=php)](https://php.net)
+[![PHP](https://img.shields.io/badge/PHP-8.4%2B-777BB4?logo=php)](https://php.net)
 [![React](https://img.shields.io/badge/React-19.x-61DAFB?logo=react)](https://react.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?logo=typescript)](https://typescriptlang.org)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-v4-06B6D4?logo=tailwindcss)](https://tailwindcss.com)
@@ -11,7 +11,11 @@
 
 ## Requisitos
 
-- **PHP** 8.3+ con extensiones: `pdo_mysql`, `json`, `mbstring`, `ctype`, `bcmath`
+- **DDEV** 1.25+ y un proveedor de Docker compatible (recomendado)
+
+Si no usas DDEV:
+
+- **PHP** 8.4.1+ con extensiones: `pdo_mysql`, `json`, `mbstring`, `ctype`, `bcmath`
 - **Node.js** 22+
 - **Composer**
 - **MySQL** 8.0+
@@ -31,31 +35,40 @@
 
 ## Desarrollo local
 
-### Con Docker
+### Con DDEV (recomendado)
 
 ```bash
 git clone <repo-url> jmswebshield-store
 cd jmswebshield-store
-cp .env.example .env    # editar .env con tus valores
-docker compose up -d    # MySQL en localhost:33060
-composer install
-npm install
-php artisan migrate
-php artisan db:seed     # crea el usuario admin
-npm run dev             # Vite con hot reload
+ddev start
+ddev composer install
+ddev npm ci
+ddev artisan key:generate
+ddev artisan migrate
+ddev artisan storage:link
+ddev npm run build
 ```
 
-O todo junto:
+DDEV crea `.env` y configura automáticamente la conexión a MySQL. La aplicación queda disponible en `https://jmswebshield-store.ddev.site`.
+
+Para trabajar con hot reload, deja este proceso ejecutándose:
 
 ```bash
-composer setup          # install + key:generate + migrate + npm install + build
-docker compose up -d
-composer dev            # servidor + queue + logs + Vite
+ddev npm run dev
 ```
 
-### Sin Docker
+Comandos útiles:
 
-Configura MySQL local y ajusta las variables `DB_*` en `.env`.
+```bash
+ddev artisan migrate --seed  # crea el admin si ADMIN_EMAIL está definido en .env
+ddev artisan queue:work      # procesa la cola
+ddev mailpit                 # abre el correo local capturado por DDEV
+ddev stop
+```
+
+### Sin DDEV
+
+Configura PHP, Node.js y MySQL localmente; copia `.env.example` a `.env` y ajusta las variables `DB_*`. El archivo `docker-compose.yml` también puede levantar MySQL en `localhost:33060`.
 
 ## Variables de entorno
 
@@ -86,7 +99,7 @@ Configura MySQL local y ajusta las variables `DB_*` en `.env`.
 
 ### 1. Requisitos del servidor
 
-- PHP 8.3+ con extensiones: `pdo_mysql`, `json`, `mbstring`, `ctype`, `bcmath`, `fileinfo`, `tokenizer`
+- PHP 8.4.1+ con extensiones: `pdo_mysql`, `json`, `mbstring`, `ctype`, `bcmath`, `fileinfo`, `tokenizer`
 - MySQL 8.0+
 (Se requiere MySQL 8.0+ por el uso de columnas JSON y JSON_EXTRACT en los queries de metadatos).
 - Node.js 22+ (para compilar assets)
@@ -200,7 +213,7 @@ server {
     error_page 404 /index.php;
 
     location ~ \.php$ {
-        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
+        fastcgi_pass unix:/var/run/php/php8.4-fpm.sock;
         fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
         include fastcgi_params;
     }
