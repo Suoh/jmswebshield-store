@@ -100,8 +100,8 @@ Configura PHP, Node.js y MySQL localmente; copia `.env.example` a `.env` y ajust
 ### 1. Requisitos del servidor
 
 - PHP 8.4.1+ con extensiones: `pdo_mysql`, `json`, `mbstring`, `ctype`, `bcmath`, `fileinfo`, `tokenizer`
-- MySQL 8.0+
-(Se requiere MySQL 8.0+ por el uso de columnas JSON y JSON_EXTRACT en los queries de metadatos).
+- MySQL 8.0+ o MariaDB 11.8+
+(Se requiere una de estas versiones por el uso de columnas JSON e índices sobre los IDs de SYSCOM almacenados en los metadatos).
 - Node.js 22+ (para compilar assets)
 - Composer
 - Servidor web: **nginx** o **Apache** con DocumentRoot apuntando a `public/`
