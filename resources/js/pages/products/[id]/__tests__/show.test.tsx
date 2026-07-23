@@ -81,3 +81,13 @@ describe('ProductShow - WhatsApp button', () => {
         ).not.toBeInTheDocument();
     });
 });
+
+describe('ProductShow - rich text description', () => {
+    it('uses theme-aware typography styles', () => {
+        render(<ProductShow product={mockProduct} />);
+
+        expect(
+            screen.getByText('Descripción completa del producto'),
+        ).toHaveClass('prose', 'prose-themed');
+    });
+});

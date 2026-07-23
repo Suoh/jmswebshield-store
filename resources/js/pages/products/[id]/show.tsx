@@ -80,7 +80,7 @@ export default function ProductShow({ product }: Props) {
                                     Descripción
                                 </h2>
                                 <div
-                                    className="prose prose-sm max-w-none text-foreground/80"
+                                    className="prose prose-themed prose-sm max-w-none"
                                     dangerouslySetInnerHTML={{
                                         __html: product.full_description,
                                     }}
@@ -168,7 +168,7 @@ export default function ProductShow({ product }: Props) {
                                                 <Link
                                                     key={cat.id}
                                                     href={`/products?category[]=${cat.id}`}
-                                                    className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary transition-colors hover:bg-primary/20"
+                                                    className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary transition-colors hover:bg-primary/5"
                                                 >
                                                     {cat.name}
                                                 </Link>
@@ -212,7 +212,7 @@ export default function ProductShow({ product }: Props) {
                                             href={whatsappHref}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none"
+                                            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-[color-mix(in_oklch,var(--primary),var(--foreground)_10%)] focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none"
                                         >
                                             <WhatsAppIcon className="h-7 w-7" />
                                             Consultar por WhatsApp

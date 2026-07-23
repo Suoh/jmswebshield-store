@@ -66,7 +66,9 @@ export default function Profile({
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="email">Correo electrónico</Label>
+                                <Label htmlFor="email">
+                                    Correo electrónico
+                                </Label>
 
                                 <Input
                                     id="email"
@@ -89,7 +91,8 @@ export default function Profile({
                                 auth.user.email_verified_at === null && (
                                     <div>
                                         <p className="-mt-4 text-sm text-muted-foreground">
-                                            Tu correo electrónico no está verificado.{' '}
+                                            Tu correo electrónico no está
+                                            verificado.{' '}
                                             <Link
                                                 href={send()}
                                                 as="button"
@@ -102,9 +105,10 @@ export default function Profile({
 
                                         {status ===
                                             'verification-link-sent' && (
-                                            <div className="mt-2 text-sm font-medium text-green-600">
+                                            <div className="mt-2 text-sm font-medium text-green-700 dark:text-green-400">
                                                 Se ha enviado un nuevo enlace de
-                                                verificación a tu correo electrónico.
+                                                verificación a tu correo
+                                                electrónico.
                                             </div>
                                         )}
                                     </div>

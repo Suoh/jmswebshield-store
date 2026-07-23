@@ -1,0 +1,1 @@
+import{a as e,h as t,i as n}from"./utils-FzVgSuBU.js";import{t as r}from"./category-form-Dg93Rcqc.js";var i=e(),a=n();function o(){let e=(0,i.c)(1),t=s,n;return e[0]===Symbol.for(`react.memo_cache_sentinel`)?(n=(0,a.jsx)(`div`,{className:`p-6`,children:(0,a.jsx)(r,{onSubmit:t})}),e[0]=n):n=e[0],n}function s(e){t.post(`/admin/categories`,e)}export{o as default};

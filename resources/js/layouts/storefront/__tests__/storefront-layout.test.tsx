@@ -50,6 +50,20 @@ describe('StorefrontLayout', () => {
         expect(screen.queryByText('Iniciar sesión')).not.toBeInTheDocument();
     });
 
+    it('shows the public theme toggle', () => {
+        render(
+            <StorefrontLayout>
+                <div>Content</div>
+            </StorefrontLayout>,
+        );
+
+        expect(
+            screen.getByRole('button', {
+                name: /cambiar a tema (claro|oscuro)/i,
+            }),
+        ).toBeInTheDocument();
+    });
+
     it('shows "Panel admin" when user is admin', () => {
         mockUsePage.mockReturnValue({
             props: {

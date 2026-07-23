@@ -1,4 +1,5 @@
 import { usePage } from '@inertiajs/react';
+import AppearanceToggle from '@/components/appearance-toggle';
 import BrandLogo from '@/components/brand-logo';
 import { Button } from '@/components/ui/button';
 import { dashboard } from '@/routes';
@@ -18,7 +19,8 @@ export default function StorefrontLayout({ children }: StorefrontLayoutProps) {
                         <BrandLogo size="sm" withText />
                     </a>
 
-                    <nav className="flex items-center gap-4">
+                    <nav className="flex items-center gap-2">
+                        <AppearanceToggle />
                         {auth.user && auth.isAdmin && (
                             <Button variant="ghost" asChild>
                                 <a href={dashboard().url}>Panel admin</a>

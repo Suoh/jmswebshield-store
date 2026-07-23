@@ -336,7 +336,7 @@ export function RichTextEditor({
                         editor={editor}
                         role="textbox"
                         aria-multiline="true"
-                        className="prose prose-sm max-w-none
+                        className="prose prose-themed prose-sm max-w-none
                             [&_.ProseMirror]:min-h-[120px]
                             [&_.ProseMirror]:px-3
                             [&_.ProseMirror]:py-2
