@@ -279,7 +279,7 @@ export default function AdminProductsIndex() {
                 {products.data.map((product) => (
                     <TableRow key={product.id}>
                         <TableCell className="min-w-0 font-medium">
-                            <div className="flex items-center gap-2 max-w-sm">
+                            <div className="flex max-w-sm items-center gap-2">
                                 {product.deleted_at && (
                                     <span className="rounded bg-destructive/10 px-1.5 py-0.5 text-xs text-destructive">
                                         Eliminado
@@ -355,7 +355,7 @@ export default function AdminProductsIndex() {
                                                         Cancelar
                                                     </AlertDialogCancel>
                                                     <AlertDialogAction
-                                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                        className="bg-destructive text-destructive-foreground hover:bg-[color-mix(in_oklch,var(--destructive),var(--foreground)_10%)]"
                                                         onClick={confirmDelete}
                                                     >
                                                         Eliminar
@@ -409,7 +409,7 @@ export default function AdminProductsIndex() {
                                                         Cancelar
                                                     </AlertDialogCancel>
                                                     <AlertDialogAction
-                                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                        className="bg-destructive text-destructive-foreground hover:bg-[color-mix(in_oklch,var(--destructive),var(--foreground)_10%)]"
                                                         onClick={() => {
                                                             if (deleteTarget) {
                                                                 handleForceDelete(

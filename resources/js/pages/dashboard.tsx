@@ -172,7 +172,7 @@ export default function Dashboard() {
                                 <CheckCircle2 className="size-5" />
                             </div>
                             <CardTitle>Atajo sugerido</CardTitle>
-                            <CardDescription className="text-primary-foreground/75">
+                            <CardDescription className="text-primary-foreground">
                                 Si ya tienes marcas cargadas, empieza directo en
                                 productos SYSCOM para importar inventario nuevo.
                             </CardDescription>

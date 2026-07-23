@@ -27,10 +27,11 @@ export default function DeleteUser() {
                 description="Elimina tu cuenta y todos sus recursos"
             />
             <div className="space-y-4 rounded-lg border border-red-100 bg-red-50 p-4 dark:border-red-200/10 dark:bg-red-700/10">
-                <div className="relative space-y-0.5 text-red-600 dark:text-red-100">
+                <div className="relative space-y-0.5 text-red-700 dark:text-red-100">
                     <p className="font-medium">Advertencia</p>
                     <p className="text-sm">
-                        Por favor procede con precaución, esto no se puede deshacer.
+                        Por favor procede con precaución, esto no se puede
+                        deshacer.
                     </p>
                 </div>
 
@@ -48,10 +49,11 @@ export default function DeleteUser() {
                             ¿Estás seguro de que deseas eliminar tu cuenta?
                         </DialogTitle>
                         <DialogDescription>
-                            Una vez que tu cuenta sea eliminada, todos sus recursos
-                            y datos también serán eliminados permanentemente. Ingresa
-                            tu contraseña para confirmar que deseas eliminar tu cuenta
-                            de forma permanente.
+                            Una vez que tu cuenta sea eliminada, todos sus
+                            recursos y datos también serán eliminados
+                            permanentemente. Ingresa tu contraseña para
+                            confirmar que deseas eliminar tu cuenta de forma
+                            permanente.
                         </DialogDescription>
 
                         <Form

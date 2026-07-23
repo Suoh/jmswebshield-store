@@ -353,7 +353,7 @@ export default function AdminSyscomProductsIndex() {
                                     </div>
                                 )}
                             </TableCell>
-                            <TableCell className="min-w-0 w-[200px] max-w-[200px]">
+                            <TableCell className="w-[200px] max-w-[200px] min-w-0">
                                 <div className="flex min-w-0 flex-col gap-0.5">
                                     <span
                                         className={
@@ -377,8 +377,8 @@ export default function AdminSyscomProductsIndex() {
                                 <span
                                     className={
                                         product.stock > 0
-                                            ? 'text-green-600 dark:text-green-400'
-                                            : 'text-red-500'
+                                            ? 'text-green-700 dark:text-green-400'
+                                            : 'text-red-700 dark:text-red-400'
                                     }
                                 >
                                     {product.stock}
