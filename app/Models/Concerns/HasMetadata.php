@@ -7,6 +7,11 @@ use Illuminate\Support\Facades\DB;
 
 trait HasMetadata
 {
+    public function initializeHasMetadata(): void
+    {
+        $this->hidden[] = 'metadata_syscom_id';
+    }
+
     public function scopeWhereHasMetadataKey(Builder $query, string $key): void
     {
         $query->whereNotNull('metadata');

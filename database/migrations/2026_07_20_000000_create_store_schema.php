@@ -100,10 +100,35 @@ return new class extends Migration
         }
 
         if (DB::connection()->getDriverName() === 'mysql') {
-            DB::statement("CREATE INDEX products_metadata_syscom_id_idx ON products ((CAST(JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.syscom_id')) AS CHAR(64))))");
-            DB::statement("CREATE INDEX brands_metadata_syscom_id_idx ON brands ((CAST(JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.syscom_id')) AS CHAR(64))))");
-            DB::statement("CREATE INDEX categories_metadata_syscom_id_idx ON categories ((CAST(JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.syscom_id')) AS CHAR(64))))");
+            if ($this->isMariaDb()) {
+                $this->createMariaDbSyscomIdIndex('products');
+                $this->createMariaDbSyscomIdIndex('brands');
+                $this->createMariaDbSyscomIdIndex('categories');
+            } else {
+                DB::statement("CREATE INDEX products_metadata_syscom_id_idx ON products ((CAST(JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.syscom_id')) AS CHAR(64))))");
+                DB::statement("CREATE INDEX brands_metadata_syscom_id_idx ON brands ((CAST(JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.syscom_id')) AS CHAR(64))))");
+                DB::statement("CREATE INDEX categories_metadata_syscom_id_idx ON categories ((CAST(JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.syscom_id')) AS CHAR(64))))");
+            }
         }
+    }
+
+    private function isMariaDb(): bool
+    {
+        $version = DB::selectOne('SELECT VERSION() AS version')->version;
+
+        return str_contains(strtolower($version), 'mariadb');
+    }
+
+    private function createMariaDbSyscomIdIndex(string $table): void
+    {
+        DB::statement(
+            "ALTER TABLE {$table}
+                ADD COLUMN metadata_syscom_id VARCHAR(64)
+                    GENERATED ALWAYS AS (
+                        JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.syscom_id'))
+                    ) VIRTUAL,
+                ADD INDEX {$table}_metadata_syscom_id_idx (metadata_syscom_id)"
+        );
     }
 
     /**
