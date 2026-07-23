@@ -25,6 +25,9 @@ describe('RichTextEditor', () => {
         expect(
             container.querySelector('.ProseMirror'),
         ).toBeInTheDocument();
+        expect(
+            container.querySelector('.prose.prose-themed'),
+        ).toBeInTheDocument();
     });
 
     it('renders toolbar buttons', () => {

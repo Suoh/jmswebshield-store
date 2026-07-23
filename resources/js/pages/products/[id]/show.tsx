@@ -80,7 +80,7 @@ export default function ProductShow({ product }: Props) {
                                     Descripción
                                 </h2>
                                 <div
-                                    className="prose prose-sm max-w-none text-foreground/80"
+                                    className="prose prose-themed prose-sm max-w-none"
                                     dangerouslySetInnerHTML={{
                                         __html: product.full_description,
                                     }}
