@@ -73,6 +73,8 @@ export interface Product {
     model: string | null;
     metadata: Record<string, string> | null;
     is_active: boolean;
+    msi_3_months: boolean;
+    msi_6_months: boolean;
     created_at: string;
     updated_at: string;
     deleted_at: string | null;

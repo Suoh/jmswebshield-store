@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Actions\ReconcileEditorImages;
 use App\Enums\SortOrder;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\ProductInstallmentsRequest;
 use App\Http\Requests\Admin\ProductRequest;
 use App\Models\Brand;
 use App\Models\Category;
@@ -12,6 +13,8 @@ use App\Models\EditorImage;
 use App\Models\Product;
 use App\Models\ProductImage;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -32,7 +35,7 @@ class ProductController extends Controller
             $query->onlyTrashed();
         }
 
-        $products = $query->orderBy('created_at', SortOrder::Desc->value)->paginate(15);
+        $products = $query->orderBy('created_at', SortOrder::Desc->value)->paginate(15)->withQueryString();
         $brands = Brand::orderBy('name')->get();
 
         return Inertia::render('admin/products/index', [
@@ -45,6 +48,28 @@ class ProductController extends Controller
                 'trashed' => request('trashed'),
             ],
         ]);
+    }
+
+    public function updateInstallments(ProductInstallmentsRequest $request): RedirectResponse
+    {
+        $data = $request->validated();
+
+        DB::transaction(function () use ($data): void {
+            $products = Product::whereIn('id', $data['product_ids'])->lockForUpdate()->get();
+
+            if ($products->count() !== count($data['product_ids'])) {
+                throw ValidationException::withMessages([
+                    'product_ids' => 'Uno o más productos ya no están disponibles. Actualiza el listado.',
+                ]);
+            }
+
+            Product::whereIn('id', $products->modelKeys())->update([
+                'msi_3_months' => $data['msi_3_months'],
+                'msi_6_months' => $data['msi_6_months'],
+            ]);
+        });
+
+        return back()->with('success', 'Meses sin intereses actualizados exitosamente.');
     }
 
     public function create(): Response

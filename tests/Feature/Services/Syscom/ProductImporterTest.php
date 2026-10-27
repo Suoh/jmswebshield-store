@@ -62,7 +62,9 @@ describe('ProductImporter category attachment', function () {
             ->and($result['failed'])->toBe(0);
 
         $product = Product::first();
-        expect($product->categories)->toHaveCount(2);
+        expect($product->categories)->toHaveCount(2)
+            ->and($product->msi_3_months)->toBeFalse()
+            ->and($product->msi_6_months)->toBeFalse();
     });
 
     it('skips categories not found locally or in SYSCOM catalog', function () {

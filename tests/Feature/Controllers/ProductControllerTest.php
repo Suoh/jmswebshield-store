@@ -229,12 +229,12 @@ it('sorts products by name ascending', function () {
         );
 });
 
-it('sorts products by created_at descending by default', function () {
+it('sorts products by created_at descending when requested', function () {
     $brand = Brand::factory()->create();
     $old = Product::factory()->create(['is_active' => true, 'brand_id' => $brand->id, 'created_at' => now()->subDays(5)]);
     $new = Product::factory()->create(['is_active' => true, 'brand_id' => $brand->id, 'created_at' => now()]);
 
-    $response = $this->get('/products');
+    $response = $this->get('/products?sort=created_at&order=desc');
 
     $response->assertOk()
         ->assertInertia(fn ($page) => $page
@@ -398,4 +398,28 @@ it('returns 404 for nonexistent product', function () {
     $response = $this->get('/products/99999');
 
     $response->assertNotFound();
+});
+
+it('defaults to alphabetical order across filtered pages', function () {
+    foreach (range(13, 1) as $index) {
+        Product::factory()->create(['name' => sprintf('Camera %02d', $index), 'is_active' => true]);
+    }
+    Product::factory()->create(['name' => 'Another product', 'is_active' => true]);
+
+    $this->get('/products?search=Camera')->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('products.data.0.name', 'Camera 01')
+            ->where('products.data.11.name', 'Camera 12')
+            ->where('products.total', 13));
+    $this->get('/products?search=Camera&page=2')->assertOk()
+        ->assertInertia(fn ($page) => $page->where('products.data.0.name', 'Camera 13'));
+    $this->get('/products')->assertOk()
+        ->assertInertia(fn ($page) => $page->where('products.data.0.name', 'Another product'));
+});
+
+it('falls back to alphabetical order for invalid sort parameters', function () {
+    Product::factory()->create(['name' => 'Zebra', 'is_active' => true]);
+    Product::factory()->create(['name' => 'Apple', 'is_active' => true]);
+    $this->get('/products?sort=invalid&order=invalid')->assertOk()
+        ->assertInertia(fn ($page) => $page->where('products.data.0.name', 'Apple'));
 });

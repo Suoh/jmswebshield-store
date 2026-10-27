@@ -1,4 +1,5 @@
 import { Head, Link, usePage } from '@inertiajs/react';
+import { useState } from 'react';
 import BrandName from '@/components/product/brand-name';
 import ProductAvailabilityBadge from '@/components/product/product-availability-badge';
 import ProductCoverImage from '@/components/product/product-cover-image';
@@ -14,6 +15,7 @@ import {
     BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { Card, CardContent } from '@/components/ui/card';
+import { formatPrice } from '@/lib/format';
 import type { Product } from '@/types/models';
 
 interface Props {
@@ -21,13 +23,32 @@ interface Props {
 }
 
 export default function ProductShow({ product }: Props) {
+    return <ProductDetails key={product.id} product={product} />;
+}
+
+function ProductDetails({ product }: Props) {
+    const [paymentMonths, setPaymentMonths] = useState(0);
+    const availableMonths = [
+        ...(product.msi_3_months ? [3] : []),
+        ...(product.msi_6_months ? [6] : []),
+    ];
+    const hasInstallments = availableMonths.length > 0;
+    const selectedMonths = availableMonths.includes(paymentMonths)
+        ? paymentMonths
+        : 0;
+    const finalPrice = Number(product.discounted_price ?? product.price);
+    const paymentMessage = hasInstallments
+        ? selectedMonths === 0
+            ? ` Mi preferencia es pago de contado por ${formatPrice(finalPrice)}.`
+            : ` Mi preferencia es ${selectedMonths} meses sin intereses de ${formatPrice(finalPrice / selectedMonths)} al mes (total: ${formatPrice(finalPrice)}).`
+        : '';
     const { props } = usePage<{ whatsappNumber: string | null }>();
     const whatsappNumber = props.whatsappNumber;
     const canContact = product.stock > 0 && whatsappNumber;
 
     const whatsappHref = canContact
         ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
-              `¡Hola! Me interesa el siguiente producto: ${product.name} (${product.model}). ${typeof window !== 'undefined' ? window.location.href : ''}. ¿Podrían darme más información?`,
+              `¡Hola! Me interesa el siguiente producto: ${product.name} (${product.model}). ${typeof window !== 'undefined' ? window.location.href : ''}.${paymentMessage} ¿Podrían darme más información?`,
           )}`
         : '#';
 
@@ -80,7 +101,7 @@ export default function ProductShow({ product }: Props) {
                                     Descripción
                                 </h2>
                                 <div
-                                    className="prose prose-themed prose-sm max-w-none"
+                                    className="prose-themed prose prose-sm max-w-none"
                                     dangerouslySetInnerHTML={{
                                         __html: product.full_description,
                                     }}
@@ -182,6 +203,43 @@ export default function ProductShow({ product }: Props) {
                                     discount={product.discount}
                                     size="md"
                                 />
+
+                                {hasInstallments && (
+                                    <fieldset className="space-y-2">
+                                        <legend className="mb-2 text-sm font-medium">
+                                            Opciones de pago
+                                        </legend>
+                                        {[0, ...availableMonths].map(
+                                            (months) => (
+                                                <label
+                                                    key={months}
+                                                    className="flex cursor-pointer items-start gap-2 rounded-md border p-3 text-sm"
+                                                >
+                                                    <input
+                                                        type="radio"
+                                                        name="payment-option"
+                                                        value={months}
+                                                        checked={
+                                                            selectedMonths ===
+                                                            months
+                                                        }
+                                                        onChange={() =>
+                                                            setPaymentMonths(
+                                                                months,
+                                                            )
+                                                        }
+                                                        className="mt-1 shrink-0"
+                                                    />
+                                                    <span>
+                                                        {months === 0
+                                                            ? `Pago de contado: ${formatPrice(finalPrice)}`
+                                                            : `${months} meses sin intereses de ${formatPrice(finalPrice / months)}`}
+                                                    </span>
+                                                </label>
+                                            ),
+                                        )}
+                                    </fieldset>
+                                )}
 
                                 {(product.model || product.stock > 0) && (
                                     <dl className="space-y-2 border-t pt-3 text-sm">

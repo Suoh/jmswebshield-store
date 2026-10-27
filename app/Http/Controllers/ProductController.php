@@ -53,12 +53,12 @@ class ProductController extends Controller
         }
 
         $allowedSorts = ['created_at', 'price', 'name'];
-        $sort = $request->input('sort', 'created_at');
-        $order = $request->input('order', SortOrder::Desc->value);
-        $sort = in_array($sort, $allowedSorts) ? $sort : 'created_at';
+        $sort = $request->input('sort', 'name');
+        $order = $request->input('order', $sort === 'created_at' ? SortOrder::Desc->value : SortOrder::Asc->value);
+        $sort = in_array($sort, $allowedSorts) ? $sort : 'name';
         $allowedOrders = array_column(SortOrder::cases(), 'value');
-        $order = in_array($order, $allowedOrders) ? $order : SortOrder::Desc->value;
-        $query->orderBy($sort, $order);
+        $order = in_array($order, $allowedOrders) ? $order : ($sort === 'created_at' ? SortOrder::Desc->value : SortOrder::Asc->value);
+        $query->orderBy($sort, $order)->orderBy('id');
 
         $products = $query->paginate(12)->withQueryString();
 

@@ -10,15 +10,18 @@ import {
 import { useUrlFilter } from '@/hooks/use-url-filter';
 
 const SORT_OPTIONS = [
+    { value: 'name-asc', label: 'Nombre: A-Z' },
     { value: 'created_at-desc', label: 'Más recientes' },
     { value: 'price-asc', label: 'Precio: menor a mayor' },
     { value: 'price-desc', label: 'Precio: mayor a menor' },
-    { value: 'name-asc', label: 'Nombre: A-Z' },
 ];
 
 export default function SortSelect() {
-    const [sortParam] = useUrlFilter('sort', 'created_at');
-    const [orderParam] = useUrlFilter('order', 'desc');
+    const [sortParam] = useUrlFilter('sort', 'name');
+    const [orderParam] = useUrlFilter(
+        'order',
+        sortParam === 'created_at' ? 'desc' : 'asc',
+    );
 
     const currentValue = useMemo(
         () => `${sortParam}-${orderParam}`,
