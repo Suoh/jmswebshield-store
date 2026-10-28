@@ -30,6 +30,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     Route::resource('categories', AdminCategoryController::class);
 
+    Route::patch('products/installments', [AdminProductController::class, 'updateInstallments'])->name('products.installments');
+
     Route::resource('products', AdminProductController::class)->except(['create', 'show']);
     Route::get('products/create', [AdminProductController::class, 'create'])->name('products.create');
     Route::get('products/{product}/edit', [AdminProductController::class, 'edit'])->name('products.edit');

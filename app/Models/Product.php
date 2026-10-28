@@ -29,6 +29,8 @@ use Illuminate\Support\Facades\Storage;
     'model',
     'metadata',
     'is_active',
+    'msi_3_months',
+    'msi_6_months',
 ])]
 class Product extends Model
 {
@@ -44,6 +46,8 @@ class Product extends Model
             'stock' => 'integer',
             'metadata' => 'array',
             'is_active' => 'boolean',
+            'msi_3_months' => 'boolean',
+            'msi_6_months' => 'boolean',
         ];
     }
 

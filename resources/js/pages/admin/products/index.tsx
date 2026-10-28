@@ -48,6 +48,12 @@ interface PageProps {
 }
 
 export default function AdminProductsIndex() {
+    const { url } = usePage();
+
+    return <AdminProductsList key={url} />;
+}
+
+function AdminProductsList() {
     const { products, brands, filters, flash } = usePage<PageProps>().props;
     const [searchUrl, setSearchUrl] = useUrlFilter(
         'search',
@@ -70,6 +76,36 @@ export default function AdminProductsIndex() {
         name: string;
     } | null>(null);
     const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const [selectedIds, setSelectedIds] = useState<number[]>([]);
+    const [installmentOption, setInstallmentOption] = useState('none');
+    const [savingInstallments, setSavingInstallments] = useState(false);
+    const [installmentError, setInstallmentError] = useState('');
+    const selectableIds = products.data
+        .filter((product) => !product.deleted_at)
+        .map((product) => product.id);
+
+    const applyInstallments = () => {
+        setSavingInstallments(true);
+        setInstallmentError('');
+        router.patch(
+            '/admin/products/installments',
+            {
+                product_ids: selectedIds,
+                msi_3_months:
+                    installmentOption === '3' || installmentOption === 'both',
+                msi_6_months:
+                    installmentOption === '6' || installmentOption === 'both',
+            },
+            {
+                preserveScroll: true,
+                onSuccess: () => setSelectedIds([]),
+                onError: (errors) =>
+                    setInstallmentError(Object.values(errors).join(' ')),
+                onFinish: () => setSavingInstallments(false),
+            },
+        );
+    };
 
     useFlashToast(flash);
 
@@ -254,8 +290,80 @@ export default function AdminProductsIndex() {
                 )}
             </form>
 
+            {selectedIds.length > 0 && (
+                <div className="mb-4 space-y-2">
+                    <div className="flex flex-wrap items-end gap-3">
+                        <span className="text-sm">
+                            {selectedIds.length} productos seleccionados
+                        </span>
+                        <div className="space-y-1">
+                            <Label htmlFor="bulk-installments">
+                                Meses sin intereses
+                            </Label>
+                            <select
+                                id="bulk-installments"
+                                value={installmentOption}
+                                onChange={(event) =>
+                                    setInstallmentOption(event.target.value)
+                                }
+                                disabled={savingInstallments}
+                                className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+                            >
+                                <option value="none">Ninguno</option>
+                                <option value="3">3 meses</option>
+                                <option value="6">6 meses</option>
+                                <option value="both">3 y 6 meses</option>
+                            </select>
+                        </div>
+                        <Button
+                            onClick={applyInstallments}
+                            disabled={savingInstallments}
+                        >
+                            {savingInstallments
+                                ? 'Aplicando…'
+                                : 'Aplicar a seleccionados'}
+                        </Button>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                        Esta opción reemplazará los plazos de todos los
+                        productos seleccionados.
+                    </p>
+                    {installmentError && (
+                        <p role="alert" className="text-sm text-destructive">
+                            {installmentError}
+                        </p>
+                    )}
+                </div>
+            )}
+
             <DataTable
                 columns={[
+                    <input
+                        key="select-page"
+                        type="checkbox"
+                        aria-label="Seleccionar todos los productos de esta página"
+                        disabled={
+                            savingInstallments || selectableIds.length === 0
+                        }
+                        checked={
+                            selectableIds.length > 0 &&
+                            selectableIds.every((id) =>
+                                selectedIds.includes(id),
+                            )
+                        }
+                        ref={(element) => {
+                            if (element) {
+                                element.indeterminate =
+                                    selectedIds.length > 0 &&
+                                    selectedIds.length < selectableIds.length;
+                            }
+                        }}
+                        onChange={(event) =>
+                            setSelectedIds(
+                                event.target.checked ? selectableIds : [],
+                            )
+                        }
+                    />,
                     'Nombre',
                     'Marca',
                     'Precio',
@@ -263,7 +371,7 @@ export default function AdminProductsIndex() {
                     'Activo',
                     'Acciones',
                 ]}
-                colSpan={6}
+                colSpan={7}
                 emptyTitle="No hay productos registrados."
                 scrollHorizontal
                 footer={
@@ -278,6 +386,25 @@ export default function AdminProductsIndex() {
             >
                 {products.data.map((product) => (
                     <TableRow key={product.id}>
+                        <TableCell>
+                            <input
+                                type="checkbox"
+                                aria-label={`Seleccionar ${product.name}`}
+                                checked={selectedIds.includes(product.id)}
+                                disabled={
+                                    savingInstallments || !!product.deleted_at
+                                }
+                                onChange={(event) =>
+                                    setSelectedIds((ids) =>
+                                        event.target.checked
+                                            ? [...ids, product.id]
+                                            : ids.filter(
+                                                  (id) => id !== product.id,
+                                              ),
+                                    )
+                                }
+                            />
+                        </TableCell>
                         <TableCell className="min-w-0 font-medium">
                             <div className="flex max-w-sm items-center gap-2">
                                 {product.deleted_at && (

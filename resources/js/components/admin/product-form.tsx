@@ -37,6 +37,8 @@ interface Product {
     model: string | null;
     image_url: string | null;
     is_active: boolean;
+    msi_3_months: boolean;
+    msi_6_months: boolean;
     categories?: Category[];
     images?: ProductImage[];
 }
@@ -58,6 +60,8 @@ export interface ProductFormPayload {
     category_ids: number[];
     model: string;
     is_active: boolean;
+    msi_3_months: boolean;
+    msi_6_months: boolean;
     editor_image_ids: number[];
     product_image_ids: number[];
 }
@@ -78,7 +82,12 @@ export default function ProductForm({
     const [editorImageIds, setEditorImageIds] = useState<number[]>([]);
     const [productImageIds, setProductImageIds] = useState<number[]>([]);
     const [sessionId] = useState(() => getOrCreateSessionId(product?.id));
-    const { data, setData, errors: formErrors, processing } = useForm({
+    const {
+        data,
+        setData,
+        errors: formErrors,
+        processing,
+    } = useForm({
         name: product?.name ?? '',
         short_description: product?.short_description ?? '',
         full_description: product?.full_description ?? '',
@@ -89,10 +98,15 @@ export default function ProductForm({
         category_ids: product?.categories?.map((c) => c.id) ?? [],
         model: product?.model ?? '',
         is_active: product?.is_active ?? true,
+        msi_3_months: product?.msi_3_months ?? false,
+        msi_6_months: product?.msi_6_months ?? false,
     });
 
     const { props } = usePage();
-    const errors = { ...formErrors, ...(props.errors as Record<string, string>) };
+    const errors = {
+        ...formErrors,
+        ...(props.errors as Record<string, string>),
+    };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -236,6 +250,40 @@ export default function ProductForm({
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
+                        <fieldset className="space-y-3">
+                            <legend className="mb-2 text-sm font-medium">
+                                Meses sin intereses
+                            </legend>
+                            {(['msi_3_months', 'msi_6_months'] as const).map(
+                                (field) => (
+                                    <div key={field} className="space-y-1">
+                                        <div className="flex items-center gap-2">
+                                            <Checkbox
+                                                id={field}
+                                                checked={data[field]}
+                                                onCheckedChange={(checked) =>
+                                                    setData(
+                                                        field,
+                                                        checked === true,
+                                                    )
+                                                }
+                                            />
+                                            <Label htmlFor={field}>
+                                                {field === 'msi_3_months'
+                                                    ? '3'
+                                                    : '6'}{' '}
+                                                meses sin intereses
+                                            </Label>
+                                        </div>
+                                        {errors[field] && (
+                                            <p className="text-sm text-destructive">
+                                                {errors[field]}
+                                            </p>
+                                        )}
+                                    </div>
+                                ),
+                            )}
+                        </fieldset>
                         <div className="grid grid-cols-3 gap-4">
                             <div className="space-y-2">
                                 <Label htmlFor="price">Precio *</Label>

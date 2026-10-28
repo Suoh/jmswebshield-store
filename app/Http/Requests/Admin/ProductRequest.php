@@ -28,6 +28,8 @@ class ProductRequest extends FormRequest
             'image_url' => ['nullable', 'url'],
             'metadata' => ['nullable', 'array'],
             'is_active' => ['boolean'],
+            'msi_3_months' => ['boolean'],
+            'msi_6_months' => ['boolean'],
             'editor_image_ids' => ['nullable', 'array'],
             'editor_image_ids.*' => ['integer', 'exists:editor_images,id'],
             'product_image_ids' => ['nullable', 'array'],
