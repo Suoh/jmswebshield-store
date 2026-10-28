@@ -7,6 +7,11 @@ use App\Exceptions\Syscom\SyscomAuthException;
 use App\Exceptions\Syscom\SyscomRateLimitException;
 use App\Exceptions\Syscom\SyscomRequestException;
 use App\Services\Syscom\SyscomClient;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
+use GuzzleHttp\Psr7\Response;
+use Illuminate\Http\Client\Factory;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
@@ -16,6 +21,55 @@ beforeEach(function () {
 });
 
 describe('SyscomClient', function () {
+    it('sends OAuth and catalog requests through the Guzzle middleware stack', function () {
+        config([
+            'services.syscom.base_url' => 'https://syscom-api.example.com',
+            'services.syscom.client_id' => 'client',
+            'services.syscom.client_secret' => 'secret',
+        ]);
+
+        $history = [];
+        $handler = HandlerStack::create(new MockHandler([
+            new Response(200, ['Content-Type' => 'application/json'], '{"access_token":"test-token"}'),
+            new Response(200, ['Content-Type' => 'application/json'], '{"productos":[{"producto_id":"123"}]}'),
+        ]));
+        $handler->push(Middleware::history($history));
+        Http::swap(new class($handler) extends Factory
+        {
+            public function __construct(private HandlerStack $handler)
+            {
+                parent::__construct();
+            }
+
+            protected function newPendingRequest()
+            {
+                return parent::newPendingRequest()->setHandler($this->handler);
+            }
+        });
+
+        $products = (new SyscomClient)->getProducts(['busqueda' => 'cámara IP'], page: 2);
+
+        expect($products)->toBe(['productos' => [['producto_id' => '123']]])
+            ->and($history)->toHaveCount(2);
+
+        $authRequest = $history[0]['request'];
+        parse_str((string) $authRequest->getBody(), $authBody);
+        expect($authRequest->getMethod())->toBe('POST')
+            ->and($authRequest->getUri()->getPath())->toBe('/api/v1/oauth/token')
+            ->and($authRequest->getHeaderLine('Content-Type'))->toBe('application/x-www-form-urlencoded')
+            ->and($authBody)->toBe([
+                'grant_type' => 'client_credentials',
+                'client_id' => 'client',
+                'client_secret' => 'secret',
+            ]);
+
+        $catalogRequest = $history[1]['request'];
+        parse_str($catalogRequest->getUri()->getQuery(), $query);
+        expect($catalogRequest->getMethod())->toBe('GET')
+            ->and($catalogRequest->getHeaderLine('Authorization'))->toBe('Bearer test-token')
+            ->and($query)->toBe(['busqueda' => 'cámara IP', 'pagina' => '2', 'limit' => '20']);
+    });
+
     describe('getAccessToken', function () {
         it('fetches token from SYSCOM OAuth endpoint', function () {
             Http::fake([

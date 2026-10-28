@@ -102,7 +102,7 @@ Configura PHP, Node.js y MySQL localmente; copia `.env.example` a `.env` y ajust
 - PHP 8.4.1+ con extensiones: `pdo_mysql`, `json`, `mbstring`, `ctype`, `bcmath`, `fileinfo`, `tokenizer`
 - MySQL 8.0+ o MariaDB 11.8+
 (Se requiere una de estas versiones por el uso de columnas JSON e índices sobre los IDs de SYSCOM almacenados en los metadatos).
-- Node.js 22+ (para compilar assets)
+- Node.js 22+ en el equipo que compila los assets; no es necesario en producción si se despliega `public/build` desde Git
 - Composer
 - Servidor web: **nginx** o **Apache** con DocumentRoot apuntando a `public/`
 
@@ -110,9 +110,38 @@ Configura PHP, Node.js y MySQL localmente; copia `.env.example` a `.env` y ajust
 
 ```bash
 composer install --no-dev --optimize-autoloader
+```
+
+Los assets se compilan localmente antes de subir los cambios. Incluir `public/build` actualizado en el commit que se despliega:
+
+```bash
 npm ci
 npm run build
 ```
+
+El requisito de PHP en `composer.json` es `^8.4.1`. `config.platform.php=8.4.1` mantiene la resolución de dependencias compatible con ese mínimo; no instala ni selecciona el intérprete del servidor. Las actualizaciones se resuelven y prueban localmente con `composer update`, y se publican tanto `composer.json` como `composer.lock`. En producción se utiliza `composer install` para instalar las versiones verificadas.
+
+En Plesk, PHP web y PHP CLI pueden ser distintos. Configurar PHP 8.4+ para el dominio y comprobar que el paso de Composer de Laravel Toolkit también utiliza esa versión. Un `export PATH` en el script de despliegue no afecta al paso de Composer que se ejecuta antes. Para comprobar el intérprete CLI de Plesk:
+
+```bash
+/opt/plesk/php/8.4/bin/php -v
+```
+
+Con los pasos de Composer y mantenimiento gestionados por Toolkit, el script personalizado debe ejecutar, desde la raíz del proyecto:
+
+```bash
+set -e
+export PATH="/opt/plesk/php/8.4/bin:$PATH"
+
+test -f artisan
+test -f public/build/manifest.json
+
+php artisan config:clear
+php artisan migrate --force
+php artisan optimize
+```
+
+Activar **Run deployment script** y desactivar la instalación de dependencias npm en Toolkit. Revisar los logs del despliegue para confirmar que Composer y las migraciones terminaron correctamente. Si se usan workers de cola persistentes, reiniciarlos después del despliegue con `php artisan queue:restart`.
 
 ### 3. Configurar .env
 
